@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\iku_parentModel;
 
 class IKUController extends Controller
 {
@@ -14,9 +15,7 @@ class IKUController extends Controller
     public function index()
     {
         return response()->json([
-            'name' => 'Abigail',
-            'state' => 'CA',
-            'total' => "User::paginate()"
+            'data' => iku_parentModel::paginate()
         ]);
     }
 
@@ -45,7 +44,7 @@ class IKUController extends Controller
     public function show($params)
     {
         return response()->json([
-            'data' => User::findOrFail($params)
+            'data' => iku_parentModel::findOrFail($params)
         ]);
 
     }
@@ -71,6 +70,8 @@ class IKUController extends Controller
      */
     public function destroy($params)
     {
-        //
+        return Response()->json([
+            'data' => iku_parentModel::find($params)->delete()
+        ]);
     }
 }
