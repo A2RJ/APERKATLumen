@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateSubmissionsTable extends Migration
+class CreateIkuChild2Table extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,10 @@ class CreateSubmissionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('submissions', function (Blueprint $table) {
-            $table->integer('id_submission', true);
-            $table->string('submission', 50);
-            $table->string('name', 50);
+        Schema::create('iku_child2', function (Blueprint $table) {
+            $table->integer('id_iku_child2', true);
+            $table->integer('id_iku_parent')->unique('id_iku_parent');
+            $table->integer('iku_child2');
         });
     }
 
@@ -27,6 +27,6 @@ class CreateSubmissionsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('submissions');
+        Schema::dropIfExists('iku_child2');
     }
 }
