@@ -25,9 +25,9 @@ DROP TABLE IF EXISTS `iku_child1`;
 CREATE TABLE `iku_child1` (
   `id_iku_child1` int(11) NOT NULL AUTO_INCREMENT,
   `id_iku_parent` int(11) NOT NULL,
-  `iku_child1` int(11) NOT NULL,
+  `iku_child1` text NOT NULL,
   PRIMARY KEY (`id_iku_child1`),
-  UNIQUE KEY `id_iku_parent` (`id_iku_parent`)
+  KEY `id_iku_parent` (`id_iku_parent`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -49,10 +49,10 @@ DROP TABLE IF EXISTS `iku_child2`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `iku_child2` (
   `id_iku_child2` int(11) NOT NULL AUTO_INCREMENT,
-  `id_iku_parent` int(11) NOT NULL,
-  `iku_child2` int(11) NOT NULL,
+  `id_iku_child1` int(11) NOT NULL,
+  `iku_child2` text NOT NULL,
   PRIMARY KEY (`id_iku_child2`),
-  UNIQUE KEY `id_iku_parent` (`id_iku_parent`)
+  KEY `id_iku_child1` (`id_iku_child1`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -73,8 +73,9 @@ DROP TABLE IF EXISTS `iku_parent`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `iku_parent` (
-  `id_iku_parent` int(11) NOT NULL,
-  `iku_parent` int(11) NOT NULL
+  `id_iku_parent` int(11) NOT NULL AUTO_INCREMENT,
+  `iku_parent` int(11) NOT NULL,
+  PRIMARY KEY (`id_iku_parent`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -136,7 +137,10 @@ CREATE TABLE `pengajuan` (
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id_pengajuan`),
-  UNIQUE KEY `id_rkat` (`id_rkat`)
+  KEY `id_iku_child1` (`id_iku_child1`),
+  KEY `id_iku_parent` (`id_iku_parent`),
+  KEY `id_iku_child2` (`id_iku_child2`),
+  KEY `id_rkat` (`id_rkat`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -173,8 +177,12 @@ CREATE TABLE `pengajuan_history` (
   `status_pengajuan` enum('progress','approved','','') COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
-  PRIMARY KEY (`id_pengajuan`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  PRIMARY KEY (`id_pengajuan`),
+  KEY `id_iku_child1` (`id_iku_child1`),
+  KEY `id_iku_parent` (`id_iku_parent`),
+  KEY `id_iku_child2` (`id_iku_child2`),
+  KEY `id_rkat` (`id_rkat`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -183,7 +191,6 @@ CREATE TABLE `pengajuan_history` (
 
 LOCK TABLES `pengajuan_history` WRITE;
 /*!40000 ALTER TABLE `pengajuan_history` DISABLE KEYS */;
-INSERT INTO `pengajuan_history` VALUES (1,12,'APASIH','coba','Sumbawa','2021-03-26','DSTI',1,12,121,'150k','150k','progress','2021-03-27 04:25:54','2021-03-27 04:25:54'),(3,12,'APASIH','coba','Sumbawa','2021-03-26','DSTI',1,12,121,'150k','150k','progress','2021-03-27 04:26:46','2021-03-27 04:26:46'),(4,12,'APASIH coba ne','coba','Sumbawa','2021-03-26','DSTI',1,12,121,'150k','150k','progress','2021-03-27 04:27:16','2021-03-27 04:27:16');
 /*!40000 ALTER TABLE `pengajuan_history` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -195,7 +202,7 @@ DROP TABLE IF EXISTS `rkat`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `rkat` (
-  `id_rkat` varchar(25) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `id_rkat` int(11) NOT NULL AUTO_INCREMENT,
   `id_user` int(11) NOT NULL,
   `kode_rkat` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `sasaran_strategi` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -213,7 +220,7 @@ CREATE TABLE `rkat` (
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id_rkat`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -222,7 +229,7 @@ CREATE TABLE `rkat` (
 
 LOCK TABLES `rkat` WRITE;
 /*!40000 ALTER TABLE `rkat` DISABLE KEYS */;
-INSERT INTO `rkat` VALUES ('10',2,'215','apa','12','2','2','3','4','2021-03-26 10:07:57','2021-03-26 10:07:57','6','76','54','5555','2021-03-26 10:50:16','2021-03-26 10:50:16'),('11',2,'215','apa','12','2','2','3','4','2021-03-26 10:07:57','2021-03-26 10:07:57','6','76','54','5555','2021-03-26 10:50:35','2021-03-26 10:50:35'),('12',12,'2','apa aku juga tak tahu','12','2','2','3','4','2021-03-26 10:07:57','2021-03-26 10:07:57','6','76','54','5555','2021-03-26 11:19:11','2021-03-26 11:19:11'),('13',12,'2','apa aku juga tak tahu','12','2','2','3','4','2021-03-26 10:07:57','2021-03-26 10:07:57','6','76','54','5555','2021-03-26 11:23:57','2021-03-26 11:23:57'),('14',12,'2','apa aku juga tak tahu','12','2','2','3','4','2021-03-26 10:07:57','2021-03-26 10:07:57','6','76','54','5555','2021-03-26 11:25:02','2021-03-26 11:25:02');
+INSERT INTO `rkat` VALUES (10,2,'215','apa','12','2','2','3','4','2021-03-26 10:07:57','2021-03-26 10:07:57','6','76','54','5555','2021-03-26 10:50:16','2021-03-26 10:50:16'),(11,2,'215','apa','12','2','2','3','4','2021-03-26 10:07:57','2021-03-26 10:07:57','6','76','54','5555','2021-03-26 10:50:35','2021-03-26 10:50:35'),(12,12,'2','apa aku juga tak tahu','12','2','2','3','4','2021-03-26 10:07:57','2021-03-26 10:07:57','6','76','54','5555','2021-03-26 11:19:11','2021-03-26 11:19:11'),(13,12,'2','apa aku juga tak tahu','12','2','2','3','4','2021-03-26 10:07:57','2021-03-26 10:07:57','6','76','54','5555','2021-03-26 11:23:57','2021-03-26 11:23:57'),(14,12,'2','apa aku juga tak tahu','12','2','2','3','4','2021-03-26 10:07:57','2021-03-26 10:07:57','6','76','54','5555','2021-03-26 11:25:02','2021-03-26 11:25:02');
 /*!40000 ALTER TABLE `rkat` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -247,34 +254,59 @@ CREATE TABLE `struktur` (
 
 LOCK TABLES `struktur` WRITE;
 /*!40000 ALTER TABLE `struktur` DISABLE KEYS */;
-INSERT INTO `struktur` VALUES (1,1,'Rektor'),(2,2,'Warek'),(3,3,'Dir. Keuangan'),(4,4,'Warek III'),(5,4,'Fakultas'),(6,5,'Prodi'),(7,5,'UPT'),(8,4,'Setniv');
+INSERT INTO `struktur` VALUES (1,1,'Rektor'),(2,2,'Warek'),(3,3,'Dir. Keuangan');
 /*!40000 ALTER TABLE `struktur` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `struktur_child`
+-- Table structure for table `struktur_child1`
 --
 
-DROP TABLE IF EXISTS `struktur_child`;
+DROP TABLE IF EXISTS `struktur_child1`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `struktur_child` (
-  `id_struktur_child` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `struktur_child1` (
+  `id_struktur_child1` int(11) NOT NULL AUTO_INCREMENT,
   `id_struktur` int(11) NOT NULL,
   `nama_struktur_child` varchar(30) NOT NULL,
-  PRIMARY KEY (`id_struktur_child`),
-  UNIQUE KEY `id_struktur` (`id_struktur`),
-  CONSTRAINT `struktur_child_ibfk_1` FOREIGN KEY (`id_struktur`) REFERENCES `struktur` (`id_struktur`)
+  PRIMARY KEY (`id_struktur_child1`),
+  KEY `id_struktur` (`id_struktur`),
+  CONSTRAINT `struktur_child1_ibfk_1` FOREIGN KEY (`id_struktur`) REFERENCES `struktur` (`id_struktur`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `struktur_child`
+-- Dumping data for table `struktur_child1`
 --
 
-LOCK TABLES `struktur_child` WRITE;
-/*!40000 ALTER TABLE `struktur_child` DISABLE KEYS */;
-/*!40000 ALTER TABLE `struktur_child` ENABLE KEYS */;
+LOCK TABLES `struktur_child1` WRITE;
+/*!40000 ALTER TABLE `struktur_child1` DISABLE KEYS */;
+/*!40000 ALTER TABLE `struktur_child1` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `struktur_child2`
+--
+
+DROP TABLE IF EXISTS `struktur_child2`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `struktur_child2` (
+  `id_struktur_child2` int(11) NOT NULL AUTO_INCREMENT,
+  `id_struktur_child1` int(11) NOT NULL,
+  `nama_struktur_child` varchar(30) NOT NULL,
+  PRIMARY KEY (`id_struktur_child2`),
+  KEY `id_struktur_child1` (`id_struktur_child1`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `struktur_child2`
+--
+
+LOCK TABLES `struktur_child2` WRITE;
+/*!40000 ALTER TABLE `struktur_child2` DISABLE KEYS */;
+/*!40000 ALTER TABLE `struktur_child2` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -289,14 +321,19 @@ CREATE TABLE `user` (
   `fullname` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `username` varchar(8) COLLATE utf8mb4_unicode_ci NOT NULL,
   `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `id_unit` int(11) NOT NULL,
+  `id_struktur` int(11) DEFAULT NULL,
+  `id_struktur_child1` int(11) DEFAULT NULL,
+  `id_struktur_child2` int(11) DEFAULT NULL,
   `email` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `nomor_wa` varchar(15) COLLATE utf8mb4_unicode_ci NOT NULL,
   `bank` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
   `no_rek` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
-  PRIMARY KEY (`id_user`)
+  PRIMARY KEY (`id_user`),
+  KEY `id_struktur` (`id_struktur`),
+  KEY `id_struktur_child1` (`id_struktur_child1`),
+  KEY `id_struktur_child2` (`id_struktur_child2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -319,11 +356,12 @@ DROP TABLE IF EXISTS `validasi`;
 CREATE TABLE `validasi` (
   `id_validasi` int(11) NOT NULL AUTO_INCREMENT,
   `id_pengajuan` int(11) NOT NULL,
-  `id_struktur` tinyint(1) NOT NULL,
+  `id_struktur` int(11) NOT NULL,
   `message` text NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`id_validasi`)
+  PRIMARY KEY (`id_validasi`),
+  KEY `id_pengajuan` (`id_pengajuan`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -345,4 +383,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-03-27 12:04:49
+-- Dump completed on 2021-03-27 23:39:05

@@ -15,8 +15,8 @@ class CreateValidasiTable extends Migration
     {
         Schema::create('validasi', function (Blueprint $table) {
             $table->integer('id_validasi', true);
-            $table->integer('id_pengajuan');
-            $table->tinyInteger('id_struktur');
+            $table->integer('id_pengajuan')->index('id_pengajuan');
+            $table->integer('id_struktur')->index('id_struktur');
             $table->text('message');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent();

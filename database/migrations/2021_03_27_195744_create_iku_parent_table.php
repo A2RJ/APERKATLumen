@@ -14,7 +14,7 @@ class CreateIkuParentTable extends Migration
     public function up()
     {
         Schema::create('iku_parent', function (Blueprint $table) {
-            $table->integer('id_iku_parent');
+            $table->integer('id_iku_parent', true);
             $table->integer('iku_parent');
         });
     }

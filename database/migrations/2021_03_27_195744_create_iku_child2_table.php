@@ -15,8 +15,8 @@ class CreateIkuChild2Table extends Migration
     {
         Schema::create('iku_child2', function (Blueprint $table) {
             $table->integer('id_iku_child2', true);
-            $table->integer('id_iku_parent')->unique('id_iku_parent');
-            $table->integer('iku_child2');
+            $table->integer('id_iku_child1')->index('id_iku_child1');
+            $table->text('iku_child2');
         });
     }
 
