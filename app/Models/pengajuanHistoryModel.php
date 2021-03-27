@@ -4,12 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class pengajuanModel extends Model
+class pengajuanHistoryModel extends Model
 {
     /**
      * Database table name
      */
-    protected $table      = "pengajuan";
+    protected $table      = "pengajuan_history";
     protected $primaryKey = "id_pengajuan";
     protected $guarded = [];
     /**
@@ -39,6 +39,6 @@ class pengajuanModel extends Model
      * @var array
      */
     protected $attributes = [
-        'status_pengajuan' => 'progress',
+        // 'status_pengajuan' => 'progress',
     ];
 }

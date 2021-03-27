@@ -4,25 +4,27 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class strukturModel extends Model
+class validasiModel extends Model
 {
     /**
      * Database table name
      */
-    protected $table      = "struktur";
-    protected $primaryKey = "id_struktur";
+    protected $table      = "validasi";
+    protected $primaryKey = "id_validasi";
     protected $guarded = [];
     /**
      * Mass assignable columns
      */
     protected $fillable = [
-        "level",
-        "nama_struktur"
+        "id_pengajuan",
+        "id_struktur",
+        "message"
     ];
 
     /**
      * Date time columns.
      */
+    // protected $dates = [];
     protected $dates = [];
     /**
      * The model's default values for attributes.

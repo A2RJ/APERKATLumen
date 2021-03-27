@@ -14,8 +14,8 @@ class CreateRkatTable extends Migration
     public function up()
     {
         Schema::create('rkat', function (Blueprint $table) {
-            $table->integer('id_rkat', true);
-            $table->integer('id_user')->unique('id_user');
+            $table->string('id_rkat', 25)->primary();
+            $table->integer('id_user');
             $table->string('kode_rkat', 50);
             $table->string('sasaran_strategi', 200);
             $table->string('indikator_sasaran_strategi', 200);

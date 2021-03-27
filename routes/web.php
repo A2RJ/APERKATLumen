@@ -34,8 +34,16 @@ $router->group(['prefix' => 'pengajuan'], function () use ($router) {
     $router->get('/', 'PengajuanController@index');
     $router->get('/{params}', 'PengajuanController@show');
     $router->post('/', 'PengajuanController@store');
+    $router->post('/approve', 'PengajuanController@approve');
+    $router->post('/decline', 'PengajuanController@decline');
     $router->put('/{params}', 'PengajuanController@update');
     $router->delete('/{params}', 'PengajuanController@destroy');
+});
+
+$router->group(['prefix' => 'util'], function () use ($router) {
+    $router->get('/{params}', 'UtilController@show');
+    $router->get('/{params}/history', 'UtilController@history');
+    $router->post('/', 'UtilController@store'); // insertOrUpdate
 });
 
 $router->group(['prefix' => 'rkat'], function () use ($router) {

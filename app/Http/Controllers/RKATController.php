@@ -29,8 +29,8 @@ class RKATController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
+            'id_rkat' => 'required',
             'id_user' => 'required',
-            'kode_rkat' => 'required',
             'sasaran_strategi' => 'required',
             'indikator_sasaran_strategi' => 'required',
             'nama_program' => 'required',
@@ -55,7 +55,7 @@ class RKATController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  int  $params
      * @return \Illuminate\Http\Response
      */
     public function show($params)
@@ -76,23 +76,6 @@ class RKATController extends Controller
      */
     public function update(Request $request, $params)
     {
-        $this->validate($request, [
-            'id_user' => 'required',
-            'kode_rkat' => 'required',
-            'sasaran_strategi' => 'required',
-            'indikator_sasaran_strategi' => 'required',
-            'nama_program' => 'required',
-            'program_kerja' => 'required',
-            'deskripsi' => 'required',
-            'tujuan' => 'required',
-            'mulai_program' => 'required',
-            'selesai_program' => 'required',
-            'tempat' => 'required',
-            'sumber_anggaran' => 'required',
-            'rencara_anggaran' => 'required',
-            'total_anggaran' => 'required'
-        ]);
-
         $data = rkatModel::find($params)->update($request->all());
 
         return response()->json([
@@ -103,7 +86,7 @@ class RKATController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  int  $params
      * @return \Illuminate\Http\Response
      */
     public function destroy($params)
