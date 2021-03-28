@@ -15,7 +15,7 @@ class CreateRkatTable extends Migration
     {
         Schema::create('rkat', function (Blueprint $table) {
             $table->integer('id_rkat', true);
-            $table->integer('id_user');
+            $table->integer('id_user')->index('id_user');
             $table->string('kode_rkat', 50);
             $table->string('sasaran_strategi', 200);
             $table->string('indikator_sasaran_strategi', 200);

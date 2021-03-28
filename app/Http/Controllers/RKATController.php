@@ -28,22 +28,7 @@ class RKATController extends Controller
      */
     public function store(Request $request)
     {
-        $this->validate($request, [
-            'id_rkat' => 'required',
-            'id_user' => 'required',
-            'sasaran_strategi' => 'required',
-            'indikator_sasaran_strategi' => 'required',
-            'nama_program' => 'required',
-            'program_kerja' => 'required',
-            'deskripsi' => 'required',
-            'tujuan' => 'required',
-            'mulai_program' => 'required',
-            'selesai_program' => 'required',
-            'tempat' => 'required',
-            'sumber_anggaran' => 'required',
-            'rencara_anggaran' => 'required',
-            'total_anggaran' => 'required'
-        ]);
+        $this->validation($request);
 
         $data = rkatModel::create($request->all());
 
@@ -76,6 +61,8 @@ class RKATController extends Controller
      */
     public function update(Request $request, $params)
     {
+        $this->validation($request);
+
         $data = rkatModel::find($params)->update($request->all());
 
         return response()->json([
@@ -96,6 +83,26 @@ class RKATController extends Controller
 
         return response()->json([
             'data' => $data ? "Success delete data" : "Failed, data not found"
+        ]);
+    }
+
+    public function validation($request)
+    {
+        $this->validate($request, [
+            "id_user" => "required|numeric",
+            "kode_rkat" => "required",
+            "sasaran_strategi" => "required",
+            "indikator_sasaran_strategi" => "required",
+            "nama_program" => "required",
+            "program_kerja" => "required",
+            "deskripsi" => "required",
+            "tujuan" => "required",
+            "mulai_program" => "required",
+            "selesai_program" => "required",
+            "tempat" => "required",
+            "sumber_anggaran" => "required",
+            "rencara_anggaran" => "required",
+            "total_anggaran" => "required"
         ]);
     }
 }

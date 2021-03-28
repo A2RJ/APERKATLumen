@@ -20,7 +20,7 @@ class CreateUserTable extends Migration
             $table->string('password');
             $table->integer('id_struktur')->nullable()->index('id_struktur');
             $table->integer('id_struktur_child1')->nullable()->index('id_struktur_child1');
-            $table->integer('id_struktur_child2')->index('id_struktur_child2');
+            $table->integer('id_struktur_child2')->nullable()->index('id_struktur_child2');
             $table->string('email', 50);
             $table->string('nomor_wa', 15);
             $table->string('bank', 20);

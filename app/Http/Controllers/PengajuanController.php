@@ -30,22 +30,16 @@ class PengajuanController extends Controller
      */
     public function store(Request $request)
     {
-
-        $this->validate($request, [
-            "id_rkat" => 'required',
-            "target_capaian" => 'required',
-            "bentuk_pelaksanaan_program" => 'required',
-            "tempat_program" => 'required',
-            "tanggal" => 'required',
-            "bidang_terkait" => 'required',
-            "id_iku_parent" => 'required',
-            "id_iku_child1" => 'required',
-            "id_iku_child2" => 'required',
-            "biaya_program" => 'required',
-            "rab" => 'required'
-        ]);
+        $this->validation($request);
 
         $data = pengajuanModel::create($request->all());
+
+        $file = $request->file('rab_file');
+        $nama_file = time() . "_" . $file->getClientOriginalName();
+        $file->move("rab_file", $nama_file);
+
+        $data->rab = $nama_file;
+        $data->save();
 
         return response()->json([
             'data' => $data ? "Success data was added" : "Failed add data"
@@ -77,17 +71,20 @@ class PengajuanController extends Controller
      */
     public function update(Request $request, $params)
     {
-        if ($request) {
-            pengajuanModel::query()
-            ->where('id_pengajuan', $request->input('id_pengajuan'))
-            ->each(function ($oldPost) {
-                $newPost = $oldPost->replicate();
-                $newPost->setTable('pengajuan_history');
-                $newPost->save();
-            });
-        }
+        $this->validation($request);
+        $this->autoProccess($request, $params);
+
         $data = pengajuanModel::find($params)->update($request->all());
 
+        if ($request->file('rab_file')) {
+            $data = pengajuanModel::find($params);
+            $file = $request->file('rab_file');
+            $nama_file = time() . "_" . $file->getClientOriginalName();
+            $file->move("rab_file", $nama_file);
+
+            $data->rab = $nama_file;
+            $data->save();
+        }
         return response()->json([
             'data' => $data ? "Data was updated" : "Failed to update data"
         ]);
@@ -139,6 +136,42 @@ class PengajuanController extends Controller
 
         return response()->json([
             'data' => $data ? "Declined" : "Failed, data not found"
+        ]);
+    }
+
+    public function validation($request)
+    {
+        $this->validate($request, [
+            "id_rkat" => "required|numeric",
+            "target_capaian" => "required",
+            "bentuk_pelaksanaan_program" => "required",
+            "tempat_program" => "required",
+            "tanggal" => "required",
+            "bidang_terkait" => "required",
+            "id_iku_parent" => "required",
+            "id_iku_child1" => "required",
+            "id_iku_child2" => "required",
+            "biaya_program" => "required",
+            "rab" => "nullable|file|image|mimes:jpeg,png,jpg|max:2048",
+            "status_pengajuan" => "required"
+        ]);
+    }
+
+    public function autoProccess(Request $request, $params)
+    {
+        pengajuanModel::query()
+        ->where('id_pengajuan', $request->input('id_pengajuan'))
+        ->each(function ($oldPost) {
+            $newPost = $oldPost->replicate();
+            $newPost->setTable('pengajuan_history');
+            $newPost->save();
+        });
+
+        validasiModel::create([
+            "id_pengajuan" => $params,
+            "id_struktur" => 1,
+            "status_pengajuan" => "status pengajuan",
+            "message" => "message",
         ]);
     }
 }

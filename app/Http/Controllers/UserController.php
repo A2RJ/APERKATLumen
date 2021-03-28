@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use App\Models\userModel;
 
 class UserController extends Controller
@@ -28,18 +29,11 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $this->validate($request, [
-            "fullname" => 'required',
-            "username" => 'required',
-            "password" => 'required',
-            "id_unit" => 'required',
-            "email" => 'required',
-            "nomor_wa" => 'required',
-            "bank" => 'required',
-            "no_rek" => 'required'
-        ]);
+        $this->validation($request);
 
         $data = userModel::create($request->all());
+        $data->password = Hash::make($request->input('password'));
+        $data->save();
 
         return response()->json([
             'data' => $data ? "Success data was added" : "Failed add data"
@@ -70,7 +64,14 @@ class UserController extends Controller
      */
     public function update(Request $request, $params)
     {
+        $this->validation($request);
+
         $data = userModel::find($params)->update($request->all());
+        if ($request->input('password')) {
+            $update = userModel::find($params);
+            $update->password = Hash::make($request->input('password'));
+            $update->save();
+        }
 
         return response()->json([
             'data' => $data ? "Data was updated" : "Failed to update data"
@@ -90,6 +91,22 @@ class UserController extends Controller
 
         return response()->json([
             'data' => $data ? "Success delete data" : "Failed, data not found"
+        ]);
+    }
+
+    public function validation($request)
+    {
+        $this->validate($request, [
+            "fullname" => "required",
+            "username" => "required|max:8",
+            "password" => "required|max:25",
+            "id_struktur" => "required",
+            "id_struktur_child1" => "nullable",
+            "id_struktur_child2" => "nullable",
+            "email" => "required",
+            "nomor_wa" => "required|numeric",
+            "bank" => "required",
+            "no_rek" => "required|numeric"
         ]);
     }
 }

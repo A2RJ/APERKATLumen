@@ -16,8 +16,8 @@ class rkatModel extends Model
      * Mass assignable columns
      */
     protected $fillable = [
-        "id_rkat",
         "id_user",
+        "kode_rkat",
         "sasaran_strategi",
         "indikator_sasaran_strategi",
         "nama_program",
@@ -31,7 +31,7 @@ class rkatModel extends Model
         "rencara_anggaran",
         "total_anggaran"
     ];
-    public $incrementing = false;
+    // public $incrementing = false;
     /**
      * Date time columns.
      */

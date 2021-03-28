@@ -17,6 +17,7 @@ class CreateValidasiTable extends Migration
             $table->integer('id_validasi', true);
             $table->integer('id_pengajuan')->index('id_pengajuan');
             $table->integer('id_struktur')->index('id_struktur');
+            $table->tinyInteger('status_pengajuan');
             $table->text('message');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent();

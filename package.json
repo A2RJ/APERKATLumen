@@ -1,0 +1,28 @@
+{
+  "name": "lumensubmissionapi",
+  "version": "1.0.0",
+  "description": "API for submission app on University Technology of Sumbawa",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "server": "php -S localhost:8000 -t public",
+    "migration": "php artisan migrate:generate",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/A2RJ/LumenSubmissionAPI.git"
+  },
+  "keywords": [
+    "Lumen",
+    "API"
+  ],
+  "author": "https://github.com/a2rj",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/A2RJ/LumenSubmissionAPI/issues"
+  },
+  "homepage": "https://github.com/A2RJ/LumenSubmissionAPI#readme"
+}

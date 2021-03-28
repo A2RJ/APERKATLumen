@@ -19,7 +19,9 @@ class userModel extends Model
         "fullname",
         "username",
         "password",
-        "id_unit",
+        "id_struktur",
+        "id_struktur_child1",
+        "id_struktur_child2",
         "email",
         "nomor_wa",
         "bank",
@@ -36,6 +38,6 @@ class userModel extends Model
      * @var array
      */
     protected $attributes = [
-        // 'delayed' => false,
+
     ];
 }
