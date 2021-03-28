@@ -103,8 +103,7 @@ class UserController extends Controller
         $data = userModel::where('email', $request->email)->first();
         if ($data && Hash::check($request->password, $data->password)) {
             $token = Hash::make($request->password);
-
-            $data = userModel::find($data->id_user);
+            
             $data->token = $token;
             $data->save();
 

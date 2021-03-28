@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\pengajuanModel;
 use App\Models\pengajuanHistoryModel;
 use App\Models\validasiModel;
+use Illuminate\Support\Str;
 
 class PengajuanController extends Controller
 {
@@ -34,12 +35,14 @@ class PengajuanController extends Controller
 
         $data = pengajuanModel::create($request->all());
 
-        $file = $request->file('rab');
-        $nama_file = time() . "_" . $file->getClientOriginalName();
-        $file->move("rab", $nama_file);
+        if ($request->hasFile('rab')) {
+            $file = $request->file('rab');
+            $fileName = time() . "_" . Str::random(5) . $request->email . "." . $file->extension();
+            $file->move("rab", $fileName);
 
-        $data->rab = $nama_file;
-        $data->save();
+            $data->rab = $fileName;
+            $data->save();
+        }
 
         return response()->json([
             'data' => $data ? "Success data was added" : "Failed add data"
@@ -176,7 +179,7 @@ class PengajuanController extends Controller
     public function status($params)
     {
         $data = validasiModel::join('pengajuan_history', 'validasi.id_pengajuan', '=', 'pengajuan_history.id_pengajuan')
-        ->where('id_pengajuan', $params);
+            ->where('id_pengajuan', $params);
         // ->where('id_struktur', '<', "level user login");
 
         return response()->json([
