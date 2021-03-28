@@ -78,8 +78,7 @@ class RKATController extends Controller
      */
     public function destroy($params)
     {
-        $data = rkatModel::find($params);
-        $data ? $data->delete() : "";
+        $data = rkatModel::find($params)->delete();
 
         return response()->json([
             'data' => $data ? "Success delete data" : "Failed, data not found"
@@ -90,7 +89,7 @@ class RKATController extends Controller
     {
         $this->validate($request, [
             "id_user" => "required|numeric",
-            "kode_rkat" => "required",
+            "kode_rkat" => "required|unique:rkat",
             "sasaran_strategi" => "required",
             "indikator_sasaran_strategi" => "required",
             "nama_program" => "required",

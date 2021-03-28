@@ -34,9 +34,9 @@ class PengajuanController extends Controller
 
         $data = pengajuanModel::create($request->all());
 
-        $file = $request->file('rab_file');
+        $file = $request->file('rab');
         $nama_file = time() . "_" . $file->getClientOriginalName();
-        $file->move("rab_file", $nama_file);
+        $file->move("rab", $nama_file);
 
         $data->rab = $nama_file;
         $data->save();
@@ -72,16 +72,16 @@ class PengajuanController extends Controller
     public function update(Request $request, $params)
     {
         $this->validation($request);
-        $this->autoProccess($request, $params);
+        $this->autoProccess($params);
 
         $data = pengajuanModel::find($params)->update($request->all());
 
-        if ($request->file('rab_file')) {
-            $data = pengajuanModel::find($params);
-            $file = $request->file('rab_file');
+        if ($request->file('rab')) {
+            $file = $request->file('rab');
             $nama_file = time() . "_" . $file->getClientOriginalName();
-            $file->move("rab_file", $nama_file);
+            $file->move("rab", $nama_file);
 
+            $data = pengajuanModel::find($params);
             $data->rab = $nama_file;
             $data->save();
         }
@@ -98,11 +98,14 @@ class PengajuanController extends Controller
      */
     public function destroy($params)
     {
-        $data = pengajuanModel::find($params);
-        $data ? $data->delete() : "";
+        $data = pengajuanModel::find($params)->delete()
+            || pengajuanHistoryModel::find($params)->delete()
+            || validasiModel::where('id_pengajuan', $params)->delete();
 
         return response()->json([
-            'data' => $data ? "Success delete data" : "Failed, data not found"
+            'data' => $data
+                ? "Success delete data"
+                : "Failed, data not found"
         ]);
     }
 
@@ -114,31 +117,76 @@ class PengajuanController extends Controller
      */
     public function history($params)
     {
-        $data = pengajuanHistoryModel::find($params);
+        $data = pengajuanHistoryModel::join('validasi', 'pengajuan_history.id_pengajuan', '=', 'validasi.id_pengajuan')
+            ->where('id_pengajuan', $params)->paginate(15);
 
         return response()->json([
             'data' => $data ? $data : "Failed, data not found"
         ]);
     }
 
-    public function approve(Request $request)
+    /**
+     * Approve the specified submission from user
+     */
+    public function approve($params)
     {
-        $data = validasiModel::updateOrCreate($request->all());
+        $data = $this->autoProccess($params);
 
         return response()->json([
-            'data' => $data ? "Approved" : "Failed, data not found"
+            'data' => $data ? "Submission was approved" : "Failed, data not found"
         ]);
     }
 
-    public function decline(Request $request)
+    /**
+     * Decline the specified submission from user
+     */
+    public function decline($params)
     {
-        $data = validasiModel::updateOrCreate($request->all());
+        $data = $this->autoProccess($params);
 
         return response()->json([
-            'data' => $data ? "Declined" : "Failed, data not found"
+            'data' => $data ? "Submission was declined" : "Failed, data not found"
         ]);
     }
 
+    /**
+     * Copy coloumn from tb pengajuan to tb pengajuan history database
+     * Insert data to tb validasi
+     */
+    public function autoProccess($params)
+    {
+        pengajuanModel::query()
+            ->where('id_pengajuan', $params)
+            ->each(function ($oldPost) {
+                $newPost = $oldPost->replicate();
+                $newPost->setTable('pengajuan_history');
+                $newPost->save();
+            });
+
+        validasiModel::create([
+            "id_pengajuan" => $params,
+            "id_struktur" => 1,
+            "status_pengajuan" => "status pengajuan",
+            "message" => "message",
+        ]);
+
+        return true;
+    }
+
+    public function status($params)
+    {
+        $data = validasiModel::join('pengajuan_history', 'validasi.id_pengajuan', '=', 'pengajuan_history.id_pengajuan')
+        ->where('id_pengajuan', $params);
+        // ->where('id_struktur', '<', "level user login");
+
+        return response()->json([
+            'data' => $data ? $data : "Failed, data not found"
+        ]);
+    }
+
+    /**
+     * Input validations using default laravel
+     */
     public function validation($request)
     {
         $this->validate($request, [
@@ -154,24 +202,6 @@ class PengajuanController extends Controller
             "biaya_program" => "required",
             "rab" => "nullable|file|image|mimes:jpeg,png,jpg|max:2048",
             "status_pengajuan" => "required"
-        ]);
-    }
-
-    public function autoProccess(Request $request, $params)
-    {
-        pengajuanModel::query()
-        ->where('id_pengajuan', $request->input('id_pengajuan'))
-        ->each(function ($oldPost) {
-            $newPost = $oldPost->replicate();
-            $newPost->setTable('pengajuan_history');
-            $newPost->save();
-        });
-
-        validasiModel::create([
-            "id_pengajuan" => $params,
-            "id_struktur" => 1,
-            "status_pengajuan" => "status pengajuan",
-            "message" => "message",
         ]);
     }
 }

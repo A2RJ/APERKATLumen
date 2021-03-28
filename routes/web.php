@@ -34,16 +34,13 @@ $router->group(['prefix' => 'pengajuan'], function () use ($router) {
     $router->get('/', 'PengajuanController@index');
     $router->get('/{params}', 'PengajuanController@show');
     $router->post('/', 'PengajuanController@store');
-    $router->post('/approve', 'PengajuanController@approve');
-    $router->post('/decline', 'PengajuanController@decline');
     $router->put('/{params}', 'PengajuanController@update');
     $router->delete('/{params}', 'PengajuanController@destroy');
-});
 
-$router->group(['prefix' => 'util'], function () use ($router) {
-    $router->get('/{params}', 'UtilController@show');
-    $router->get('/{params}/history', 'UtilController@history');
-    $router->post('/', 'UtilController@store'); // insertOrUpdate
+    $router->post('/status/{params}', 'PengajuanController@status');
+    $router->post('/history/{params}', 'PengajuanController@history');
+    $router->post('/approve/{params}', 'PengajuanController@approve');
+    $router->post('/decline/{params}', 'PengajuanController@decline');
 });
 
 $router->group(['prefix' => 'rkat'], function () use ($router) {
@@ -68,4 +65,8 @@ $router->group(['prefix' => 'user'], function () use ($router) {
     $router->post('/', 'UserController@store');
     $router->put('/{params}', 'UserController@update');
     $router->delete('/{params}', 'UserController@destroy');
+
+    $router->post('/login', 'UserController@login');
+    $router->post('/userLogin', 'UserController@userLogin');
+    $router->post('/logout', 'UserController@logout');
 });

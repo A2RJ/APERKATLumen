@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\struktur_child1Model;
+use App\Models\struktur_child2Model;
 use Illuminate\Http\Request;
 use App\Models\strukturModel;
-use App\Models\struktur_childModel;
 
 class StrukturController extends Controller
 {
@@ -16,8 +17,7 @@ class StrukturController extends Controller
     public function index()
     {
         return Response()->json([
-            'data' => strukturModel::join('struktur_child', 'struktur.id_struktur', '=', 'struktur_child.id_struktur_child')
-            ->paginate(15)
+            'data' => strukturModel::paginate()
         ]);
     }
 
@@ -49,11 +49,15 @@ class StrukturController extends Controller
      */
     public function show($params)
     {
-        $data = strukturModel::join('struktur_child', 'struktur.id_struktur', '=', 'struktur_child.id_struktur_child')
-        ->find($params);
+        $data = struktur_child1Model::where('id_struktur', $params)->find();
 
         return response()->json([
-            'data' => $data ? $data : "Failed, data not found"
+            'data' => $data
+                ? [
+                    'iku_child1' => $data,
+                    'iku_child1' => struktur_child2Model::where('id_struktur_child1', $data[0]['id_struktur_child1'])->find()
+                ]
+                : "Failed, data not found"
         ]);
     }
 

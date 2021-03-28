@@ -4,20 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class struktur_childModel extends Model
+class struktur_child1Model extends Model
 {
     /**
      * Database table name
      */
     protected $table      = "struktur_child";
-    protected $primaryKey = "id_struktur_child";
+    protected $primaryKey = "id_struktur_child1";
     protected $guarded = [];
     /**
      * Mass assignable columns
      */
     protected $fillable = [
         "id_struktur",
-        "nama_struktur_child"
+        "nama_struktur_child1"
     ];
 
     /**

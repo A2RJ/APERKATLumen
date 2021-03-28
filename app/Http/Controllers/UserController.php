@@ -86,24 +86,71 @@ class UserController extends Controller
      */
     public function destroy($params)
     {
-        $data = userModel::find($params);
-        $data ? $data->delete() : "";
+        $data = userModel::find($params)->delete();
 
         return response()->json([
             'data' => $data ? "Success delete data" : "Failed, data not found"
         ]);
     }
 
+    public function login(Request $request)
+    {
+        $this->validate($request, [
+            'email' => 'required|email|exists:user.email',
+            'password' => 'required',
+        ]);
+
+        $data = userModel::where('email', $request->email)->first();
+        if ($data && Hash::check($request->password, $data->password)) {
+            $token = Hash::make($request->password);
+
+            $data = userModel::find($data->id_user);
+            $data->token = $token;
+            $data->save();
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $token
+            ]);
+        }
+        return response()->json([
+            'status' => 'Failed',
+            'data' => 'Data not matching'
+        ]);
+    }
+
+    public function userLogin(Request $request)
+    {
+        $data = userModel::where('token', $request->token)->find();
+        return response()->json([
+            'data' => $data ? $data : null
+        ]);
+    }
+
+    public function logout(Request $request)
+    {
+        $data = userModel::where('token', $request->token)->find();
+        $data->token = '';
+        $data->save();
+
+        return response()->json([
+            'data' => $data ? 'Success' : 'Failed'
+        ]);
+    }
+
+    public function resetEmailURL(Request $request)
+    {
+    }
+
     public function validation($request)
     {
         $this->validate($request, [
             "fullname" => "required",
-            "username" => "required|max:8",
-            "password" => "required|max:25",
+            "email" => "required|email|unique:user.email",
+            "password" => "required|min:8",
             "id_struktur" => "required",
             "id_struktur_child1" => "nullable",
             "id_struktur_child2" => "nullable",
-            "email" => "required",
             "nomor_wa" => "required|numeric",
             "bank" => "required",
             "no_rek" => "required|numeric"

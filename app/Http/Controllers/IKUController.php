@@ -17,9 +17,7 @@ class IKUController extends Controller
     public function index()
     {
         return Response()->json([
-            'data' => iku_parentModel::join('iku_child1', 'iku_parent.id_iku_parent', '=', 'iku_child1.id_iku_child1')
-            ->join('iku_child2', 'iku_parent.id_iku_parent', '=', 'iku_child2.id_iku_child2')
-            ->paginate(15)
+            'data' => iku_parentModel::paginate()
         ]);
     }
 
@@ -51,12 +49,15 @@ class IKUController extends Controller
      */
     public function show($params)
     {
-        $data = iku_parentModel::join('iku_child1', 'iku_parent.id_iku_parent', '=', 'iku_child1.id_iku_child1')
-        ->join('iku_child2', 'iku_parent.id_iku_parent', '=', 'iku_child2.id_iku_child2')
-        ->find($params);
+        $data = iku_child1Model::find($params);
 
         return response()->json([
-            'data' => $data ? $data : "Failed, data not found"
+            'data' => $data
+                ? [
+                    'iku_child1' => $data,
+                    'iku_child1' => iku_child2Model::where('id_iku_child1', $data[0]['id_iku_child1'])->find()
+                ]
+                : "Failed, data not found"
         ]);
     }
 

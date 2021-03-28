@@ -16,7 +16,7 @@ class iku_child2Model extends Model
      * Mass assignable columns
      */
     protected $fillable = [
-        "id_iku_parent",
+        "id_iku_child1",
         "iku_child2"
     ];
 
