@@ -15,12 +15,11 @@ class CreateValidasiTable extends Migration
     {
         Schema::create('validasi', function (Blueprint $table) {
             $table->integer('id_validasi', true);
-            $table->integer('id_pengajuan')->index('id_pengajuan');
+            $table->integer('id_pengajuan_history')->index('id_pengajuan_history');
             $table->integer('id_struktur')->index('id_struktur');
-            $table->tinyInteger('status_pengajuan');
+            $table->tinyInteger('status_validasi');
             $table->text('message');
-            $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->useCurrent();
+            $table->timestamps();
         });
     }
 
