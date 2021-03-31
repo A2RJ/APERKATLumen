@@ -46,6 +46,9 @@ class StrukturController extends Controller
      *
      * @param  int  $params
      * @return \Illuminate\Http\Response
+     * 
+     * Get struktur berdasarkan id_user
+     * ambil data atasan masing2 akun
      */
     public function show($params)
     {

@@ -19,7 +19,8 @@ class CreateValidasiTable extends Migration
             $table->integer('id_struktur')->index('id_struktur');
             $table->tinyInteger('status_validasi');
             $table->text('message');
-            $table->timestamps();
+            $table->dateTime('created_at');
+            $table->dateTime('updated_at');
         });
     }
 

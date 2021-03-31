@@ -16,7 +16,7 @@ class validasiModel extends Model
      * Mass assignable columns
      */
     protected $fillable = [
-        "id_pengajuan",
+        "id_pengajuan_history",
         "id_struktur",
         "status_pengajuan",
         "message"

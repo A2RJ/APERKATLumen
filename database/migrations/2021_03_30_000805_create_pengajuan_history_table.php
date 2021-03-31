@@ -26,7 +26,7 @@ class CreatePengajuanHistoryTable extends Migration
             $table->integer('id_iku_child2')->index('id_iku_child2');
             $table->string('biaya_program', 50);
             $table->string('rab', 100);
-            $table->enum('status_pengajuan', ['progress', 'approved', '', '']);
+            $table->enum('status_pengajuan', ['progress', 'approved']);
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
         });

@@ -120,9 +120,11 @@ class UserController extends Controller
 
     public function userLogin(Request $request)
     {
-        $data = userModel::where('token', $request->token)->find();
+        $explode = explode(' ', $request->header('Authorization'));
+        $data = userModel::where('token', end($explode))->first();
+
         return response()->json([
-            'data' => $data ? $data : null
+            'data' => $data
         ]);
     }
 

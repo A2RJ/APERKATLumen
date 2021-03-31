@@ -9,7 +9,7 @@ class struktur_child1Model extends Model
     /**
      * Database table name
      */
-    protected $table      = "struktur_child";
+    protected $table      = "struktur_child1";
     protected $primaryKey = "id_struktur_child1";
     protected $guarded = [];
     /**

@@ -41,7 +41,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
         $router->post('/status/{params}', 'PengajuanController@status');
         $router->get('/history/{params}', 'PengajuanController@history');
-        $router->post('/approve/{params}', 'PengajuanController@approve');
+        $router->get('/approve/{params}', 'PengajuanController@approve');
         $router->post('/decline/{params}', 'PengajuanController@decline');
     });
 
@@ -69,7 +69,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->delete('/{params}', 'UserController@destroy');
 
         $router->post('/login', 'UserController@login');
-        $router->post('/userLogin', 'UserController@userLogin');
+        // $router->post('/userLogin', 'UserController@userLogin');
         $router->post('/logout', 'UserController@logout');
     });
 });

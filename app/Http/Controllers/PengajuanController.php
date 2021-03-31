@@ -3,11 +3,15 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use App\Models\pengajuanModel;
 use App\Models\pengajuanHistoryModel;
+use App\Models\rkatModel;
+use App\Models\struktur_child1Model;
+use App\Models\struktur_child2Model;
+use App\Models\strukturModel;
+use App\Models\userModel;
 use App\Models\validasiModel;
-use Illuminate\Support\Str;
-use Illuminate\Http\File;
 
 class PengajuanController extends Controller
 {
@@ -75,10 +79,10 @@ class PengajuanController extends Controller
      */
     public function update(Request $request, $params)
     {
+        $this->autoProccess($request, $params);
+
         $data = pengajuanModel::find($params);
         $data ? $data->update($request->all()) : false;
-
-        $this->autoProccess($params);
 
         return response()->json([
             'data' => $data ? "Data was updated" : "Failed to update data not found"
@@ -97,7 +101,7 @@ class PengajuanController extends Controller
         $data ? $data->delete() : false;
         $pengajuan = pengajuanHistoryModel::find($params);
         $pengajuan ? $pengajuan->delete() : false;
-        $validasi = validasiModel::where('id_pengajuan', $params);
+        $validasi = validasiModel::where('id_pengajuan_history', $params);
         $validasi ? $validasi->delete() : false;
 
         return response()->json([
@@ -124,11 +128,11 @@ class PengajuanController extends Controller
     }
 
     /**
-     * Approve the specified submission from user
+     * Approve the specified submission from user by id_pengajuan
      */
-    public function approve($params)
+    public function approve(Request $request, $params)
     {
-        $data = $this->autoProccess($params);
+        $data = $this->autoProccess($request, $params, true);
 
         return response()->json([
             'data' => $data ? "Submission was approved" : "Failed, data not found"
@@ -138,9 +142,9 @@ class PengajuanController extends Controller
     /**
      * Decline the specified submission from user
      */
-    public function decline($params)
+    public function decline(Request $request, $params)
     {
-        $data = $this->autoProccess($params);
+        $data = $this->autoProccess($request, $params, false);
 
         return response()->json([
             'data' => $data ? "Submission was declined" : "Failed, data not found"
@@ -151,7 +155,7 @@ class PengajuanController extends Controller
      * Copy coloumn from tb pengajuan to tb pengajuan history database
      * Insert data to tb validasi
      */
-    public function autoProccess($params)
+    public function autoProccess($request, $params, $status = null)
     {
         pengajuanModel::query()
             ->where('id_pengajuan', $params)
@@ -161,16 +165,52 @@ class PengajuanController extends Controller
                 $newPost->save();
             });
 
-        // Get struktur user by token
-        $data = pengajuanHistoryModel::latest()->first();
+        $pengajuan = pengajuanModel::find($params);
+        $pengajuan_history = pengajuanHistoryModel::where('id_rkat', $pengajuan->id_rkat)->latest()->first();
+
+        $explode = explode(' ', $request->header('Authorization'));
+        $userStruktur = userModel::where('token', end($explode))->first();
+
+        $id_struktur = $userStruktur->id_struktur;
+        $id_struktur_child1 = $userStruktur->id_struktur_child1;
+        $id_struktur_child2 = $userStruktur->id_struktur_child2;
+
+        if ($id_struktur_child2) {
+            $struktur = $id_struktur_child2;
+            $data = struktur_child2Model::find($struktur);
+            $nama_struktur = $data->nama_struktur_child2;
+        } elseif ($id_struktur_child1 == true && $id_struktur_child2 == null) {
+            $struktur = $id_struktur_child1;
+            $data = struktur_child1Model::find($struktur);
+            $nama_struktur = $data->nama_struktur_child1;
+        } elseif ($id_struktur == true && $id_struktur_child1 == null && $id_struktur_child2 == null) {
+            $struktur = $id_struktur;
+            $data = strukturModel::find($struktur);
+            $nama_struktur = $data->nama_struktur;
+        }
+
+        $rkat = rkatModel::find($pengajuan->id_rkat);
+
+        if ($rkat->id_rkat !== $userStruktur->id_rkat) {
+            $message = $nama_struktur . " melakukan update data pengajuan";
+        }else{
+            $message = "Telah disetujui oleh " . $nama_struktur;
+        }
+
         validasiModel::create([
-            "id_pengajuan_history" => $data->id_pengajuan,
-            "id_struktur" => 1,
-            "status_validasi" => "status validasi",
-            "message" => "message",
+            "id_pengajuan_history" => $pengajuan_history->id_pengajuan,
+            "id_struktur" => $struktur,
+            "status_pengajuan" => $status,
+            "message" => $message,
         ]);
+
+        return true;
     }
 
+    /**
+     * Get status validasi berdasarkan id_pengajuan
+     * ambil data atasan masing2 akun
+     */
     public function status($params)
     {
         $data = validasiModel::join('pengajuan_history', 'validasi.id_pengajuan', '=', 'pengajuan_history.id_pengajuan')
