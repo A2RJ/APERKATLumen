@@ -219,7 +219,7 @@ class PengajuanController extends Controller
         return $data;
     }
 
-    public function status(Request $request, $params)
+    public function status($params)
     {
         $pengajuan = pengajuanModel::join('rkat', 'pengajuan.id_rkat', 'rkat.id_rkat')
             ->join('user', 'rkat.id_user', 'user.id_user')
@@ -265,6 +265,7 @@ class PengajuanController extends Controller
             ];
         } elseif ($pengajuan->id_struktur_child1 == true && $pengajuan->id_struktur_child2 == null) {
             $child1 = struktur_child1Model::find($pengajuan->id_struktur_child1);
+
             $data = [
                 [
                     "id_struktur" => $child1->id_struktur_child1,
@@ -289,9 +290,48 @@ class PengajuanController extends Controller
             ];
         } elseif ($pengajuan->id_struktur == true && $pengajuan->id_struktur_child1 == null && $pengajuan->id_struktur_child2 == null) {
             $struktur = strukturModel::where('id_struktur', '<=', $pengajuan->id_struktur)
-                ->orderBy('level', 'DESC')
-                ->get();
-            $data = $struktur;
+                ->orderBy('level', 'DESC')->get();
+            $hitung = $struktur->count();
+            if ($hitung == 1) {
+                $data = [
+                    [
+                        "id_struktur" => $struktur[0]->id_struktur,
+                        "nama_struktur" => $struktur[0]->nama_struktur,
+                        "status" => $this->statusNull($struktur[0]->id_struktur)
+                    ]
+                ];
+            } elseif ($hitung == 2) {
+                $data = [
+                    [
+                        "id_struktur" => $struktur[0]->id_struktur,
+                        "nama_struktur" => $struktur[0]->nama_struktur,
+                        "status" => $this->statusNull($struktur[0]->id_struktur)
+                    ],
+                    [
+                        "id_struktur" => $struktur[1]->id_struktur,
+                        "nama_struktur" => $struktur[1]->nama_struktur,
+                        "status" => $this->statusNull($struktur[1]->id_struktur)
+                    ]
+                ];
+            } elseif ($hitung == 3) {
+                $data = [
+                    [
+                        "id_struktur" => $struktur[0]->id_struktur,
+                        "nama_struktur" => $struktur[0]->nama_struktur,
+                        "status" => $this->statusNull($struktur[0]->id_struktur)
+                    ],
+                    [
+                        "id_struktur" => $struktur[1]->id_struktur,
+                        "nama_struktur" => $struktur[1]->nama_struktur,
+                        "status" => $this->statusNull($struktur[1]->id_struktur)
+                    ],
+                    [
+                        "id_struktur" => $struktur[2]->id_struktur,
+                        "nama_struktur" => $struktur[2]->nama_struktur,
+                        "status" => $this->statusNull($struktur[2]->id_struktur)
+                    ]
+                ];
+            }
         }
 
         return response()->json([

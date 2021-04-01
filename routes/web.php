@@ -13,17 +13,17 @@
 |
 */
 
-$router->get('/', function () use ($router) {
-    return response()->json([
-        'app_version' => $router->app->version(),
-        'author' => "Universitas Teknologi Sumbawa",
-        'programmer' => "https://github.com/a2rj",
-        'about_API' => "API SUBMISSION"
-    ]);
-});
-
 $router->group(['middleware' => 'auth'], function () use ($router) {
     
+    $router->get('/', function () use ($router) {
+        return response()->json([
+            'app_version' => $router->app->version(),
+            'vendor' => "Universitas Teknologi Sumbawa",
+            'author' => "https://github.com/a2rj",
+            'about_API' => "API SUBMISSION"
+        ]);
+    });
+
     $router->group(['prefix' => 'iku'], function () use ($router) {
         $router->get('/', 'IKUController@index');
         $router->get('/{params}', 'IKUController@show');
@@ -40,9 +40,9 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->delete('/{params}', 'PengajuanController@destroy');
 
         $router->get('/status/{params}', 'PengajuanController@status');
-        $router->get('/history/{params}', 'PengajuanController@history');
         $router->get('/approve/{params}', 'PengajuanController@approve');
-        $router->post('/decline/{params}', 'PengajuanController@decline');
+        $router->get('/decline/{params}', 'PengajuanController@decline');
+        $router->get('/history/{params}', 'PengajuanController@history');
     });
 
     $router->group(['prefix' => 'rkat'], function () use ($router) {
