@@ -39,7 +39,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->put('/{params}', 'PengajuanController@update');
         $router->delete('/{params}', 'PengajuanController@destroy');
 
-        $router->post('/status/{params}', 'PengajuanController@status');
+        $router->get('/status/{params}', 'PengajuanController@status');
         $router->get('/history/{params}', 'PengajuanController@history');
         $router->get('/approve/{params}', 'PengajuanController@approve');
         $router->post('/decline/{params}', 'PengajuanController@decline');

@@ -18,7 +18,7 @@ class validasiModel extends Model
     protected $fillable = [
         "id_pengajuan_history",
         "id_struktur",
-        "status_pengajuan",
+        "status_validasi",
         "message"
     ];
 
