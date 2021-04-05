@@ -19,13 +19,13 @@ class CreatePengajuanHistoryTable extends Migration
             $table->string('target_capaian', 100);
             $table->string('bentuk_pelaksanaan_program', 100);
             $table->string('tempat_program', 100);
-            $table->date('tanggal');
+            $table->dateTime('tanggal');
             $table->string('bidang_terkait', 50);
             $table->integer('id_iku_parent')->index('id_iku_parent');
             $table->integer('id_iku_child1')->index('id_iku_child1');
             $table->integer('id_iku_child2')->index('id_iku_child2');
             $table->string('biaya_program', 50);
-            $table->string('rab', 100);
+            $table->string('rab', 100)->nullable();
             $table->enum('status_pengajuan', ['progress', 'approved']);
             $table->dateTime('created_at');
             $table->dateTime('updated_at');

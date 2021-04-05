@@ -13,26 +13,36 @@
 |
 */
 
+$router->get('/', function () use ($router) {
+    return response()->json([
+        'app_version' => $router->app->version(),
+        'vendor' => "Universitas Teknologi Sumbawa",
+        'author' => "https://github.com/a2rj",
+        'about_API' => "API SUBMISSION"
+    ]);
+});
+$router->group(['middleware' => 'auth','prefix' => 'api'], function ($router) 
+{
+    $router->get('me', 'AuthController@me');
+});
+$router->group(['prefix' => 'api'], function () use ($router) 
+{
+   $router->post('register', 'AuthController@register');
+   $router->post('login', 'AuthController@login');
+   $router->post('logout', 'AuthController@logout');
+});
+
 $router->group(['middleware' => 'auth'], function () use ($router) {
-    
-    $router->get('/', function () use ($router) {
-        return response()->json([
-            'app_version' => $router->app->version(),
-            'vendor' => "Universitas Teknologi Sumbawa",
-            'author' => "https://github.com/a2rj",
-            'about_API' => "API SUBMISSION"
-        ]);
-    });
 
     $router->group(['prefix' => 'iku'], function () use ($router) {
         $router->get('/', 'IKUController@index');
-        $router->get('/{params}', 'IKUController@show');
         $router->post('/', 'IKUController@store');
         $router->put('/{params}', 'IKUController@update');
         $router->delete('/{params}', 'IKUController@destroy');
     });
 
     $router->group(['prefix' => 'pengajuan'], function () use ($router) {
+        $router->get('/{params}', 'IKUController@show');
         $router->get('/', 'PengajuanController@index');
         $router->get('/{params}', 'PengajuanController@show');
         $router->post('/', 'PengajuanController@store');
@@ -67,9 +77,5 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->post('/', 'UserController@store');
         $router->put('/{params}', 'UserController@update');
         $router->delete('/{params}', 'UserController@destroy');
-
-        $router->post('/login', 'UserController@login');
-        $router->post('/userLogin', 'UserController@userLogin');
-        $router->post('/logout', 'UserController@logout');
     });
 });

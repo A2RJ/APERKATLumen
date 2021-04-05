@@ -6,12 +6,13 @@
     "type": "project",
     "require": {
         "php": "^7.3|^8.0",
+        "chuckrincon/lumen-config-discover": "^1.0",
         "flipbox/lumen-generator": "^8.2",
         "illuminate/mail": "^8.34",
         "kitloong/laravel-migrations-generator": "^4.4",
         "laravel/lumen-framework": "^8.0",
         "sanjeev-kr/laravel-mysqlbackup": "^1.0",
-        "tymon/jwt-auth": "^1.0.2"
+        "tymon/jwt-auth": "dev-develop"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

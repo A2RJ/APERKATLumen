@@ -36,7 +36,20 @@ class PengajuanController extends Controller
      */
     public function store(Request $request)
     {
-        $this->validation($request);
+        $this->validate($request, [
+            "id_rkat" => "required|numeric",
+            "target_capaian" => "required",
+            "bentuk_pelaksanaan_program" => "required",
+            "tempat_program" => "required",
+            "tanggal" => "required",
+            "bidang_terkait" => "required",
+            "id_iku_parent" => "required",
+            "id_iku_child1" => "required",
+            "id_iku_child2" => "required",
+            "biaya_program" => "required",
+            "rab" => "nullable",
+            "status_pengajuan" => "required"
+        ]);
 
         $data = pengajuanModel::create($request->all());
 
@@ -340,23 +353,28 @@ class PengajuanController extends Controller
     }
 
     /**
-     * Input validations using default laravel
-     */
-    public function validation($request)
+     * Get submission by user login
+    */
+    public function pengatjuanUnit(Request $request)
     {
-        $this->validate($request, [
-            "id_rkat" => "required|numeric",
-            "target_capaian" => "required",
-            "bentuk_pelaksanaan_program" => "required",
-            "tempat_program" => "required",
-            "tanggal" => "required",
-            "bidang_terkait" => "required",
-            "id_iku_parent" => "required",
-            "id_iku_child1" => "required",
-            "id_iku_child2" => "required",
-            "biaya_program" => "required",
-            "rab" => "nullable",
-            "status_pengajuan" => "required"
+        $explode = explode(' ', $request->header('Authorization'));
+        $userStruktur = userModel::where('token', end($explode))->first();
+
+        if ($userStruktur->id_struktur_child2) {
+            $userStruktur->id_struktur_child2;
+            $userStruktur->id_struktur_child1;
+            $userStruktur->id_struktur;
+            
+        } elseif ($userStruktur->id_struktur_child1 == true && $userStruktur->id_struktur_child2 == null) {
+            $userStruktur->id_struktur_child1;
+            $userStruktur->id_struktur;
+            
+        } elseif ($userStruktur->id_struktur == true && $userStruktur->id_struktur_child1 == null && $userStruktur->id_struktur_child2 == null) {
+            $userStruktur->id_struktur;
+        }
+
+        return response()->json([
+            'data' => $userStruktur
         ]);
     }
 }

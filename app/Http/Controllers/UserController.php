@@ -96,26 +96,24 @@ class UserController extends Controller
     public function login(Request $request)
     {
         $this->validate($request, [
-            'email' => 'required|email|exists:user.email',
+            'email' => 'required|email',
             'password' => 'required',
         ]);
 
         $data = userModel::where('email', $request->email)->first();
         if ($data && Hash::check($request->password, $data->password)) {
             $token = Hash::make($request->password);
-            
+
             $data->token = $token;
             $data->save();
 
             return response()->json([
-                'status' => 'success',
-                'data' => $token
+                'access_token' => $token,
+                'token_type' => 'bearer',
+                "expires_in" => 3600
             ]);
         }
-        return response()->json([
-            'status' => 'Failed',
-            'data' => 'Data not matching'
-        ]);
+        return response()->json(['message' => 'Unauthorized'], 401);
     }
 
     public function userLogin(Request $request)
@@ -124,7 +122,7 @@ class UserController extends Controller
         $data = userModel::where('token', end($explode))->first();
 
         return response()->json([
-            'data' => $data
+            'data' => $data ? $data : ""
         ]);
     }
 
