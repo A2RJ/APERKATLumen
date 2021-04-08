@@ -21,16 +21,16 @@ $router->get('/', function () use ($router) {
         'about_API' => "API SUBMISSION"
     ]);
 });
-$router->group(['middleware' => 'auth','prefix' => 'api'], function ($router) 
-{
+
+$router->group(['middleware' => 'auth', 'prefix' => 'api'], function ($router) {
     $router->get('me', 'AuthController@me');
 });
-$router->group(['prefix' => 'api'], function () use ($router) 
-{
-   $router->post('register', 'AuthController@register');
-   $router->post('login', 'AuthController@login');
-   $router->post('logout', 'AuthController@logout');
-   $router->post('refresh', 'AuthController@refresh');
+
+$router->group(['prefix' => 'api'], function () use ($router) {
+    $router->post('register', 'AuthController@register');
+    $router->post('login', 'AuthController@login');
+    $router->post('logout', 'AuthController@logout');
+    $router->post('refresh', 'AuthController@refresh');
 });
 
 $router->group(['middleware' => 'auth'], function () use ($router) {
@@ -43,7 +43,6 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     });
 
     $router->group(['prefix' => 'pengajuan'], function () use ($router) {
-        $router->get('/{params}', 'IKUController@show');
         $router->get('/', 'PengajuanController@index');
         $router->get('/{params}', 'PengajuanController@show');
         $router->post('/', 'PengajuanController@store');
