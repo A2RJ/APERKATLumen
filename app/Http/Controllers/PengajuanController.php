@@ -70,6 +70,22 @@ class PengajuanController extends Controller
     /**
      * Display the specified resource.
      *
+     * @param  int  $params = id_user
+     * @return \Illuminate\Http\Response
+     */
+    public function byUser($params)
+    {
+        $data = pengajuanModel::join('rkat', 'pengajuan.id_rkat', '=', 'rkat.id_rkat')
+            ->where('rkat.id_user', $params)->paginate();
+
+        return response()->json([
+            'data' => $data ? $data : "Failed, data not found"
+        ]);
+    }
+
+    /**
+     * Display the specified resource.
+     *
      * @param  int  $params
      * @return \Illuminate\Http\Response
      */
@@ -77,9 +93,13 @@ class PengajuanController extends Controller
     {
         $data = pengajuanModel::join('rkat', 'pengajuan.id_rkat', '=', 'rkat.id_rkat')
             ->find($params);
+        $status = $this->status($params);
+        $history = $this->history($params);
 
         return response()->json([
-            'data' => $data ? $data : "Failed, data not found"
+            'data' => $data ? $data : "Failed, data not found",
+            'status' => $status->original['data'] ? $status->original['data'] : "Failed, status not found",
+            'history' => $history->original['data'] ? $history->original['data'] : "Failed, history not found"
         ]);
     }
 
@@ -133,7 +153,7 @@ class PengajuanController extends Controller
     public function history($params)
     {
         $data = pengajuanHistoryModel::join('validasi', 'pengajuan_history.id_pengajuan', '=', 'validasi.id_pengajuan_history')
-            ->where('pengajuan_history.id_rkat', $params)->paginate(15);
+            ->where('pengajuan_history.id', $params)->paginate(15);
 
         return response()->json([
             'data' => $data ? $data : "Failed, data not found"
@@ -175,14 +195,14 @@ class PengajuanController extends Controller
             ->each(function ($oldPost) {
                 $newPost = $oldPost->replicate();
                 $newPost->setTable('pengajuan_history');
+                $newPost->id = $oldPost->id_pengajuan;
                 $newPost->save();
             });
 
         $pengajuan = pengajuanModel::find($params);
         $pengajuan_history = pengajuanHistoryModel::where('id_rkat', $pengajuan->id_rkat)->latest()->first();
 
-        $explode = explode(' ', $request->header('Authorization'));
-        $userStruktur = userModel::where('token', end($explode))->first();
+        $userStruktur = userModel::where('token', $request->token)->first();
 
         $id_struktur = $userStruktur->id_struktur;
         $id_struktur_child1 = $userStruktur->id_struktur_child1;
@@ -302,9 +322,9 @@ class PengajuanController extends Controller
                 ]
             ];
         } elseif ($pengajuan->id_struktur == true && $pengajuan->id_struktur_child1 == null && $pengajuan->id_struktur_child2 == null) {
-            $struktur = strukturModel::where('id_struktur', '<=', $pengajuan->id_struktur)
-                ->orderBy('level', 'DESC')->get();
+            $struktur = strukturModel::where('id_struktur', '<=', $pengajuan->id_struktur)->orderBy('level', 'DESC')->get();
             $hitung = $struktur->count();
+
             if ($hitung == 1) {
                 $data = [
                     [
@@ -353,28 +373,49 @@ class PengajuanController extends Controller
     }
 
     /**
-     * Get submission by user login
-    */
-    public function pengatjuanUnit(Request $request)
+     * Get submission bawahan by id user login
+     */
+    public function pengajuanSubordinate($params)
     {
-        $explode = explode(' ', $request->header('Authorization'));
-        $userStruktur = userModel::where('token', end($explode))->first();
+        $userStruktur = userModel::where('id_user', $params)->first();
 
         if ($userStruktur->id_struktur_child2) {
-            $userStruktur->id_struktur_child2;
-            $userStruktur->id_struktur_child1;
-            $userStruktur->id_struktur;
-            
+            $data = null;
         } elseif ($userStruktur->id_struktur_child1 == true && $userStruktur->id_struktur_child2 == null) {
-            $userStruktur->id_struktur_child1;
-            $userStruktur->id_struktur;
-            
+            $data = struktur_child1Model::join('struktur_child2', 'struktur_child1.id_struktur_child1', 'struktur_child2.id_struktur_child1')
+                ->join('user', 'struktur_child2.id_struktur_child2', 'user.id_struktur_child2')
+                ->join('rkat', 'user.id_user', 'rkat.id_user')
+                ->join('pengajuan', 'rkat.id_rkat', 'pengajuan.id_rkat')
+                ->where('struktur_child1.id_struktur_child1', $userStruktur->id_struktur_child1)
+                ->get();
         } elseif ($userStruktur->id_struktur == true && $userStruktur->id_struktur_child1 == null && $userStruktur->id_struktur_child2 == null) {
-            $userStruktur->id_struktur;
+            $struktur = strukturModel::where('id_struktur', '<=', $userStruktur->id_struktur)->orderBy('level', 'DESC')->get();
+            $hitung = $struktur->count();
+
+            if ($hitung == 1) {
+                $data = userModel::join('rkat', 'user.id_user', 'rkat.id_user')
+                    ->join('pengajuan', 'rkat.id_rkat', 'pengajuan.id_rkat')
+                    ->where('user.id_struktur', '!=', 1)
+                    ->get();
+            } elseif ($hitung == 2) {
+                $data = userModel::join('rkat', 'user.id_user', 'rkat.id_user')
+                    ->join('pengajuan', 'rkat.id_rkat', 'pengajuan.id_rkat')
+                    ->where('user.id_struktur', '!=', 1)
+                    ->where('user.id_struktur', '!=', 2)
+                    ->get();
+            } elseif ($hitung == 3) {
+                $data = userModel::join('rkat', 'user.id_user', 'rkat.id_user')
+                ->join('pengajuan', 'rkat.id_rkat', 'pengajuan.id_rkat')
+                ->where('user.id_struktur', '!=', 1)
+                ->where('user.id_struktur', '!=', 2)
+                ->where('user.id_struktur', 3)
+                ->where('user.id_struktur_child1', '!=', 0)
+                ->get();
+            }
         }
 
         return response()->json([
-            'data' => $userStruktur
+            "data" => $data
         ]);
     }
 }

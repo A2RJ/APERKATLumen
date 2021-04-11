@@ -43,7 +43,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     });
 
     $router->group(['prefix' => 'pengajuan'], function () use ($router) {
-        $router->get('/', 'PengajuanController@index');
+        $router->get('/byUser/{params}', 'PengajuanController@byUser');
         $router->get('/{params}', 'PengajuanController@show');
         $router->post('/', 'PengajuanController@store');
         $router->put('/{params}', 'PengajuanController@update');
@@ -53,6 +53,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/approve/{params}', 'PengajuanController@approve');
         $router->get('/decline/{params}', 'PengajuanController@decline');
         $router->get('/history/{params}', 'PengajuanController@history');
+        $router->get('/pengajuanSubordinate/{params}', 'PengajuanController@pengajuanSubordinate');
     });
 
     $router->group(['prefix' => 'rkat'], function () use ($router) {
