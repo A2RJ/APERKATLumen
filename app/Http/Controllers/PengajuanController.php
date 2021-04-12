@@ -23,7 +23,7 @@ class PengajuanController extends Controller
     public function index()
     {
         return Response()->json([
-            'data' => pengajuanModel::join('rkat', 'pengajuan.id_rkat', '=', 'rkat.id_rkat')
+            'data' => pengajuanModel::join('rkat', 'pengajuan.kode_rkat', '=', 'rkat.kode_rkat')
                 ->paginate(15)
         ]);
     }
@@ -37,7 +37,7 @@ class PengajuanController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
-            "id_rkat" => "required|numeric",
+            "kode_rkat" => "required",
             "target_capaian" => "required",
             "bentuk_pelaksanaan_program" => "required",
             "tempat_program" => "required",
@@ -75,7 +75,10 @@ class PengajuanController extends Controller
      */
     public function byUser($params)
     {
-        $data = pengajuanModel::join('rkat', 'pengajuan.id_rkat', '=', 'rkat.id_rkat')
+        $data = pengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.kode_rkat')
+            ->join('user', 'rkat.id_user', 'user.id_user')
+            ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+            ->select("pengajuan.*", "user.fullname", "struktur_child1.nama_struktur_child1")
             ->where('rkat.id_user', $params)->paginate();
 
         return response()->json([
@@ -91,7 +94,7 @@ class PengajuanController extends Controller
      */
     public function show($params)
     {
-        $data = pengajuanModel::join('rkat', 'pengajuan.id_rkat', '=', 'rkat.id_rkat')
+        $data = pengajuanModel::join('rkat', 'pengajuan.kode_rkat', '=', 'rkat.kode_rkat')
             ->find($params);
         $status = $this->status($params);
         $history = $this->history($params);
@@ -200,7 +203,7 @@ class PengajuanController extends Controller
             });
 
         $pengajuan = pengajuanModel::find($params);
-        $pengajuan_history = pengajuanHistoryModel::where('id_rkat', $pengajuan->id_rkat)->latest()->first();
+        $pengajuan_history = pengajuanHistoryModel::where('kode_rkat', $pengajuan->kode_rkat)->latest()->first();
 
         $userStruktur = userModel::where('token', $request->token)->first();
 
@@ -222,9 +225,9 @@ class PengajuanController extends Controller
             $nama_struktur = $data->nama_struktur;
         }
 
-        $rkat = rkatModel::find($pengajuan->id_rkat);
+        $rkat = rkatModel::where('kode_rkat', $pengajuan->kode_rkat)->first();
 
-        if ($rkat->id_rkat !== $userStruktur->id_rkat) {
+        if ($rkat->kode_rkat !== $userStruktur->kode_rkat) {
             $message = $nama_struktur . " melakukan update data pengajuan";
         } else {
             $message = "Telah disetujui oleh " . $nama_struktur;
@@ -254,7 +257,7 @@ class PengajuanController extends Controller
 
     public function status($params)
     {
-        $pengajuan = pengajuanModel::join('rkat', 'pengajuan.id_rkat', 'rkat.id_rkat')
+        $pengajuan = pengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.kode_rkat')
             ->join('user', 'rkat.id_user', 'user.id_user')
             ->where('pengajuan.id_pengajuan', $params)
             ->first();
@@ -385,7 +388,7 @@ class PengajuanController extends Controller
             $data = struktur_child1Model::join('struktur_child2', 'struktur_child1.id_struktur_child1', 'struktur_child2.id_struktur_child1')
                 ->join('user', 'struktur_child2.id_struktur_child2', 'user.id_struktur_child2')
                 ->join('rkat', 'user.id_user', 'rkat.id_user')
-                ->join('pengajuan', 'rkat.id_rkat', 'pengajuan.id_rkat')
+                ->join('pengajuan', 'rkat.kode_rkat', 'pengajuan.kode_rkat')
                 ->where('struktur_child1.id_struktur_child1', $userStruktur->id_struktur_child1)
                 ->get();
         } elseif ($userStruktur->id_struktur == true && $userStruktur->id_struktur_child1 == null && $userStruktur->id_struktur_child2 == null) {
@@ -394,23 +397,23 @@ class PengajuanController extends Controller
 
             if ($hitung == 1) {
                 $data = userModel::join('rkat', 'user.id_user', 'rkat.id_user')
-                    ->join('pengajuan', 'rkat.id_rkat', 'pengajuan.id_rkat')
+                    ->join('pengajuan', 'rkat.kode_rkat', 'pengajuan.kode_rkat')
                     ->where('user.id_struktur', '!=', 1)
                     ->get();
             } elseif ($hitung == 2) {
                 $data = userModel::join('rkat', 'user.id_user', 'rkat.id_user')
-                    ->join('pengajuan', 'rkat.id_rkat', 'pengajuan.id_rkat')
+                    ->join('pengajuan', 'rkat.kode_rkat', 'pengajuan.kode_rkat')
                     ->where('user.id_struktur', '!=', 1)
                     ->where('user.id_struktur', '!=', 2)
                     ->get();
             } elseif ($hitung == 3) {
                 $data = userModel::join('rkat', 'user.id_user', 'rkat.id_user')
-                ->join('pengajuan', 'rkat.id_rkat', 'pengajuan.id_rkat')
-                ->where('user.id_struktur', '!=', 1)
-                ->where('user.id_struktur', '!=', 2)
-                ->where('user.id_struktur', 3)
-                ->where('user.id_struktur_child1', '!=', 0)
-                ->get();
+                    ->join('pengajuan', 'rkat.kode_rkat', 'pengajuan.kode_rkat')
+                    ->where('user.id_struktur', '!=', 1)
+                    ->where('user.id_struktur', '!=', 2)
+                    ->where('user.id_struktur', 3)
+                    ->where('user.id_struktur_child1', '!=', 0)
+                    ->get();
             }
         }
 

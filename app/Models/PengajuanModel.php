@@ -16,7 +16,7 @@ class pengajuanModel extends Model
      * Mass assignable columns
      */
     protected $fillable = [
-        "id_rkat",
+        "kode_rkat",
         "target_capaian",
         "bentuk_pelaksanaan_program",
         "tempat_program",

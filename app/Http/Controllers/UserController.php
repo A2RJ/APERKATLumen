@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\userModel;
+use App\Models\strukturModel;
 
 class UserController extends Controller
 {
@@ -16,7 +17,8 @@ class UserController extends Controller
     public function index()
     {
         return Response()->json([
-            'data' => userModel::paginate()
+            'data' => userModel::join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                ->paginate(10)
         ]);
     }
 
@@ -50,6 +52,41 @@ class UserController extends Controller
     {
         $data = userModel::find($params);
 
+        return response()->json([
+            'data' => $data ? $data : "Failed, data not found"
+        ]);
+    }
+
+    public function datauser($params)
+    {
+        $data = userModel::where('id_user', $params)->get();
+        if ($data[0]->id_struktur_child2 != null) {
+            $data = [
+                'level' => "prodi"
+            ];
+        } elseif ($data[0]->id_struktur_child2 == 0 && $data[0]->id_struktur_child1 == true) {
+            $data = [
+                'level' => "fakultas"
+            ];
+        } elseif ($data[0]->id_struktur == true && $data[0]->id_struktur_child1 == null && $data[0]->id_struktur_child2 == null) {
+            $struktur = strukturModel::where('id_struktur', '<=', $data[0]->id_struktur)->orderBy('level', 'DESC')->get();
+            $hitung = $struktur->count();
+
+            if ($hitung == 1) {
+                $data = [
+                    'level' => "rektor"
+                ];
+            } elseif ($hitung == 2) {
+                $data = [
+                    'level' => "warek"
+                ];
+            } elseif ($hitung == 3) {
+                $data = [
+                    'level' => "dirKeuangan"
+                ];
+            }
+        }
+        
         return response()->json([
             'data' => $data ? $data : "Failed, data not found"
         ]);

@@ -15,7 +15,10 @@ class RKATController extends Controller
     public function index()
     {
         return Response()->json([
-            'data' => rkatModel::paginate()
+            'data' => rkatModel::join('user', 'rkat.id_user', 'user.id_user')
+            ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+            ->select('rkat.*', "struktur_child1.nama_struktur_child1")
+            ->get()
         ]);
     }
 
@@ -30,6 +33,7 @@ class RKATController extends Controller
     {
         $this->validate($request, [
             "id_user" => "required|numeric",
+            "kode_rkat" => "required",
             "sasaran_strategi" => "required",
             "indikator_sasaran_strategi" => "required",
             "nama_program" => "required",

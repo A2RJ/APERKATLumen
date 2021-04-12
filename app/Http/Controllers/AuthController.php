@@ -6,6 +6,7 @@ use App\Models\userModel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use App\Models\strukturModel;
 
 class AuthController extends Controller
 {
@@ -81,7 +82,36 @@ class AuthController extends Controller
      */	 	
     public function me()
     {
-        return response()->json(auth()->user());
+        $login = auth()->user();
+        $data = userModel::where("id_user", $login->id_user)->get();
+        if ($data[0]->id_struktur_child2) {
+            $data = [
+                'level' => "prodi"
+            ];
+        } elseif ($data[0]->id_struktur_child2 == 0 && $data[0]->id_struktur_child1 == true) {
+            $data = [
+                'level' => "fakultas"
+            ];
+        } elseif ($data[0]->id_struktur == true && $data[0]->id_struktur_child1 == null && $data[0]->id_struktur_child2 == null) {
+            $struktur = strukturModel::where('id_struktur', '<=', $data[0]->id_struktur)->orderBy('level', 'DESC')->get();
+            $hitung = $struktur->count();
+
+            if ($hitung == 1) {
+                $data = [
+                    'level' => "rektor"
+                ];
+            } elseif ($hitung == 2) {
+                $data = [
+                    'level' => "warek"
+                ];
+            } elseif ($hitung == 3) {
+                $data = [
+                    'level' => "dirKeuangan"
+                ];
+            }
+        }
+        
+        return response()->json([$login, $data]);
     }
 
         /**
