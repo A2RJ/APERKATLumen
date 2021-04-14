@@ -228,7 +228,7 @@ class PengajuanController extends Controller
         $rkat = rkatModel::join('pengajuan', 'rkat.kode_rkat', 'pengajuan.kode_rkat')
         ->join('user', 'rkat.id_user', 'user.id_user')
         ->where('pengajuan.id_pengajuan', $params)
-        ->where('user.token', $request->token)
+        ->where('user.id_user', $request->id_user)
         ->get();
 
         if ($rkat) {
