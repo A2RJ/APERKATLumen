@@ -205,13 +205,13 @@ class PengajuanController extends Controller
         $pengajuan = pengajuanModel::find($params);
         $pengajuan_history = pengajuanHistoryModel::where('kode_rkat', $pengajuan->kode_rkat)->latest()->first();
 
-        $userStruktur = userModel::where('token', $request->token)->first();
+        $userStruktur = userModel::where('id_user', $request->id_user)->first();
 
         $id_struktur = $userStruktur->id_struktur;
         $id_struktur_child1 = $userStruktur->id_struktur_child1;
         $id_struktur_child2 = $userStruktur->id_struktur_child2;
 
-        if ($id_struktur_child2) {
+        if ($id_struktur_child2 != null) {
             $struktur = $id_struktur_child2;
             $data = struktur_child2Model::find($struktur);
             $nama_struktur = $data->nama_struktur_child2;
@@ -225,9 +225,13 @@ class PengajuanController extends Controller
             $nama_struktur = $data->nama_struktur;
         }
 
-        $rkat = rkatModel::where('kode_rkat', $pengajuan->kode_rkat)->first();
+        $rkat = rkatModel::join('pengajuan', 'rkat.kode_rkat', 'pengajuan.kode_rkat')
+        ->join('user', 'rkat.id_user', 'user.id_user')
+        ->where('pengajuan.id_pengajuan', $params)
+        ->where('user.token', $request->token)
+        ->get();
 
-        if ($rkat->kode_rkat !== $userStruktur->kode_rkat) {
+        if ($rkat) {
             $message = $nama_struktur . " melakukan update data pengajuan";
         } else {
             $message = "Telah disetujui oleh " . $nama_struktur;
