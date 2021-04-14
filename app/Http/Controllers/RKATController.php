@@ -61,6 +61,21 @@ class RKATController extends Controller
      * @param  int  $params
      * @return \Illuminate\Http\Response
      */
+    public function byKode($params)
+    {
+        $data = rkatModel::where('kode_rkat', $params)->get();
+
+        return response()->json([
+            'data' => $data ? $data : "Failed, data not found"
+        ]);
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $params
+     * @return \Illuminate\Http\Response
+     */
     public function show($params)
     {
         $data = rkatModel::find($params);

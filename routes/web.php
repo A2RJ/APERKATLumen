@@ -59,6 +59,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->group(['prefix' => 'rkat'], function () use ($router) {
         $router->get('/', 'RKATController@index');
         $router->get('/{params}', 'RKATController@show');
+        $router->get('/byKode/{params}', 'RKATController@byKode');
         $router->post('/', 'RKATController@store');
         $router->put('/{params}', 'RKATController@update');
         $router->delete('/{params}', 'RKATController@destroy');

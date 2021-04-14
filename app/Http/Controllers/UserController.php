@@ -18,7 +18,7 @@ class UserController extends Controller
     {
         return Response()->json([
             'data' => userModel::join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
-                ->paginate(10)
+                ->get()
         ]);
     }
 

@@ -17,7 +17,7 @@ class IKUController extends Controller
     public function index()
     {
         return Response()->json([
-            'data' => iku_parentModel::paginate()
+            'data' => iku_parentModel::get()
         ]);
     }
 
@@ -55,7 +55,7 @@ class IKUController extends Controller
             'data' => $data
                 ? [
                     'iku_child1' => $data,
-                    'iku_child1' => iku_child2Model::where('id_iku_child1', $data[0]['id_iku_child1'])->find()
+                    'iku_child2' => iku_child2Model::where('id_iku_child1', $data[0]['id_iku_child1'])->find()
                 ]
                 : "Failed, data not found"
         ]);
