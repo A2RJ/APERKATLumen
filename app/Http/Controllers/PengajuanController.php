@@ -205,24 +205,22 @@ class PengajuanController extends Controller
         $pengajuan = pengajuanModel::find($params);
         $pengajuan_history = pengajuanHistoryModel::where('kode_rkat', $pengajuan->kode_rkat)->latest()->first();
 
-        $userStruktur = userModel::where('id_user', $request->id_user)->first();
+        $userStruktur = userModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+        ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+        ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+        ->select('user.*', 'struktur.*', 'user.id_struktur_child1', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
+        ->where('user.id_user', $request->id_user)
+        ->first();
 
-        $id_struktur = $userStruktur->id_struktur;
-        $id_struktur_child1 = $userStruktur->id_struktur_child1;
-        $id_struktur_child2 = $userStruktur->id_struktur_child2;
-
-        if ($id_struktur_child2 != null) {
-            $struktur = $id_struktur_child2;
-            $data = struktur_child2Model::find($struktur);
-            $nama_struktur = $data->nama_struktur_child2;
-        } elseif ($id_struktur_child1 == true && $id_struktur_child2 == null) {
-            $struktur = $id_struktur_child1;
-            $data = struktur_child1Model::find($struktur);
-            $nama_struktur = $data->nama_struktur_child1;
-        } elseif ($id_struktur == true && $id_struktur_child1 == null && $id_struktur_child2 == null) {
-            $struktur = $id_struktur;
-            $data = strukturModel::find($struktur);
-            $nama_struktur = $data->nama_struktur;
+        if ($userStruktur->nama_struktur == true && $userStruktur->nama_struktur_child1 == '0' && $userStruktur->nama_struktur_child2 == '0') {
+            $id_struktur = $userStruktur->id_struktur;
+            $nama_struktur = $userStruktur->nama_struktur;
+        } else if ($userStruktur->nama_struktur == true && $userStruktur->nama_struktur_child1 != '0' && $userStruktur->nama_struktur_child2 == '0') {
+            $id_struktur = $userStruktur->id_struktur_child1;
+            $nama_struktur = $userStruktur->nama_struktur_child1;
+        } else if ($userStruktur->nama_struktur == true && $userStruktur->nama_struktur_child1 != '0' && $userStruktur->nama_struktur_child2 != '0') {
+            $id_struktur = $userStruktur->id_struktur_child2;
+            $nama_struktur = $userStruktur->nama_struktur_child2;
         }
 
         $rkat = rkatModel::join('pengajuan', 'rkat.kode_rkat', 'pengajuan.kode_rkat')
@@ -239,7 +237,7 @@ class PengajuanController extends Controller
 
         validasiModel::create([
             "id_pengajuan_history" => $pengajuan_history->id_pengajuan,
-            "id_struktur" => $struktur,
+            "id_struktur" => $id_struktur,
             "status_validasi" => $status ? $status : 0,
             "message" => $message,
         ]);
@@ -254,7 +252,7 @@ class PengajuanController extends Controller
 
     public function statusNull($id)
     {
-        $data = validasiModel::where('id_struktur', $id)->first();
+        $data = validasiModel::where('id_struktur', $id)->orderBy('id_validasi', 'DESC')->first();
         $data ? $data = $data->status_validasi : $data;
         return $data;
     }
@@ -428,7 +426,7 @@ class PengajuanController extends Controller
                     ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                     ->join('struktur_child2', 'struktur_child1.id_struktur_child1', 'struktur_child2.id_struktur_child1')
                     ->where('user.id_struktur', '!=', 1)
-                    ->select('user.id_user', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'rkat.created_at')
+                    ->select('user.id_user', 'pengajuan.id_pengajuan', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'rkat.created_at')
                     ->get();
             } elseif ($userStruktur->id_struktur == 2) {
                 $data = userModel::join('rkat', 'user.id_user', 'rkat.id_user')
@@ -438,7 +436,7 @@ class PengajuanController extends Controller
                     ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                     ->where('user.id_struktur', '!=', 1)
                     ->where('user.id_struktur', '!=', 2)
-                    ->select('user.id_user', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'rkat.created_at')
+                    ->select('user.id_user', 'pengajuan.id_pengajuan', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'rkat.created_at')
                     ->get();
             } elseif ($userStruktur->id_struktur == 3) {
                 $data = userModel::join('rkat', 'user.id_user', 'rkat.id_user')
@@ -449,7 +447,7 @@ class PengajuanController extends Controller
                     ->where('user.id_struktur', '!=', 1)
                     ->where('user.id_struktur', '!=', 2)
                     ->where('user.id_struktur', '!=', 3)
-                    ->select('user.id_user', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'rkat.created_at')
+                    ->select('user.id_user', 'pengajuan.id_pengajuan', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'rkat.created_at')
                     ->get();
             }
         } else {
@@ -459,9 +457,9 @@ class PengajuanController extends Controller
                 ->join('struktur_child2', 'struktur_child1.id_struktur_child1', 'struktur_child2.id_struktur_child1')
                 ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->where('user.id_struktur_child1', $userStruktur->id_struktur_child1)
-                ->where('user.id_struktur_child2', '!=', 0)
+                ->where('user.id_struktur_child2', '!=', '0')
                 ->where('user.id_user', '!=', $userStruktur->id_user)
-                ->select('user.id_user', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'rkat.created_at')
+                ->select('user.id_user', 'pengajuan.id_pengajuan', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'rkat.created_at')
                 ->get();
         }
 

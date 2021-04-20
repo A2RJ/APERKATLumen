@@ -72,36 +72,27 @@ class UserController extends Controller
 
     public function datauser($params)
     {
-        $data = userModel::where('id_user', $params)->get();
-        if ($data[0]->id_struktur_child2 != null) {
-            $data = [
-                'level' => "prodi"
-            ];
-        } elseif ($data[0]->id_struktur_child2 == 0 && $data[0]->id_struktur_child1 == true) {
-            $data = [
-                'level' => "fakultas"
-            ];
-        } elseif ($data[0]->id_struktur == true && $data[0]->id_struktur_child1 == null && $data[0]->id_struktur_child2 == null) {
-            $struktur = strukturModel::where('id_struktur', '<=', $data[0]->id_struktur)->orderBy('level', 'DESC')->get();
-            $hitung = $struktur->count();
-
-            if ($hitung == 1) {
-                $data = [
-                    'level' => "rektor"
-                ];
-            } elseif ($hitung == 2) {
-                $data = [
-                    'level' => "warek"
-                ];
-            } elseif ($hitung == 3) {
-                $data = [
-                    'level' => "dirKeuangan"
-                ];
-            }
+        $userStruktur = userModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+        ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+        ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+        ->select('user.*', 'struktur.*', 'user.id_struktur_child1', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
+        ->where('user.id_user', $params)
+        ->first();
+        if ($userStruktur->nama_struktur == true && $userStruktur->nama_struktur_child1 == '0' && $userStruktur->nama_struktur_child2 == '0') {
+            $id_struktur = $userStruktur->id_struktur;
+            $nama_struktur = $userStruktur->nama_struktur;
+        } else if ($userStruktur->nama_struktur == true && $userStruktur->nama_struktur_child1 != '0' && $userStruktur->nama_struktur_child2 == '0') {
+            $id_struktur = $userStruktur->id_struktur_child1;
+            $nama_struktur = $userStruktur->nama_struktur_child1;
+        } else if ($userStruktur->nama_struktur == true && $userStruktur->nama_struktur_child1 != '0' && $userStruktur->nama_struktur_child2 != '0') {
+            $id_struktur = $userStruktur->id_struktur_child2;
+            $nama_struktur = $userStruktur->nama_struktur_child2;
         }
-
         return response()->json([
-            'data' => $data ? $data : "Failed, data not found"
+            'data' => $userStruktur ? [
+                'id_struktur' => $id_struktur,
+                'nama_struktur' => $nama_struktur
+            ] : "Failed, data not found"
         ]);
     }
 
