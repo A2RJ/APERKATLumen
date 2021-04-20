@@ -120,4 +120,12 @@ class RKATController extends Controller
             'data' => $data ? "Success delete data" : "Failed, data not found"
         ]);
     }
+
+    public function kodeRKAT()
+    {
+        return Response()->json([
+            'data' => rkatModel::select('rkat.kode_rkat as value', 'rkat.kode_rkat as text')
+            ->get()
+        ]);
+    }
 }
