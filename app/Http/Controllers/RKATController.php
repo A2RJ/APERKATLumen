@@ -16,12 +16,12 @@ class RKATController extends Controller
     {
         return Response()->json([
             'data' => rkatModel::join('user', 'rkat.id_user', 'user.id_user')
-            ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
-            ->select('rkat.*', "struktur_child1.nama_struktur_child1")
+            // ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+            // ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+            ->select('rkat.*', "user.fullname")
             ->get()
         ]);
     }
-
 
     /**
      * Store a newly created resource in storage.

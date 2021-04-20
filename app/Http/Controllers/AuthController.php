@@ -12,7 +12,7 @@ class AuthController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login','register']]);
+        $this->middleware('auth:api', ['except' => ['login', 'register']]);
     }
 
     /**
@@ -29,38 +29,34 @@ class AuthController extends Controller
             'password' => 'required|confirmed',
         ]);
 
-        try 
-        {
+        try {
             $data = userModel::create($request->all());
             $data->password = Hash::make($request->input('password'));
             $data->save();
 
-            return response()->json( [
-                        'entity' => 'users', 
-                        'action' => 'create', 
-                        'result' => 'success'
+            return response()->json([
+                'entity' => 'users',
+                'action' => 'create',
+                'result' => 'success'
             ], 201);
-
-        } 
-        catch (\Exception $e) 
-        {
-            return response()->json( [
-                       'entity' => 'users', 
-                       'action' => 'create', 
-                       'result' => 'failed'
+        } catch (\Exception $e) {
+            return response()->json([
+                'entity' => 'users',
+                'action' => 'create',
+                'result' => 'failed'
             ], 409);
         }
     }
-	
-     /**
+
+    /**
      * Get a JWT via given credentials.
      *
      * @param  Request  $request
      * @return Response
-     */	 
+     */
     public function login(Request $request)
     {
-          //validate incoming request 
+        //validate incoming request 
         $this->validate($request, [
             'email' => 'required|string',
             'password' => 'required|string',
@@ -68,53 +64,62 @@ class AuthController extends Controller
 
         $credentials = $request->only(['email', 'password']);
 
-        if (! $token = Auth::attempt($credentials)) {			
+        if (!$token = Auth::attempt($credentials)) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
         return $this->respondWithToken($token);
     }
-	
-     /**
+
+    /**
      * Get user details.
      *
      * @param  Request  $request
      * @return Response
-     */	 	
+     */
     public function me()
     {
         $login = auth()->user();
-        $data = userModel::where("id_user", $login->id_user)->get();
-        if ($data[0]->id_struktur_child2) {
-            $data = [
-                'level' => "prodi"
-            ];
-        } elseif ($data[0]->id_struktur_child2 == 0 && $data[0]->id_struktur_child1 == true) {
-            $data = [
-                'level' => "fakultas"
-            ];
-        } elseif ($data[0]->id_struktur == true && $data[0]->id_struktur_child1 == null && $data[0]->id_struktur_child2 == null) {
-            $struktur = strukturModel::where('id_struktur', '<=', $data[0]->id_struktur)->orderBy('level', 'DESC')->get();
-            $hitung = $struktur->count();
+        $userStruktur = userModel::where('id_user', $login->id_user)->first();
 
-            if ($hitung == 1) {
+        if ($userStruktur->id_struktur == 1 || $userStruktur->id_struktur == 2) {
+            if ($userStruktur->id_struktur == 1) {
                 $data = [
                     'level' => "rektor"
                 ];
-            } elseif ($hitung == 2) {
+            } elseif ($userStruktur->id_struktur == 2) {
                 $data = [
                     'level' => "warek"
                 ];
-            } elseif ($hitung == 3) {
+            } 
+        } else {
+            $data = userModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+            ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+            ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+            ->select('user.id_struktur', 'user.id_struktur_child1', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
+            ->where('user.id_user', $login->id_user)
+            ->first();
+
+            if ($data->id_struktur == 3 && $data->id_struktur_child1 == 9) {
                 $data = [
                     'level' => "dirKeuangan"
                 ];
             }
+            else if ($data->nama_struktur_child1 == true && $data->nama_struktur_child2 == 0) {
+                $data = [
+                    'level' => "fakultas"
+                ];
+            }else{
+                $data = [
+                    'level' => "prodi"
+                ];
+            }
+            
         }
-        
+
         return response()->json([$login, $data]);
     }
 
-        /**
+    /**
      * Refresh a token.
      *
      * @return \Illuminate\Http\JsonResponse
@@ -124,7 +129,7 @@ class AuthController extends Controller
         return $this->respondWithToken(auth::refresh());
     }
 
-        /**
+    /**
      * Log the user out (Invalidate the token).
      *
      * @return \Illuminate\Http\JsonResponse
@@ -136,7 +141,7 @@ class AuthController extends Controller
         return response()->json(['message' => Auth::check()]);
     }
 
-        /**
+    /**
      * Get the token array structure.
      *
      * @param  string $token
@@ -151,5 +156,4 @@ class AuthController extends Controller
             'expires_in' => 3600
         ]);
     }
-
 }

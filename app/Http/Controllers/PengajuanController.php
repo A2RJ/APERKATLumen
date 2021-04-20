@@ -266,106 +266,140 @@ class PengajuanController extends Controller
             ->where('pengajuan.id_pengajuan', $params)
             ->first();
 
+        $fakultas =  userModel::join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+            ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+            ->where('struktur_child2.id_struktur_child1', $pengajuan->id_struktur_child1)
+            ->where('struktur_child2.nama_struktur_child2', '0')
+            ->select('user.id_user')
+            ->first();
+
         $struktur = strukturModel::where('id_struktur', 1)
             ->orWhere('id_struktur', 2)
             ->orWhere('id_struktur', 3)
             ->orderBy('level', 'DESC')
             ->get();
 
-        if ($pengajuan->id_struktur_child2) {
-            $child2 = struktur_child2Model::find($pengajuan->id_struktur_child2);
-            $child1 = struktur_child1Model::find($pengajuan->id_struktur_child1);
+        $struktur = strukturModel::where('id_struktur', '<=', $pengajuan->id_struktur)->orderBy('level', 'DESC')->get();
 
+        if ($pengajuan->id_struktur == 1) {
+            $rektor =  userModel::where('id_struktur', $struktur[0]->id_struktur)->select('user.id_user')->first();
             $data = [
                 [
-                    "id_struktur" => $child2->id_struktur_child2,
-                    "nama_struktur" => $child2->nama_struktur_child2,
-                    "status" => $this->statusNull($child2->id_struktur_child2)
-                ],
+                    "id_user" => $rektor->id_user,
+                    "id_struktur" => $struktur[0]->id_struktur,
+                    "nama_struktur" => $struktur[0]->nama_struktur,
+                    "status" => $this->statusNull($struktur[0]->id_struktur)
+                ]
+            ];
+        } elseif ($pengajuan->id_struktur == 2) {
+            $warek =  userModel::where('id_struktur', $struktur[0]->id_struktur)->select('user.id_user')->first();
+            $rektor =  userModel::where('id_struktur', $struktur[1]->id_struktur)->select('user.id_user')->first();
+            $data = [
                 [
-                    "id_struktur" => $child1->id_struktur_child1,
-                    "nama_struktur" => $child1->nama_struktur_child1,
-                    "status" => $this->statusNull($child1->id_struktur_child1)
-                ],
-                [
+                    "id_user" => $warek->id_user,
                     "id_struktur" => $struktur[0]->id_struktur,
                     "nama_struktur" => $struktur[0]->nama_struktur,
                     "status" => $this->statusNull($struktur[0]->id_struktur)
                 ],
                 [
+                    "id_user" => $rektor->id_user,
                     "id_struktur" => $struktur[1]->id_struktur,
                     "nama_struktur" => $struktur[1]->nama_struktur,
                     "status" => $this->statusNull($struktur[1]->id_struktur)
-                ],
-                [
-                    "id_struktur" => $struktur[2]->id_struktur,
-                    "nama_struktur" => $struktur[2]->nama_struktur,
-                    "status" => $this->statusNull($struktur[2]->id_struktur)
                 ]
             ];
-        } elseif ($pengajuan->id_struktur_child1 == true && $pengajuan->id_struktur_child2 == null) {
-            $child1 = struktur_child1Model::find($pengajuan->id_struktur_child1);
+        } elseif ($pengajuan->id_struktur == 3) {
+            $data = userModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                ->select('user.id_struktur', 'user.id_struktur_child1', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
+                ->where('user.id_user', $pengajuan->id_user)
+                ->first();
 
-            $data = [
-                [
-                    "id_struktur" => $child1->id_struktur_child1,
-                    "nama_struktur" => $child1->nama_struktur_child1,
-                    "status" => $this->statusNull($child1->id_struktur_child1)
-                ],
-                [
-                    "id_struktur" => $struktur[0]->id_struktur,
-                    "nama_struktur" => $struktur[0]->nama_struktur,
-                    "status" => $this->statusNull($struktur[0]->id_struktur)
-                ],
-                [
-                    "id_struktur" => $struktur[1]->id_struktur,
-                    "nama_struktur" => $struktur[1]->nama_struktur,
-                    "status" => $this->statusNull($struktur[1]->id_struktur)
-                ],
-                [
-                    "id_struktur" => $struktur[2]->id_struktur,
-                    "nama_struktur" => $struktur[2]->nama_struktur,
-                    "status" => $this->statusNull($struktur[2]->id_struktur)
-                ]
-            ];
-        } elseif ($pengajuan->id_struktur == true && $pengajuan->id_struktur_child1 == null && $pengajuan->id_struktur_child2 == null) {
-            $struktur = strukturModel::where('id_struktur', '<=', $pengajuan->id_struktur)->orderBy('level', 'DESC')->get();
-            $hitung = $struktur->count();
-
-            if ($hitung == 1) {
+            $keuangan =  userModel::where('id_struktur', $struktur[0]->id_struktur)->where('id_struktur_child1', 9)->select('user.id_user')->first();
+            $warek =  userModel::where('id_struktur', $struktur[1]->id_struktur)->select('user.id_user')->first();
+            $rektor =  userModel::where('id_struktur', $struktur[2]->id_struktur)->select('user.id_user')->first();
+            if ($data->id_struktur == 3 && $data->id_struktur_child1 == 9) {
                 $data = [
                     [
-                        "id_struktur" => $struktur[0]->id_struktur,
-                        "nama_struktur" => $struktur[0]->nama_struktur,
-                        "status" => $this->statusNull($struktur[0]->id_struktur)
-                    ]
-                ];
-            } elseif ($hitung == 2) {
-                $data = [
-                    [
+                        "id_user" => $keuangan->id_user,
                         "id_struktur" => $struktur[0]->id_struktur,
                         "nama_struktur" => $struktur[0]->nama_struktur,
                         "status" => $this->statusNull($struktur[0]->id_struktur)
                     ],
                     [
-                        "id_struktur" => $struktur[1]->id_struktur,
-                        "nama_struktur" => $struktur[1]->nama_struktur,
-                        "status" => $this->statusNull($struktur[1]->id_struktur)
-                    ]
-                ];
-            } elseif ($hitung == 3) {
-                $data = [
-                    [
-                        "id_struktur" => $struktur[0]->id_struktur,
-                        "nama_struktur" => $struktur[0]->nama_struktur,
-                        "status" => $this->statusNull($struktur[0]->id_struktur)
-                    ],
-                    [
+                        "id_user" => $warek->id_user,
                         "id_struktur" => $struktur[1]->id_struktur,
                         "nama_struktur" => $struktur[1]->nama_struktur,
                         "status" => $this->statusNull($struktur[1]->id_struktur)
                     ],
                     [
+                        "id_user" => $rektor->id_user,
+                        "id_struktur" => $struktur[2]->id_struktur,
+                        "nama_struktur" => $struktur[2]->nama_struktur,
+                        "status" => $this->statusNull($struktur[2]->id_struktur)
+                    ]
+                ];
+            } else if ($data->nama_struktur_child1 == true && $data->nama_struktur_child2 == 0) {
+                $child1 = struktur_child1Model::find($pengajuan->id_struktur_child1);
+
+                $data = [
+                    [
+                        "id_user" => $pengajuan->id_user,
+                        "id_struktur" => $child1->id_struktur_child1,
+                        "nama_struktur" => $child1->nama_struktur_child1,
+                        "status" => $this->statusNull($child1->id_struktur_child1)
+                    ],
+                    [
+                        "id_user" => $keuangan->id_user,
+                        "id_struktur" => $struktur[0]->id_struktur,
+                        "nama_struktur" => $struktur[0]->nama_struktur,
+                        "status" => $this->statusNull($struktur[0]->id_struktur)
+                    ],
+                    [
+                        "id_user" => $warek->id_user,
+                        "id_struktur" => $struktur[1]->id_struktur,
+                        "nama_struktur" => $struktur[1]->nama_struktur,
+                        "status" => $this->statusNull($struktur[1]->id_struktur)
+                    ],
+                    [
+                        "id_user" => $rektor->id_user,
+                        "id_struktur" => $struktur[2]->id_struktur,
+                        "nama_struktur" => $struktur[2]->nama_struktur,
+                        "status" => $this->statusNull($struktur[2]->id_struktur)
+                    ]
+                ];
+            } else {
+                $child2 = struktur_child2Model::find($pengajuan->id_struktur_child2);
+                $child1 = struktur_child1Model::find($pengajuan->id_struktur_child1);
+
+                $data = [
+                    [
+                        "id_user" => $pengajuan->id_user,
+                        "id_struktur" => $child2->id_struktur_child2,
+                        "nama_struktur" => $child2->nama_struktur_child2,
+                        "status" => $this->statusNull($child2->id_struktur_child2)
+                    ],
+                    [
+                        "id_user" => $fakultas->id_user,
+                        "id_struktur" => $child1->id_struktur_child1,
+                        "nama_struktur" => $child1->nama_struktur_child1,
+                        "status" => $this->statusNull($child1->id_struktur_child1)
+                    ],
+                    [
+                        "id_user" => $keuangan->id_user,
+                        "id_struktur" => $struktur[0]->id_struktur,
+                        "nama_struktur" => $struktur[0]->nama_struktur,
+                        "status" => $this->statusNull($struktur[0]->id_struktur)
+                    ],
+                    [
+                        "id_user" => $warek->id_user,
+                        "id_struktur" => $struktur[1]->id_struktur,
+                        "nama_struktur" => $struktur[1]->nama_struktur,
+                        "status" => $this->statusNull($struktur[1]->id_struktur)
+                    ],
+                    [
+                        "id_user" => $rektor->id_user,
                         "id_struktur" => $struktur[2]->id_struktur,
                         "nama_struktur" => $struktur[2]->nama_struktur,
                         "status" => $this->statusNull($struktur[2]->id_struktur)
@@ -386,9 +420,39 @@ class PengajuanController extends Controller
     {
         $userStruktur = userModel::where('id_user', $params)->first();
 
-        if ($userStruktur->id_struktur_child2) {
-            $data = null;
-        } elseif ($userStruktur->id_struktur_child1 == true && $userStruktur->id_struktur_child2 == null) {
+        if ($userStruktur->id_struktur == 1 || $userStruktur->id_struktur == 2 || $userStruktur->id_struktur == 3) {
+            if ($userStruktur->id_struktur == 1) {
+                $data = userModel::join('rkat', 'user.id_user', 'rkat.id_user')
+                    ->join('pengajuan', 'rkat.kode_rkat', 'pengajuan.kode_rkat')
+                    ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                    ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                    ->join('struktur_child2', 'struktur_child1.id_struktur_child1', 'struktur_child2.id_struktur_child1')
+                    ->where('user.id_struktur', '!=', 1)
+                    ->select('user.id_user', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'rkat.created_at')
+                    ->get();
+            } elseif ($userStruktur->id_struktur == 2) {
+                $data = userModel::join('rkat', 'user.id_user', 'rkat.id_user')
+                    ->join('pengajuan', 'rkat.kode_rkat', 'pengajuan.kode_rkat')
+                    ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                    ->join('struktur_child2', 'struktur_child1.id_struktur_child1', 'struktur_child2.id_struktur_child1')
+                    ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                    ->where('user.id_struktur', '!=', 1)
+                    ->where('user.id_struktur', '!=', 2)
+                    ->select('user.id_user', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'rkat.created_at')
+                    ->get();
+            } elseif ($userStruktur->id_struktur == 3) {
+                $data = userModel::join('rkat', 'user.id_user', 'rkat.id_user')
+                    ->join('pengajuan', 'rkat.kode_rkat', 'pengajuan.kode_rkat')
+                    ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                    ->join('struktur_child2', 'struktur_child1.id_struktur_child1', 'struktur_child2.id_struktur_child1')
+                    ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                    ->where('user.id_struktur', '!=', 1)
+                    ->where('user.id_struktur', '!=', 2)
+                    ->where('user.id_struktur', '!=', 3)
+                    ->select('user.id_user', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'rkat.created_at')
+                    ->get();
+            }
+        } else {
             $data = userModel::join('rkat', 'user.id_user', 'rkat.id_user')
                 ->join('pengajuan', 'rkat.kode_rkat', 'pengajuan.kode_rkat')
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
@@ -396,42 +460,9 @@ class PengajuanController extends Controller
                 ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->where('user.id_struktur_child1', $userStruktur->id_struktur_child1)
                 ->where('user.id_struktur_child2', '!=', 0)
+                ->where('user.id_user', '!=', $userStruktur->id_user)
+                ->select('user.id_user', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'rkat.created_at')
                 ->get();
-        } elseif ($userStruktur->id_struktur == true && $userStruktur->id_struktur_child1 == null && $userStruktur->id_struktur_child2 == null) {
-            $struktur = strukturModel::where('id_struktur', '<=', $userStruktur->id_struktur)->orderBy('level', 'DESC')->get();
-            $hitung = $struktur->count();
-
-            if ($hitung == 1) {
-                $data = userModel::join('rkat', 'user.id_user', 'rkat.id_user')
-                    ->join('pengajuan', 'rkat.kode_rkat', 'pengajuan.kode_rkat')
-                    ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
-                    ->join('struktur_child2', 'struktur_child1.id_struktur_child1', 'struktur_child2.id_struktur_child1')
-                    ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
-                    ->where('user.id_struktur', '!=', 1)
-                    ->where('user.id_struktur_child1', '!=', 0)
-                    ->get();
-            } elseif ($hitung == 2) {
-                $data = userModel::join('rkat', 'user.id_user', 'rkat.id_user')
-                    ->join('pengajuan', 'rkat.kode_rkat', 'pengajuan.kode_rkat')
-                    ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
-                    ->join('struktur_child2', 'struktur_child1.id_struktur_child1', 'struktur_child2.id_struktur_child1')
-                    ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
-                    ->where('user.id_struktur', '!=', 1)
-                    ->where('user.id_struktur', '!=', 2)
-                    ->where('user.id_struktur_child1', '!=', 0)
-                    ->get();
-                } elseif ($hitung == 3) {
-                    $data = userModel::join('rkat', 'user.id_user', 'rkat.id_user')
-                    ->join('pengajuan', 'rkat.kode_rkat', 'pengajuan.kode_rkat')
-                    ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
-                    ->join('struktur_child2', 'struktur_child1.id_struktur_child1', 'struktur_child2.id_struktur_child1')
-                    ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
-                    ->where('user.id_struktur', '!=', 1)
-                    ->where('user.id_struktur', '!=', 2)
-                    ->where('user.id_struktur', 3)
-                    ->where('user.id_struktur_child1', '!=', 0)
-                    ->get();
-            }
         }
 
         return response()->json([

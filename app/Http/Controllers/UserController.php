@@ -17,7 +17,20 @@ class UserController extends Controller
     public function index()
     {
         return Response()->json([
-            'data' => userModel::join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+            'data' => userModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                ->select('user.id_user', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'user.created_at')
+                ->get()
+        ]);
+    }
+
+    public function rkatUser()
+    {
+        return Response()->json([
+            'data' => userModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                ->select('user.id_user as value', 'user.fullname as text')
                 ->get()
         ]);
     }
@@ -86,7 +99,7 @@ class UserController extends Controller
                 ];
             }
         }
-        
+
         return response()->json([
             'data' => $data ? $data : "Failed, data not found"
         ]);

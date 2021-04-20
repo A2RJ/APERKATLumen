@@ -75,6 +75,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
     $router->group(['prefix' => 'user'], function () use ($router) {
         $router->get('/', 'UserController@index');
+        $router->get('/rkatUser', 'UserController@rkatUser');
         $router->get('/{params}', 'UserController@show');
         $router->get('/datauser/{params}', 'UserController@datauser');
         $router->post('/', 'UserController@store');
