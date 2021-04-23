@@ -1,5 +1,8 @@
 <?php
 
+/**
+* Location: /app/Http/Middleware
+*/
 namespace App\Http\Middleware;
 
 use Closure;
@@ -7,7 +10,7 @@ use Closure;
 class CorsMiddleware
 {
     /**
-     * Run the request filter.
+     * Handle an incoming request.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure  $next
@@ -15,7 +18,6 @@ class CorsMiddleware
      */
     public function handle($request, Closure $next)
     {
-        //RULE HEADERSNYA HARUS KITA SET SECARA SPESIFIK SEPERTI INI 
         $headers = [
             'Access-Control-Allow-Origin'      => '*',
             'Access-Control-Allow-Methods'     => 'POST, GET, OPTIONS, PUT, DELETE',
@@ -24,17 +26,17 @@ class CorsMiddleware
             'Access-Control-Allow-Headers'     => 'Content-Type, Authorization, X-Requested-With'
         ];
 
-        //TAPI JIKA METHOD YANG MASUK ADALAH OPTIONS
-        if ($request->isMethod('OPTIONS')) {
-            //MAKA KITA KEMBALIKAN BAHWA METHOD TERSEBUT ADALAH OPTIONS
-            return response()->json('{"method": "OPTIONS"}', 200, $headers);
+        if ($request->isMethod('OPTIONS'))
+        {
+            return response()->json('{"method":"OPTIONS"}', 200, $headers);
         }
 
-        //SELAIN ITU, KITA AKAN MENERUSKAN RESPONSE SEPERTI BIASA DENGAN MENGIKUT SERTAKAN HEADERS YANG SUDAH DITETAPKAN.
         $response = $next($request);
-        foreach ($headers as $key => $row) {
-            $response->header($key, $row);
+        foreach($headers as $key => $value)
+        {
+            $response->header($key, $value);
         }
+
         return $response;
     }
 }

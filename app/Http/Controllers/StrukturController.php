@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\struktur_child1Model;
-use App\Models\struktur_child2Model;
 use Illuminate\Http\Request;
 use App\Models\strukturModel;
+use App\Models\struktur_child1Model;
+use App\Models\struktur_child2Model;
 
 class StrukturController extends Controller
 {

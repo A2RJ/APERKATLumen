@@ -4,14 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use App\Models\pengajuanModel;
-use App\Models\pengajuanHistoryModel;
+use App\Models\UserModel;
 use App\Models\RKATModel;
+use App\Models\strukturModel;
+use App\Models\validasiModel;
+use App\Models\pengajuanModel;
 use App\Models\struktur_child1Model;
 use App\Models\struktur_child2Model;
-use App\Models\strukturModel;
-use App\Models\UserModel;
-use App\Models\validasiModel;
+use App\Models\pengajuanHistoryModel;
 
 class PengajuanController extends Controller
 {

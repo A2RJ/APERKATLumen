@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\iku_parentModel;
 use App\Models\iku_child1Model;
 use App\Models\iku_child2Model;
-use Illuminate\Support\Facades\DB;
 
 class IKUController extends Controller
 {
@@ -63,6 +63,20 @@ class IKUController extends Controller
                 : "Failed, data not found"
         ]);
     }
+
+    public function child1ByID($params)
+    {
+        $data = DB::table('iku_child1')
+            ->where('id_iku_child1', $params)
+            ->select('id_iku_child1 as value', 'iku_child1 as text')
+            ->first();
+
+        return response()->json([
+            'data' => $data
+                ? $data
+                : "Failed, data not found"
+        ]);
+    }
     
     public function getIkuChild2($params)
     {
@@ -70,6 +84,20 @@ class IKUController extends Controller
             ->where('id_iku_child1', $params)
             ->select('id_iku_child2 as value', 'iku_child2 as text')
             ->get();
+
+        return response()->json([
+            'data' => $data
+                ? $data
+                : "Failed, data not found"
+        ]);
+    }
+    
+    public function child2ByID($params)
+    {
+        $data = DB::table('iku_child2')
+            ->where('id_iku_child2', $params)
+            ->select('id_iku_child2 as value', 'iku_child2 as text')
+            ->first();
 
         return response()->json([
             'data' => $data

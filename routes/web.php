@@ -80,7 +80,9 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->group(['prefix' => 'iku'], function () use ($router) {
         $router->get('/', 'IKUController@index');
         $router->get('/child1/{params}', 'IKUController@getIkuChild1');
+        $router->get('/child1ByID/{params}', 'IKUController@child1ByID');
         $router->get('/child2/{params}', 'IKUController@getIkuChild2');
+        $router->get('/child2ByID/{params}', 'IKUController@child2ByID');
         $router->post('/', 'IKUController@store');
         $router->put('/{params}', 'IKUController@update');
         $router->delete('/{params}', 'IKUController@destroy');
