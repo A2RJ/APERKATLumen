@@ -54,7 +54,7 @@ class PengajuanController extends Controller
         $data = pengajuanModel::create($request->all());
         
         // Untuk otomatis lakukan update data agar langsung hijau di detail pengajuan 
-        $this->autoProccess($request, $data->id_pengajuan);
+        $this->autoProccess($request, $data->id_pengajuan, true);
 
         if ($request->hasFile('rab')) {
             $file = $request->file('rab');
