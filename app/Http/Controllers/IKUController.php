@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\iku_parentModel;
 use App\Models\iku_child1Model;
 use App\Models\iku_child2Model;
+use Illuminate\Support\Facades\DB;
 
 class IKUController extends Controller
 {
@@ -17,8 +18,9 @@ class IKUController extends Controller
     public function index()
     {
         return Response()->json([
-            'data' => iku_parentModel::where('id_iku_parent', '!=', '0')
-            ->get()
+            'data' => DB::table('iku_parent')
+                ->select('id_iku_parent as value', 'iku_parent as text')
+                ->get()
         ]);
     }
 
@@ -39,6 +41,40 @@ class IKUController extends Controller
 
         return response()->json([
             'data' => $data ? "Success data was added" : "Failed add data"
+        ]);
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $params
+     * @return \Illuminate\Http\Response
+     */
+    public function getIkuChild1($params)
+    {
+        $data = DB::table('iku_child1')
+            ->where('id_iku_parent', $params)
+            ->select('id_iku_child1 as value', 'iku_child1 as text')
+            ->get();
+
+        return response()->json([
+            'data' => $data
+                ? $data
+                : "Failed, data not found"
+        ]);
+    }
+    
+    public function getIkuChild2($params)
+    {
+        $data = DB::table('iku_child2')
+            ->where('id_iku_child1', $params)
+            ->select('id_iku_child2 as value', 'iku_child2 as text')
+            ->get();
+
+        return response()->json([
+            'data' => $data
+                ? $data
+                : "Failed, data not found"
         ]);
     }
 
