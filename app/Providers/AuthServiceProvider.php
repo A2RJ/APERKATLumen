@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Models\userModel;
+use App\Models\UserModel;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -33,7 +33,7 @@ class AuthServiceProvider extends ServiceProvider
         $this->app['auth']->viaRequest('api', function ($request) {
             if ($request->header('Authorization')) {
                 $explode = explode(' ', $request->header('Authorization'));
-                return userModel::where('token', end($explode))->first();
+                return UserModel::where('token', end($explode))->first();
             }
             // if ($request->input('api_token')) {
             //     return User::where('api_token', $request->input('api_token'))->first();

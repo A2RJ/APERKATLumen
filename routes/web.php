@@ -35,13 +35,6 @@ $router->group(['prefix' => 'api'], function () use ($router) {
 
 $router->group(['middleware' => 'auth'], function () use ($router) {
 
-    $router->group(['prefix' => 'iku'], function () use ($router) {
-        $router->get('/', 'IKUController@index');
-        $router->post('/', 'IKUController@store');
-        $router->put('/{params}', 'IKUController@update');
-        $router->delete('/{params}', 'IKUController@destroy');
-    });
-
     $router->group(['prefix' => 'pengajuan'], function () use ($router) {
         $router->get('/byUser/{params}', 'PengajuanController@byUser');
         $router->get('/{params}', 'PengajuanController@show');
@@ -82,5 +75,12 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->post('/', 'UserController@store');
         $router->put('/{params}', 'UserController@update');
         $router->delete('/{params}', 'UserController@destroy');
+    });
+
+    $router->group(['prefix' => 'iku'], function () use ($router) {
+        $router->get('/', 'IKUController@index');
+        $router->post('/', 'IKUController@store');
+        $router->put('/{params}', 'IKUController@update');
+        $router->delete('/{params}', 'IKUController@destroy');
     });
 });

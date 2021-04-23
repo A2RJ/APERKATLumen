@@ -9,7 +9,7 @@ use Laravel\Lumen\Auth\Authorizable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 // use Illuminate\Database\Eloquent\Model;
 
-class userModel extends Model implements AuthenticatableContract, AuthorizableContract, JWTSubject
+class UserModel extends Model implements AuthenticatableContract, AuthorizableContract, JWTSubject
 {
     use Authenticatable, Authorizable;
     /**

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\userModel;
+use App\Models\UserModel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
@@ -30,7 +30,7 @@ class AuthController extends Controller
         ]);
 
         try {
-            $data = userModel::create($request->all());
+            $data = UserModel::create($request->all());
             $data->password = Hash::make($request->input('password'));
             $data->save();
 
@@ -79,7 +79,7 @@ class AuthController extends Controller
     public function me()
     {
         $login = auth()->user();
-        $userStruktur = userModel::where('id_user', $login->id_user)->first();
+        $userStruktur = UserModel::where('id_user', $login->id_user)->first();
 
         if ($userStruktur->id_struktur == 1 || $userStruktur->id_struktur == 2) {
             if ($userStruktur->id_struktur == 1) {
@@ -92,7 +92,7 @@ class AuthController extends Controller
                 ];
             } 
         } else {
-            $data = userModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+            $data = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
             ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
             ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
             ->select('user.id_struktur', 'user.id_struktur_child1', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')

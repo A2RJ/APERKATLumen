@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\userModel;
+use App\Models\UserModel;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -15,7 +15,7 @@ class UserTableSeeder extends Seeder
      */
     public function run()
     {
-        userModel::create([
+        UserModel::create([
             'fullname' => "Ardiansyah Putra",
             'email' => "ardi@gmail.com",
             'password' => Hash::make('ardi'),

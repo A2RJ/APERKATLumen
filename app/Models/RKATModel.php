@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class rkatModel extends Model
+class RKATModel extends Model
 {
     /**
      * Database table name

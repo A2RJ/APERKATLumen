@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use App\Models\userModel;
+use App\Models\UserModel;
 use App\Models\strukturModel;
 
 class UserController extends Controller
@@ -17,7 +17,7 @@ class UserController extends Controller
     public function index()
     {
         return Response()->json([
-            'data' => userModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+            'data' => UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                 ->select('user.id_user', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'user.created_at')
@@ -28,7 +28,7 @@ class UserController extends Controller
     public function rkatUser()
     {
         return Response()->json([
-            'data' => userModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+            'data' => UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->select('user.id_user as value', 'user.fullname as text')
                 ->get()
@@ -46,7 +46,7 @@ class UserController extends Controller
     {
         $this->validation($request);
 
-        $data = userModel::create($request->all());
+        $data = UserModel::create($request->all());
         $data->password = Hash::make($request->input('password'));
         $data->save();
 
@@ -63,7 +63,7 @@ class UserController extends Controller
      */
     public function show($params)
     {
-        $data = userModel::find($params);
+        $data = UserModel::find($params);
 
         return response()->json([
             'data' => $data ? $data : "Failed, data not found"
@@ -72,7 +72,7 @@ class UserController extends Controller
 
     public function datauser($params)
     {
-        $userStruktur = userModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+        $userStruktur = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
         ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
         ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
         ->select('user.*', 'struktur.*', 'user.id_struktur_child1', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
@@ -107,9 +107,9 @@ class UserController extends Controller
     {
         $this->validation($request);
 
-        $data = userModel::find($params)->update($request->all());
+        $data = UserModel::find($params)->update($request->all());
         if ($request->input('password')) {
-            $update = userModel::find($params);
+            $update = UserModel::find($params);
             $update->password = Hash::make($request->input('password'));
             $update->save();
         }
@@ -127,7 +127,7 @@ class UserController extends Controller
      */
     public function destroy($params)
     {
-        $data = userModel::find($params)->delete();
+        $data = UserModel::find($params)->delete();
 
         return response()->json([
             'data' => $data ? "Success delete data" : "Failed, data not found"
@@ -141,7 +141,7 @@ class UserController extends Controller
             'password' => 'required',
         ]);
 
-        $data = userModel::where('email', $request->email)->first();
+        $data = UserModel::where('email', $request->email)->first();
         if ($data && Hash::check($request->password, $data->password)) {
             $token = Hash::make($request->password);
 
@@ -160,7 +160,7 @@ class UserController extends Controller
     public function userLogin(Request $request)
     {
         $explode = explode(' ', $request->header('Authorization'));
-        $data = userModel::where('token', end($explode))->first();
+        $data = UserModel::where('token', end($explode))->first();
 
         return response()->json([
             'data' => $data ? $data : ""
@@ -169,7 +169,7 @@ class UserController extends Controller
 
     public function logout(Request $request)
     {
-        $data = userModel::where('token', $request->token)->find();
+        $data = UserModel::where('token', $request->token)->find();
         $data->token = '';
         $data->save();
 

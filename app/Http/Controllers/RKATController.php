@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\rkatModel;
+use App\Models\RKATModel;
 
 class RKATController extends Controller
 {
@@ -15,7 +15,7 @@ class RKATController extends Controller
     public function index()
     {
         return Response()->json([
-            'data' => rkatModel::join('user', 'rkat.id_user', 'user.id_user')
+            'data' => RKATModel::join('user', 'rkat.id_user', 'user.id_user')
             // ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
             // ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
             ->select('rkat.*', "user.fullname")
@@ -48,7 +48,7 @@ class RKATController extends Controller
             "total_anggaran" => "required"
         ]);
 
-        $data = rkatModel::create($request->all());
+        $data = RKATModel::create($request->all());
 
         return response()->json([
             'data' => $data ? "Success data was added" : "Failed add data"
@@ -63,7 +63,7 @@ class RKATController extends Controller
      */
     public function byKode($params)
     {
-        $data = rkatModel::where('kode_rkat', $params)->get();
+        $data = RKATModel::where('kode_rkat', $params)->get();
 
         return response()->json([
             'data' => $data ? $data : "Failed, data not found"
@@ -78,7 +78,7 @@ class RKATController extends Controller
      */
     public function show($params)
     {
-        $data = rkatModel::find($params);
+        $data = RKATModel::find($params);
 
         return response()->json([
             'data' => $data ? $data : "Failed, data not found"
@@ -96,7 +96,7 @@ class RKATController extends Controller
     {
         // $this->validation($request);
 
-        $data = rkatModel::find($params)->update($request->all());
+        $data = RKATModel::find($params)->update($request->all());
 
         return response()->json([
             'data' => $data ? "Data was updated" : "Failed to update data"
@@ -111,7 +111,7 @@ class RKATController extends Controller
      */
     public function destroy($params)
     {
-        $data = rkatModel::find($params);
+        $data = RKATModel::find($params);
         if ($data) {
             $data->delete();
         }
@@ -124,7 +124,7 @@ class RKATController extends Controller
     public function kodeRKAT()
     {
         return Response()->json([
-            'data' => rkatModel::select('rkat.kode_rkat as value', 'rkat.kode_rkat as text')
+            'data' => RKATModel::select('rkat.kode_rkat as value', 'rkat.kode_rkat as text')
             ->get()
         ]);
     }

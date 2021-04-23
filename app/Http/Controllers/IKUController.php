@@ -17,7 +17,8 @@ class IKUController extends Controller
     public function index()
     {
         return Response()->json([
-            'data' => iku_parentModel::get()
+            'data' => iku_parentModel::where('id_iku_parent', '!=', '0')
+            ->get()
         ]);
     }
 
