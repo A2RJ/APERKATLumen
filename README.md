@@ -29,3 +29,7 @@ Pindahkan ke Progress or Done jika sudah selesai
     -   [x] Ambil parent, child one/two, simpan ke masing2 variabel agar 1x request dapat semua data
 -   [x] CONTROLLER STRUKTUR
     -   [x] Ambil struktur dan child stuktur (CHAINING)
+
+- Coba request ke aperkat/api
+- Coba lumen langsung didalam folder api.aperkat
+- Coba lumen didalam aperkat/api

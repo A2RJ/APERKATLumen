@@ -17,6 +17,7 @@ class pengajuanModel extends Model
      */
     protected $fillable = [
         "kode_rkat",
+        "id_user",
         "target_capaian",
         "bentuk_pelaksanaan_program",
         "tempat_program",

@@ -29,7 +29,8 @@ class RKATModel extends Model
         "tempat",
         "sumber_anggaran",
         "rencara_anggaran",
-        "total_anggaran"
+        "total_anggaran",
+        "sisa_anggaran"
     ];
     // public $incrementing = false;
     /**

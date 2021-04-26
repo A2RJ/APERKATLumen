@@ -39,6 +39,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/byUser/{params}', 'PengajuanController@byUser');
         $router->get('/{params}', 'PengajuanController@show');
         $router->post('/', 'PengajuanController@store');
+        $router->post('/upload', 'PengajuanController@upload');
         $router->put('/{params}', 'PengajuanController@update');
         $router->delete('/{params}', 'PengajuanController@destroy');
 

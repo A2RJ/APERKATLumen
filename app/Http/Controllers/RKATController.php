@@ -45,7 +45,8 @@ class RKATController extends Controller
             "tempat" => "required",
             "sumber_anggaran" => "required",
             "rencara_anggaran" => "required",
-            "total_anggaran" => "required"
+            "total_anggaran" => "required",
+            "sisa_anggaran" => "required"
         ]);
 
         $data = RKATModel::create($request->all());
