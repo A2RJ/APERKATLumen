@@ -70,7 +70,7 @@ class PengajuanController extends Controller
             $fileName = uniqid(40) . "." . $request->file('file')->getClientOriginalExtension();
             $request->file('file')->move('storage/files', $fileName);
             return $fileName;
-        }else{
+        } else {
             return false;
         }
     }
@@ -126,7 +126,12 @@ class PengajuanController extends Controller
         $this->autoProccess($request, $params, true);
 
         $data = pengajuanModel::find($params);
+        $r = $data;
         $data ? $data->update($request->all()) : false;
+
+        $rkat = RKATModel::where('kode_rkat', $request->kode_rkat)->first();
+        $rkat->sisa_anggaran = (intval($rkat->total_anggaran) + intval($r->biaya_program)) - intval($request->biaya_program);
+        $rkat->save();
 
         return response()->json([
             'data' => $data ? "Data was updated" : "Failed to update data not found"
@@ -142,6 +147,11 @@ class PengajuanController extends Controller
     public function destroy($params)
     {
         $data = pengajuanModel::find($params);
+
+        $rkat = RKATModel::where('kode_rkat', $data->kode_rkat)->first();
+        $rkat->sisa_anggaran = intval($rkat->total_anggaran) + intval($data->biaya_program);
+        $rkat->save();
+
         $data ? $data->delete() : false;
         $pengajuan = pengajuanHistoryModel::find($params);
         $pengajuan ? $pengajuan->delete() : false;

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "35729409a4882924c08f70e591a2d106",
+    "content-hash": "ac2af15c0147aa0e28709ff7684f5be5",
     "packages": [
         {
             "name": "brick/math",
@@ -1857,16 +1857,16 @@
         },
         {
             "name": "illuminate/mail",
-            "version": "v8.34.0",
+            "version": "v8.39.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/mail.git",
-                "reference": "3e5a29577ddf2e6fd48ba114276f1e0fcbbbe017"
+                "reference": "6e2af3a60ac68669ee302fdc98501f55980b653f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/mail/zipball/3e5a29577ddf2e6fd48ba114276f1e0fcbbbe017",
-                "reference": "3e5a29577ddf2e6fd48ba114276f1e0fcbbbe017",
+                "url": "https://api.github.com/repos/illuminate/mail/zipball/6e2af3a60ac68669ee302fdc98501f55980b653f",
+                "reference": "6e2af3a60ac68669ee302fdc98501f55980b653f",
                 "shasum": ""
             },
             "require": {
@@ -1914,7 +1914,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2021-03-21T13:55:04+00:00"
+            "time": "2021-04-23T12:41:34+00:00"
         },
         {
             "name": "illuminate/pagination",
