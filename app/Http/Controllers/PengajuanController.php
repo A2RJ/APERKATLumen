@@ -53,11 +53,12 @@ class PengajuanController extends Controller
         ]);
 
         $data = pengajuanModel::create($request->all());
+        $this->autoProccess($request, $data->id_pengajuan, true, "Input data pengajuan");
 
         // biaya program - total anggaran RKAT
-        $rkat = RKATModel::where('kode_rkat', $data->kode_rkat)->first();
-        $rkat->sisa_anggaran = intval($rkat->total_anggaran) - intval($data->biaya_program);
-        $rkat->save();
+        // $rkat = RKATModel::where('kode_rkat', $data->kode_rkat)->first();
+        // $rkat->sisa_anggaran = intval($rkat->total_anggaran) - intval($data->biaya_program);
+        // $rkat->save();
 
         return response()->json([
             'data' => $data ? $data : "Failed, data not save"
@@ -68,7 +69,7 @@ class PengajuanController extends Controller
     {
         if ($request->hasFile('file')) {
             $fileName = uniqid(40) . "." . $request->file('file')->getClientOriginalExtension();
-            $request->file('file')->move('storage/files', $fileName);
+            $request->file('file')->move('../../SubmissionNuxtJS/static', $fileName);
             return $fileName;
         } else {
             return false;
@@ -123,15 +124,15 @@ class PengajuanController extends Controller
      */
     public function update(Request $request, $params)
     {
-        $this->autoProccess($request, $params, true);
+        $this->autoProccess($request, $params, true, "melakukan revisi pengajuan");
 
         $data = pengajuanModel::find($params);
         $r = $data;
         $data ? $data->update($request->all()) : false;
 
-        $rkat = RKATModel::where('kode_rkat', $request->kode_rkat)->first();
-        $rkat->sisa_anggaran = (intval($rkat->total_anggaran) + intval($r->biaya_program)) - intval($request->biaya_program);
-        $rkat->save();
+        // $rkat = RKATModel::where('kode_rkat', $request->kode_rkat)->first();
+        // $rkat->sisa_anggaran = (intval($rkat->total_anggaran) + intval($r->biaya_program)) - intval($request->biaya_program);
+        // $rkat->save();
 
         return response()->json([
             'data' => $data ? "Data was updated" : "Failed to update data not found"
@@ -148,9 +149,9 @@ class PengajuanController extends Controller
     {
         $data = pengajuanModel::find($params);
 
-        $rkat = RKATModel::where('kode_rkat', $data->kode_rkat)->first();
-        $rkat->sisa_anggaran = intval($rkat->total_anggaran) + intval($data->biaya_program);
-        $rkat->save();
+        // $rkat = RKATModel::where('kode_rkat', $data->kode_rkat)->first();
+        // $rkat->sisa_anggaran = intval($rkat->total_anggaran) + intval($data->biaya_program);
+        // $rkat->save();
 
         $data ? $data->delete() : false;
         $pengajuan = pengajuanHistoryModel::find($params);
@@ -186,7 +187,7 @@ class PengajuanController extends Controller
      */
     public function approve(Request $request, $params)
     {
-        $data = $this->autoProccess($request, $params, true);
+        $data = $this->autoProccess($request, $params, true, "Approve pengajuan");
 
         return response()->json([
             'data' => $data ? "Submission was approved" : "Failed, data not found"
@@ -198,7 +199,7 @@ class PengajuanController extends Controller
      */
     public function decline(Request $request, $params)
     {
-        $data = $this->autoProccess($request, $params, false);
+        $data = $this->autoProccess($request, $params, false, "Pengajuan declined");
 
         return response()->json([
             'data' => $data ? "Submission was declined" : "Failed, data not found"
@@ -209,7 +210,7 @@ class PengajuanController extends Controller
      * Copy coloumn from tb pengajuan to tb pengajuan history database
      * Insert data to tb validasi
      */
-    public function autoProccess($request, $params, $status = null)
+    public function autoProccess($request, $params, $status = null, $message = '')
     {
         pengajuanModel::query()
             ->where('id_pengajuan', $params)
@@ -240,24 +241,12 @@ class PengajuanController extends Controller
             $id_struktur = $userStruktur->id_struktur_child2;
             $nama_struktur = $userStruktur->nama_struktur_child2;
         }
-
-        $rkat = RKATModel::join('pengajuan', 'rkat.kode_rkat', 'pengajuan.kode_rkat')
-            ->join('user', 'rkat.id_user', 'user.id_user')
-            ->where('pengajuan.id_pengajuan', $params)
-            ->where('user.id_user', $request->id_user)
-            ->get();
-
-        if ($rkat) {
-            $message = $nama_struktur . " melakukan update data pengajuan";
-        } else {
-            $message = "Telah disetujui oleh " . $nama_struktur;
-        }
-
+        
         validasiModel::create([
             "id_pengajuan_history" => $pengajuan_history->id_pengajuan,
             "id_struktur" => $id_struktur,
-            "status_validasi" => $status ? $status : 0,
-            "message" => $message,
+            "status_validasi" => $status,
+            "message" => $nama_struktur . " " . $message . " " . $request->message ? $request->message : "",
         ]);
 
         return true;
@@ -268,11 +257,27 @@ class PengajuanController extends Controller
      * ambil data atasan masing2 akun
      */
 
-    public function statusNull($id)
+    public function validasi($params)
     {
-        $data = validasiModel::where('id_struktur', $id)->orderBy('id_validasi', 'DESC')->first();
-        $data ? $data = $data->status_validasi : $data;
-        return $data;
+        $data = pengajuanHistoryModel::join('validasi', 'pengajuan_history.id_pengajuan', 'validasi.id_pengajuan_history')
+        ->where('pengajuan_history.id', $params)
+        ->select('validasi.status_validasi')
+        ->orderBy('validasi.id_validasi', 'DESC')
+        ->first();
+
+        return $data ? $data->status_validasi : null;
+    }
+
+    public function statusNull($id_struktur, $id_pengajuan)
+    {
+        $data = validasiModel::join('pengajuan_history', 'validasi.id_pengajuan_history', 'pengajuan_history.id_pengajuan')
+        ->join('pengajuan', 'pengajuan_history.id', 'pengajuan.id_pengajuan')
+        ->where('validasi.id_struktur', $id_struktur)->where('pengajuan.id_pengajuan', $id_pengajuan)
+        ->select('validasi.status_validasi')
+        ->orderBy('validasi.id_validasi', 'DESC')
+        ->first();
+
+        return $data ? $data->status_validasi : $data;
     }
 
     public function status($params)
@@ -304,7 +309,7 @@ class PengajuanController extends Controller
                     "id_user" => $rektor->id_user,
                     "id_struktur" => $struktur[0]->id_struktur,
                     "nama_struktur" => $struktur[0]->nama_struktur,
-                    "status" => $this->statusNull($struktur[0]->id_struktur)
+                    "status" => $this->statusNull($struktur[0]->id_struktur, $pengajuan->id_pengajuan)
                 ]
             ];
         } elseif ($pengajuan->id_struktur == 2) {
@@ -315,13 +320,13 @@ class PengajuanController extends Controller
                     "id_user" => $warek->id_user,
                     "id_struktur" => $struktur[0]->id_struktur,
                     "nama_struktur" => $struktur[0]->nama_struktur,
-                    "status" => $this->statusNull($struktur[0]->id_struktur)
+                    "status" => $this->statusNull($struktur[0]->id_struktur, $pengajuan->id_pengajuan)
                 ],
                 [
                     "id_user" => $rektor->id_user,
                     "id_struktur" => $struktur[1]->id_struktur,
                     "nama_struktur" => $struktur[1]->nama_struktur,
-                    "status" => $this->statusNull($struktur[1]->id_struktur)
+                    "status" => $this->statusNull($struktur[1]->id_struktur, $pengajuan->id_pengajuan)
                 ]
             ];
         } elseif ($pengajuan->id_struktur == 3) {
@@ -341,19 +346,19 @@ class PengajuanController extends Controller
                         "id_user" => $keuangan->id_user,
                         "id_struktur" => $struktur[0]->id_struktur,
                         "nama_struktur" => $struktur[0]->nama_struktur,
-                        "status" => $this->statusNull($struktur[0]->id_struktur)
+                        "status" => $this->statusNull($struktur[0]->id_struktur, $pengajuan->id_pengajuan)
                     ],
                     [
                         "id_user" => $warek->id_user,
                         "id_struktur" => $struktur[1]->id_struktur,
                         "nama_struktur" => $struktur[1]->nama_struktur,
-                        "status" => $this->statusNull($struktur[1]->id_struktur)
+                        "status" => $this->statusNull($struktur[1]->id_struktur, $pengajuan->id_pengajuan)
                     ],
                     [
                         "id_user" => $rektor->id_user,
                         "id_struktur" => $struktur[2]->id_struktur,
                         "nama_struktur" => $struktur[2]->nama_struktur,
-                        "status" => $this->statusNull($struktur[2]->id_struktur)
+                        "status" => $this->statusNull($struktur[2]->id_struktur, $pengajuan->id_pengajuan)
                     ]
                 ];
             } else if ($data->nama_struktur_child1 == true && $data->nama_struktur_child2 == 0) {
@@ -364,25 +369,25 @@ class PengajuanController extends Controller
                         "id_user" => $pengajuan->id_user,
                         "id_struktur" => $child1->id_struktur_child1,
                         "nama_struktur" => $child1->nama_struktur_child1,
-                        "status" => $this->statusNull($child1->id_struktur_child1)
+                        "status" => $this->statusNull($child1->id_struktur_child1, $pengajuan->id_pengajuan)
                     ],
                     [
                         "id_user" => $keuangan->id_user,
                         "id_struktur" => $struktur[0]->id_struktur,
                         "nama_struktur" => $struktur[0]->nama_struktur,
-                        "status" => $this->statusNull($struktur[0]->id_struktur)
+                        "status" => $this->statusNull($struktur[0]->id_struktur, $pengajuan->id_pengajuan)
                     ],
                     [
                         "id_user" => $warek->id_user,
                         "id_struktur" => $struktur[1]->id_struktur,
                         "nama_struktur" => $struktur[1]->nama_struktur,
-                        "status" => $this->statusNull($struktur[1]->id_struktur)
+                        "status" => $this->statusNull($struktur[1]->id_struktur, $pengajuan->id_pengajuan)
                     ],
                     [
                         "id_user" => $rektor->id_user,
                         "id_struktur" => $struktur[2]->id_struktur,
                         "nama_struktur" => $struktur[2]->nama_struktur,
-                        "status" => $this->statusNull($struktur[2]->id_struktur)
+                        "status" => $this->statusNull($struktur[2]->id_struktur, $pengajuan->id_pengajuan)
                     ]
                 ];
             } else {
@@ -394,31 +399,31 @@ class PengajuanController extends Controller
                         "id_user" => $pengajuan->id_user,
                         "id_struktur" => $child2->id_struktur_child2,
                         "nama_struktur" => $child2->nama_struktur_child2,
-                        "status" => $this->statusNull($child2->id_struktur_child2)
+                        "status" => $this->statusNull($child2->id_struktur_child2, $pengajuan->id_pengajuan)
                     ],
                     [
                         "id_user" => $fakultas->id_user,
                         "id_struktur" => $child1->id_struktur_child1,
                         "nama_struktur" => $child1->nama_struktur_child1,
-                        "status" => $this->statusNull($child1->id_struktur_child1)
+                        "status" => $this->statusNull($child1->id_struktur_child1, $pengajuan->id_pengajuan)
                     ],
                     [
                         "id_user" => $keuangan->id_user,
                         "id_struktur" => $struktur[0]->id_struktur,
                         "nama_struktur" => $struktur[0]->nama_struktur,
-                        "status" => $this->statusNull($struktur[0]->id_struktur)
+                        "status" => $this->statusNull($struktur[0]->id_struktur, $pengajuan->id_pengajuan)
                     ],
                     [
                         "id_user" => $warek->id_user,
                         "id_struktur" => $struktur[1]->id_struktur,
                         "nama_struktur" => $struktur[1]->nama_struktur,
-                        "status" => $this->statusNull($struktur[1]->id_struktur)
+                        "status" => $this->statusNull($struktur[1]->id_struktur, $pengajuan->id_pengajuan)
                     ],
                     [
                         "id_user" => $rektor->id_user,
                         "id_struktur" => $struktur[2]->id_struktur,
                         "nama_struktur" => $struktur[2]->nama_struktur,
-                        "status" => $this->statusNull($struktur[2]->id_struktur)
+                        "status" => $this->statusNull($struktur[2]->id_struktur, $pengajuan->id_pengajuan)
                     ]
                 ];
             }

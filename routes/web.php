@@ -47,6 +47,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->post('/approve/{params}', 'PengajuanController@approve');
         $router->post('/decline/{params}', 'PengajuanController@decline');
         $router->get('/history/{params}', 'PengajuanController@history');
+        $router->get('/validasi/{params}', 'PengajuanController@validasi');
         $router->get('/pengajuanSubordinate/{params}', 'PengajuanController@pengajuanSubordinate');
     });
 
