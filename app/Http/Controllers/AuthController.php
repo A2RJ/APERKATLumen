@@ -80,39 +80,39 @@ class AuthController extends Controller
         $login = auth()->user();
         $userStruktur = UserModel::where('id_user', $login->id_user)->first();
 
-        if ($userStruktur->id_struktur == 1 || $userStruktur->id_struktur == 2) {
-            if ($userStruktur->id_struktur == 1) {
-                $data = [
-                    'level' => "rektor"
-                ];
-            } elseif ($userStruktur->id_struktur == 2) {
-                $data = [
-                    'level' => "warek"
-                ];
-            } 
+        if ($userStruktur->id_struktur == 1) {
+            $data = [
+                'level' => "rektor"
+            ];
+        } elseif ($userStruktur->id_struktur == 2) {
+            $data = [
+                'level' => "warek"
+            ];
+        } elseif ($userStruktur->id_struktur == 4) {
+            $data = [
+                'level' => "sekniv"
+            ];
         } else {
             $data = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
-            ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
-            ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-            ->select('user.id_struktur', 'user.id_struktur_child1', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
-            ->where('user.id_user', $login->id_user)
-            ->first();
+                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                ->select('user.id_struktur', 'user.id_struktur_child1', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
+                ->where('user.id_user', $login->id_user)
+                ->first();
 
             if ($data->id_struktur == 3 && $data->id_struktur_child1 == 9) {
                 $data = [
                     'level' => "dirKeuangan"
                 ];
-            }
-            else if ($data->nama_struktur_child1 == true && $data->nama_struktur_child2 == 0) {
+            } else if ($data->nama_struktur_child1 == true && $data->nama_struktur_child2 == 0) {
                 $data = [
                     'level' => "fakultas"
                 ];
-            }else{
+            } else {
                 $data = [
                     'level' => "prodi"
                 ];
             }
-            
         }
 
         return response()->json([$login, $data]);

@@ -104,14 +104,11 @@ class PengajuanController extends Controller
     public function show($params)
     {
         $data = pengajuanModel::join('rkat', 'pengajuan.kode_rkat', '=', 'rkat.kode_rkat')
+            ->select("pengajuan.*")
             ->find($params);
-        $status = $this->status($params);
-        $history = $this->history($params);
 
         return response()->json([
-            'data' => $data ? $data : "Failed, data not found",
-            'status' => $status->original['data'] ? $status->original['data'] : "Failed, status not found",
-            'history' => $history->original['data'] ? $history->original['data'] : "Failed, history not found"
+            'data' => $data ? $data : "Failed, data not found"
         ]);
     }
 
@@ -175,7 +172,7 @@ class PengajuanController extends Controller
     public function history($params)
     {
         $data = pengajuanHistoryModel::join('validasi', 'pengajuan_history.id_pengajuan', '=', 'validasi.id_pengajuan_history')
-            ->where('pengajuan_history.id', $params)->paginate(15);
+            ->where('pengajuan_history.id', $params)->get();
 
         return response()->json([
             'data' => $data ? $data : "Failed, data not found"
@@ -241,12 +238,12 @@ class PengajuanController extends Controller
             $id_struktur = $userStruktur->id_struktur_child2;
             $nama_struktur = $userStruktur->nama_struktur_child2;
         }
-        
+
         validasiModel::create([
             "id_pengajuan_history" => $pengajuan_history->id_pengajuan,
             "id_struktur" => $id_struktur,
             "status_validasi" => $status,
-            "message" => $nama_struktur . " " . $request->message
+            "message" => $nama_struktur . " - " . $request->message
         ]);
 
         return true;
@@ -260,10 +257,10 @@ class PengajuanController extends Controller
     public function validasi($params)
     {
         $data = pengajuanHistoryModel::join('validasi', 'pengajuan_history.id_pengajuan', 'validasi.id_pengajuan_history')
-        ->where('pengajuan_history.id', $params)
-        ->select('validasi.status_validasi')
-        ->orderBy('validasi.id_validasi', 'DESC')
-        ->first();
+            ->where('pengajuan_history.id', $params)
+            ->select('validasi.status_validasi')
+            ->orderBy('validasi.id_validasi', 'DESC')
+            ->first();
 
         return $data ? $data->status_validasi : null;
     }
@@ -271,11 +268,26 @@ class PengajuanController extends Controller
     public function statusNull($id_struktur, $id_pengajuan)
     {
         $data = validasiModel::join('pengajuan_history', 'validasi.id_pengajuan_history', 'pengajuan_history.id_pengajuan')
-        ->join('pengajuan', 'pengajuan_history.id', 'pengajuan.id_pengajuan')
-        ->where('validasi.id_struktur', $id_struktur)->where('pengajuan.id_pengajuan', $id_pengajuan)
-        ->select('validasi.status_validasi')
-        ->orderBy('validasi.id_validasi', 'DESC')
-        ->first();
+            ->join('pengajuan', 'pengajuan_history.id', 'pengajuan.id_pengajuan')
+            ->where('validasi.id_struktur', $id_struktur)
+            ->where('pengajuan.id_pengajuan', $id_pengajuan)
+            ->select('validasi.status_validasi')
+            ->orderBy('validasi.id_validasi', 'DESC')
+            ->first();
+
+        return $data ? $data->status_validasi : $data;
+    }
+
+    public function pencairan($id_struktur, $id_pengajuan)
+    {
+        $data = validasiModel::join('pengajuan_history', 'validasi.id_pengajuan_history', 'pengajuan_history.id_pengajuan')
+            ->join('pengajuan', 'pengajuan_history.id', 'pengajuan.id_pengajuan')
+            ->where('validasi.id_struktur', $id_struktur)
+            ->where('pengajuan.id_pengajuan', $id_pengajuan)
+            ->where('validasi.message', 'Direktur Keuangan - Sudah dilakukan pencairan')
+            ->select('validasi.status_validasi')
+            ->orderBy('validasi.id_validasi', 'DESC')
+            ->first();
 
         return $data ? $data->status_validasi : $data;
     }
@@ -301,6 +313,7 @@ class PengajuanController extends Controller
             ->get();
 
         $struktur = strukturModel::where('id_struktur', '<=', $pengajuan->id_struktur)->orderBy('level', 'DESC')->get();
+        $keuangan =  UserModel::where('id_struktur', $struktur[0]->id_struktur)->where('id_struktur_child1', 9)->select('user.id_user')->first();
 
         if ($pengajuan->id_struktur == 1) {
             $rektor =  UserModel::where('id_struktur', $struktur[0]->id_struktur)->select('user.id_user')->first();
@@ -310,6 +323,18 @@ class PengajuanController extends Controller
                     "id_struktur" => $struktur[0]->id_struktur,
                     "nama_struktur" => $struktur[0]->nama_struktur,
                     "status" => $this->statusNull($struktur[0]->id_struktur, $pengajuan->id_pengajuan)
+                ],
+                [
+                    "id_user" => 'pencairan',
+                    "id_struktur" => $struktur[0]->id_struktur,
+                    "nama_struktur" => $struktur[0]->nama_struktur,
+                    "status" => $this->pencairan($struktur[0]->id_struktur, $pengajuan->id_pengajuan)
+                ],
+                [
+                    "id_user" => 10,
+                    "id_struktur" => 4,
+                    "nama_struktur" => 'Sekniv',
+                    "status" => $this->statusNull(4, $pengajuan->id_pengajuan)
                 ]
             ];
         } elseif ($pengajuan->id_struktur == 2) {
@@ -327,6 +352,18 @@ class PengajuanController extends Controller
                     "id_struktur" => $struktur[1]->id_struktur,
                     "nama_struktur" => $struktur[1]->nama_struktur,
                     "status" => $this->statusNull($struktur[1]->id_struktur, $pengajuan->id_pengajuan)
+                ],
+                [
+                    "id_user" => 'pencairan',
+                    "id_struktur" => $struktur[0]->id_struktur,
+                    "nama_struktur" => $struktur[0]->nama_struktur,
+                    "status" => $this->pencairan($struktur[0]->id_struktur, $pengajuan->id_pengajuan)
+                ],
+                [
+                    "id_user" => 10,
+                    "id_struktur" => 4,
+                    "nama_struktur" => 'Sekniv',
+                    "status" => $this->statusNull(4, $pengajuan->id_pengajuan)
                 ]
             ];
         } elseif ($pengajuan->id_struktur == 3) {
@@ -340,6 +377,7 @@ class PengajuanController extends Controller
             $keuangan =  UserModel::where('id_struktur', $struktur[0]->id_struktur)->where('id_struktur_child1', 9)->select('user.id_user')->first();
             $warek =  UserModel::where('id_struktur', $struktur[1]->id_struktur)->select('user.id_user')->first();
             $rektor =  UserModel::where('id_struktur', $struktur[2]->id_struktur)->select('user.id_user')->first();
+
             if ($data->id_struktur == 3 && $data->id_struktur_child1 == 9) {
                 $data = [
                     [
@@ -359,6 +397,18 @@ class PengajuanController extends Controller
                         "id_struktur" => $struktur[2]->id_struktur,
                         "nama_struktur" => $struktur[2]->nama_struktur,
                         "status" => $this->statusNull($struktur[2]->id_struktur, $pengajuan->id_pengajuan)
+                    ],
+                    [
+                        "id_user" => 'pencairan',
+                        "id_struktur" => $struktur[0]->id_struktur,
+                        "nama_struktur" => $struktur[0]->nama_struktur,
+                        "status" => $this->pencairan($struktur[0]->id_struktur, $pengajuan->id_pengajuan)
+                    ],
+                    [
+                        "id_user" => 10,
+                        "id_struktur" => 4,
+                        "nama_struktur" => 'Sekniv',
+                        "status" => $this->statusNull(4, $pengajuan->id_pengajuan)
                     ]
                 ];
             } else if ($data->nama_struktur_child1 == true && $data->nama_struktur_child2 == 0) {
@@ -388,6 +438,18 @@ class PengajuanController extends Controller
                         "id_struktur" => $struktur[2]->id_struktur,
                         "nama_struktur" => $struktur[2]->nama_struktur,
                         "status" => $this->statusNull($struktur[2]->id_struktur, $pengajuan->id_pengajuan)
+                    ],
+                    [
+                        "id_user" => 'pencairan',
+                        "id_struktur" => $struktur[0]->id_struktur,
+                        "nama_struktur" => $struktur[0]->nama_struktur,
+                        "status" => $this->pencairan($struktur[0]->id_struktur, $pengajuan->id_pengajuan)
+                    ],
+                    [
+                        "id_user" => 10,
+                        "id_struktur" => 4,
+                        "nama_struktur" => 'Sekniv',
+                        "status" => $this->statusNull(4, $pengajuan->id_pengajuan)
                     ]
                 ];
             } else {
@@ -424,6 +486,18 @@ class PengajuanController extends Controller
                         "id_struktur" => $struktur[2]->id_struktur,
                         "nama_struktur" => $struktur[2]->nama_struktur,
                         "status" => $this->statusNull($struktur[2]->id_struktur, $pengajuan->id_pengajuan)
+                    ],
+                    [
+                        "id_user" => 'pencairan',
+                        "id_struktur" => $struktur[0]->id_struktur,
+                        "nama_struktur" => $struktur[0]->nama_struktur,
+                        "status" => $this->pencairan($struktur[0]->id_struktur, $pengajuan->id_pengajuan)
+                    ],
+                    [
+                        "id_user" => 10,
+                        "id_struktur" => 4,
+                        "nama_struktur" => 'Sekniv',
+                        "status" => $this->statusNull(4, $pengajuan->id_pengajuan)
                     ]
                 ];
             }
@@ -458,6 +532,14 @@ class PengajuanController extends Controller
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                 ->where('user.id_struktur', '!=', 1)
                 ->where('user.id_struktur', '!=', 2)
+                ->select('user.id_user', 'pengajuan.id_pengajuan', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'rkat.created_at')
+                ->get();
+        } elseif ($userStruktur->id_struktur == 4) {
+            $data = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
+                ->join('rkat', 'pengajuan.kode_rkat', 'rkat.kode_rkat')
+                ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                 ->select('user.id_user', 'pengajuan.id_pengajuan', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'rkat.created_at')
                 ->get();
         } elseif ($userStruktur->id_struktur == 3) {
