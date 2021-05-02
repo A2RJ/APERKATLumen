@@ -124,10 +124,10 @@ class PengajuanController extends Controller
      */
     public function update(Request $request, $params)
     {
-        $this->autoProccess($request, $params, true, "melakukan revisi pengajuan");
+        $this->autoProccess($request, $params, true);
 
         $data = pengajuanModel::find($params);
-        $r = $data;
+        // $r = $data;
         $data ? $data->update($request->all()) : false;
 
         // $rkat = RKATModel::where('kode_rkat', $request->kode_rkat)->first();
@@ -187,7 +187,7 @@ class PengajuanController extends Controller
      */
     public function approve(Request $request, $params)
     {
-        $data = $this->autoProccess($request, $params, true, "Approve pengajuan");
+        $data = $this->autoProccess($request, $params, true);
 
         return response()->json([
             'data' => $data ? "Submission was approved" : "Failed, data not found"
@@ -199,7 +199,7 @@ class PengajuanController extends Controller
      */
     public function decline(Request $request, $params)
     {
-        $data = $this->autoProccess($request, $params, false, "Pengajuan declined");
+        $data = $this->autoProccess($request, $params, false);
 
         return response()->json([
             'data' => $data ? "Submission was declined" : "Failed, data not found"
@@ -210,7 +210,7 @@ class PengajuanController extends Controller
      * Copy coloumn from tb pengajuan to tb pengajuan history database
      * Insert data to tb validasi
      */
-    public function autoProccess($request, $params, $status = null, $message = '')
+    public function autoProccess($request, $params, $status = null)
     {
         pengajuanModel::query()
             ->where('id_pengajuan', $params)
@@ -246,7 +246,7 @@ class PengajuanController extends Controller
             "id_pengajuan_history" => $pengajuan_history->id_pengajuan,
             "id_struktur" => $id_struktur,
             "status_validasi" => $status,
-            "message" => $nama_struktur . " " . $message . " " . $request->message ? $request->message : "",
+            "message" => $nama_struktur . " " . $request->message
         ]);
 
         return true;
