@@ -36,19 +36,19 @@ $router->group(['prefix' => 'api'], function () use ($router) {
 $router->group(['middleware' => 'auth'], function () use ($router) {
 
     $router->group(['prefix' => 'pengajuan'], function () use ($router) {
-        $router->get('/byUser/{params}', 'PengajuanController@byUser');
+        $router->get('/', 'PengajuanController@index');
         $router->get('/{params}', 'PengajuanController@show');
-        $router->post('/', 'PengajuanController@store');
-        $router->post('/upload', 'PengajuanController@upload');
-        $router->put('/{params}', 'PengajuanController@update');
-        $router->delete('/{params}', 'PengajuanController@destroy');
-
+        $router->get('/byUser/{params}', 'PengajuanController@byUser');
         $router->get('/status/{params}', 'PengajuanController@status');
-        $router->post('/approve/{params}', 'PengajuanController@approve');
-        $router->post('/decline/{params}', 'PengajuanController@decline');
         $router->get('/history/{params}', 'PengajuanController@history');
         $router->get('/validasi/{params}', 'PengajuanController@validasi');
         $router->get('/pengajuanSubordinate/{params}', 'PengajuanController@pengajuanSubordinate');
+        $router->post('/', 'PengajuanController@store');
+        $router->post('/upload', 'PengajuanController@upload');
+        $router->post('/approve/{params}', 'PengajuanController@approve');
+        $router->post('/decline/{params}', 'PengajuanController@decline');
+        $router->post('/{params}', 'PengajuanController@update');
+        $router->delete('/{params}', 'PengajuanController@destroy');
     });
 
     $router->group(['prefix' => 'rkat'], function () use ($router) {

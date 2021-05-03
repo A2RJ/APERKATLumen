@@ -69,7 +69,7 @@ class PengajuanController extends Controller
     {
         if ($request->hasFile('file')) {
             $fileName = uniqid(40) . "." . $request->file('file')->getClientOriginalExtension();
-            $request->file('file')->move('../../SubmissionNuxtJS/static', $fileName);
+            $request->file('file')->move('../../', $fileName);
             return $fileName;
         } else {
             return false;
@@ -207,7 +207,7 @@ class PengajuanController extends Controller
      * Copy coloumn from tb pengajuan to tb pengajuan history database
      * Insert data to tb validasi
      */
-    public function autoProccess($request, $params, $status = null)
+    public function autoProccess($request, $params, $status = 0)
     {
         pengajuanModel::query()
             ->where('id_pengajuan', $params)
@@ -220,13 +220,22 @@ class PengajuanController extends Controller
 
         $pengajuan = pengajuanModel::find($params);
         $pengajuan_history = pengajuanHistoryModel::where('kode_rkat', $pengajuan->kode_rkat)->latest()->first();
-
-        $userStruktur = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
-            ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
-            ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-            ->select('user.*', 'struktur.*', 'user.id_struktur_child1', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
-            ->where('user.id_user', $request->id_user)
-            ->first();
+        
+        if ($request->id_atasan) {
+            $userStruktur = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                ->select('user.*', 'struktur.*', 'user.id_struktur_child1', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
+                ->where('user.id_user', $request->id_atasan)
+                ->first();
+        } else {
+            $userStruktur = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                ->select('user.*', 'struktur.*', 'user.id_struktur_child1', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
+                ->where('user.id_user', $request->id_user)
+                ->first();
+        }
 
         if ($userStruktur->nama_struktur == true && $userStruktur->nama_struktur_child1 == '0' && $userStruktur->nama_struktur_child2 == '0') {
             $id_struktur = $userStruktur->id_struktur;
@@ -271,6 +280,7 @@ class PengajuanController extends Controller
             ->join('pengajuan', 'pengajuan_history.id', 'pengajuan.id_pengajuan')
             ->where('validasi.id_struktur', $id_struktur)
             ->where('pengajuan.id_pengajuan', $id_pengajuan)
+            ->where('validasi.message', '!=', 'Direktur Keuangan - Sudah dilakukan pencairan')
             ->select('validasi.status_validasi')
             ->orderBy('validasi.id_validasi', 'DESC')
             ->first();
@@ -411,7 +421,7 @@ class PengajuanController extends Controller
                         "status" => $this->statusNull(4, $pengajuan->id_pengajuan)
                     ]
                 ];
-            } else if ($data->nama_struktur_child1 == true && $data->nama_struktur_child2 == 0) {
+            } else if ($data->nama_struktur_child1 == true && $data->nama_struktur_child2 == '0') {
                 $child1 = struktur_child1Model::find($pengajuan->id_struktur_child1);
 
                 $data = [

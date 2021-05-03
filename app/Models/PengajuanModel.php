@@ -27,7 +27,10 @@ class pengajuanModel extends Model
         "id_iku_child1",
         "id_iku_child2",
         "biaya_program",
-        "rab"
+        "rab",
+        "pencairan",
+        "lpj_kegiatan",
+        "lpj_keuangan"
     ];
 
     /**

@@ -104,9 +104,9 @@ class AuthController extends Controller
                 $data = [
                     'level' => "dirKeuangan"
                 ];
-            } else if ($data->nama_struktur_child1 == true && $data->nama_struktur_child2 == 0) {
+            } else if ($data->nama_struktur_child1 == true && $data->nama_struktur_child2 == '0') {
                 $data = [
-                    'level' => "fakultas"
+                    'level' => $data->nama_struktur_child1 . $data->nama_struktur_child2
                 ];
             } else {
                 $data = [
