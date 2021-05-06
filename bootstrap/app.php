@@ -60,8 +60,21 @@ $app->singleton(
 */
 
 $app->configure('app');
+$app->configure('dompdf');
+$app->singleton(
+    'mailer',
+    function ($app) {
+        return $app->loadComponent('mail', 'Illuminate\Mail\MailServiceProvider', 'mailer');
+    }
+);
+// Aliases
+$app->alias('mailer', \Illuminate\Contracts\Mail\Mailer::class);
+// Make Queue
+$app->make('queue');
 
-// $app->configure('mail');
+// $app->alias('mail.manager', Illuminate\Mail\MailManager::class);
+// $app->alias('mail.manager', Illuminate\Contracts\Mail\Factory::class);
+
 // $app->alias('mailer', Illuminate\Mail\Mailer::class);
 // $app->alias('mailer', Illuminate\Contracts\Mail\Mailer::class);
 // $app->alias('mailer', Illuminate\Contracts\Mail\MailQueue::class);
@@ -102,11 +115,12 @@ $app->register(App\Providers\AuthServiceProvider::class);
 $app->register(App\Providers\EventServiceProvider::class);
 $app->register(Tymon\JWTAuth\Providers\LumenServiceProvider::class);
 $app->register(Chuckrincon\LumenConfigDiscover\DiscoverServiceProvider::class);
-
-$app->register(Illuminate\Mail\MailServiceProvider::class);
+$app->register(Illuminate\Mail\MailServiceProvider::class);class_alias('Illuminate\Support\Facades\Config', 'Config');
 $app->register(\Sanjeev\MySqlBackup\MySqlBackupServiceProvider::class);
 $app->register(\Flipbox\LumenGenerator\LumenGeneratorServiceProvider::class);
 $app->register(\KitLoong\MigrationsGenerator\MigrationsGeneratorServiceProvider::class);
+$app->register(\Barryvdh\DomPDF\ServiceProvider::class);
+class_alias('Barryvdh\DomPDF\Facade', 'PDF');
 
 /*
 |--------------------------------------------------------------------------

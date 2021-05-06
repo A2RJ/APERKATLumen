@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use PDF;
 use Illuminate\Http\Request;
 use App\Models\File;
 use App\Models\UserModel;
@@ -27,7 +28,19 @@ class PengajuanController extends Controller
                 ->paginate(15)
         ]);
     }
+    
+    public function coba()
+    {
+        $data = [
+            'coba' => "Berhasil"
+        ];
+        $data = [
+            'coba' => "Berhasil"
+        ];
 
+        $pdf = PDF::loadView('pengajuan', $data);
+        return $pdf->download('pengajuan' . date("Y-m-d") . '.pdf');
+    }
     /**
      * Store a newly created resource in storage.
      *
