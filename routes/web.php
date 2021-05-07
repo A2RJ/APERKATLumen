@@ -13,31 +13,31 @@
 |
 */
 
-use Illuminate\Support\Facades\Mail;
+// use Illuminate\Support\Facades\Mail;
 
 // class_alias('Illuminate\Support\Facades\Config', 'Coba');
 
+// $data = array('name' => 'Arunkumar');
+// Mail::send('mail', $data, function ($message) {
+//     $message->to('xcz.ardiansyahputra2468@gmail.com', 'Arunkumar')->subject('Test Mail from Selva');
+//     $message->from('gamesonly.a2rj@gmail.com', 'Selvakumar');
+// });
+// echo 'Email Sent. Check your inbox.';
+
+// $data = [
+//     'coba' => "Berhasil"
+// ];
+
+// $pdf = PDF::loadView('pengajuan', $data);
+// return $pdf->download('pengajuan' . date("Y-m-d") . '.pdf');
+
 $router->get('/', function () use ($router) {
-
-    $data = array('name' => 'Arunkumar');
-    Mail::send('mail', $data, function ($message) {
-        $message->to('xcz.ardiansyahputra2468@gmail.com', 'Arunkumar')->subject('Test Mail from Selva');
-        $message->from('gamesonly.a2rj@gmail.com', 'Selvakumar');
-    });
-    echo 'Email Sent. Check your inbox.';
-
-    // return response()->json([
-    //     'app_version' => $router->app->version(),
-    //     'vendor' => "Universitas Teknologi Sumbawa",
-    //     'author' => "https://github.com/a2rj",
-    //     'about_API' => "API SUBMISSION"
-    // ]);
-    // $data = [
-    //     'coba' => "Berhasil"
-    // ];
-
-    // $pdf = PDF::loadView('pengajuan', $data);
-    // return $pdf->download('pengajuan' . date("Y-m-d") . '.pdf');
+    return response()->json([
+        'app_version' => $router->app->version(),
+        'vendor' => "Universitas Teknologi Sumbawa",
+        'author' => "https://github.com/a2rj",
+        'about_API' => "API SUBMISSION"
+    ]);
 });
 
 $router->group(['middleware' => 'auth', 'prefix' => 'api'], function ($router) {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use PDF;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use App\Models\File;
 use App\Models\UserModel;
 use App\Models\RKATModel;
@@ -29,18 +30,6 @@ class PengajuanController extends Controller
         ]);
     }
     
-    public function coba()
-    {
-        $data = [
-            'coba' => "Berhasil"
-        ];
-        $data = [
-            'coba' => "Berhasil"
-        ];
-
-        $pdf = PDF::loadView('pengajuan', $data);
-        return $pdf->download('pengajuan' . date("Y-m-d") . '.pdf');
-    }
     /**
      * Store a newly created resource in storage.
      *
@@ -348,7 +337,7 @@ class PengajuanController extends Controller
                     "status" => $this->statusNull($struktur[0]->id_struktur, $pengajuan->id_pengajuan)
                 ],
                 [
-                    "id_user" => 'pencairan',
+                    "id_user" => 9999,
                     "id_struktur" => $struktur[0]->id_struktur,
                     "nama_struktur" => $struktur[0]->nama_struktur,
                     "status" => $this->pencairan($struktur[0]->id_struktur, $pengajuan->id_pengajuan)
@@ -377,7 +366,7 @@ class PengajuanController extends Controller
                     "status" => $this->statusNull($struktur[1]->id_struktur, $pengajuan->id_pengajuan)
                 ],
                 [
-                    "id_user" => 'pencairan',
+                    "id_user" => 9999,
                     "id_struktur" => $struktur[0]->id_struktur,
                     "nama_struktur" => $struktur[0]->nama_struktur,
                     "status" => $this->pencairan($struktur[0]->id_struktur, $pengajuan->id_pengajuan)
@@ -422,7 +411,7 @@ class PengajuanController extends Controller
                         "status" => $this->statusNull($struktur[2]->id_struktur, $pengajuan->id_pengajuan)
                     ],
                     [
-                        "id_user" => 'pencairan',
+                        "id_user" => 9999,
                         "id_struktur" => $struktur[0]->id_struktur,
                         "nama_struktur" => $struktur[0]->nama_struktur,
                         "status" => $this->pencairan($struktur[0]->id_struktur, $pengajuan->id_pengajuan)
@@ -463,7 +452,7 @@ class PengajuanController extends Controller
                         "status" => $this->statusNull($struktur[2]->id_struktur, $pengajuan->id_pengajuan)
                     ],
                     [
-                        "id_user" => 'pencairan',
+                        "id_user" => 9999,
                         "id_struktur" => $struktur[0]->id_struktur,
                         "nama_struktur" => $struktur[0]->nama_struktur,
                         "status" => $this->pencairan($struktur[0]->id_struktur, $pengajuan->id_pengajuan)
@@ -511,7 +500,7 @@ class PengajuanController extends Controller
                         "status" => $this->statusNull($struktur[2]->id_struktur, $pengajuan->id_pengajuan)
                     ],
                     [
-                        "id_user" => 'pencairan',
+                        "id_user" => 9999,
                         "id_struktur" => $struktur[0]->id_struktur,
                         "nama_struktur" => $struktur[0]->nama_struktur,
                         "status" => $this->pencairan($struktur[0]->id_struktur, $pengajuan->id_pengajuan)
@@ -595,5 +584,49 @@ class PengajuanController extends Controller
         return response()->json([
             "data" => $data
         ]);
+    }
+
+    public function PDF()
+    {
+        $data = [
+            'coba' => "Berhasil"
+        ];
+    
+        $pdf = PDF::loadView('pengajuan', $data);
+        return $pdf->download('pengajuan-' . date("Y-m-d") . '.pdf');
+    }
+
+    public function sendMail()
+    {
+        // $loop = $this.status('1'); // id_pengajuan
+        $loop = [
+            'email' => 'xcz.ardiansyahputra2468@gmail.com',
+            'nama_struktur' => 'Rektor',
+            'subject' => 'APA'
+        ];
+
+        $from = [
+            'email' => 'gamesonly.a2rj@gmail.com',
+            'nama' => 'Universitas Teknologi Sumbawa'
+        ];
+        
+        foreach ($loop as $to) {
+            $data = array('name' => 'APERKAT - Universitas Teknologi Sumbawa');
+            Mail::send('mail', $data, function ($message) use ($to, $from) {
+                $message->to($to['email'], $to['nama_struktur'])->subject($to['subject']);
+                $message->from($from['email'], $from['nama']);
+            });
+        }
+
+        echo 'Email Sent. Check your inbox.';
+
+        // $emails = ['myoneemail@esomething.com', 'myother@esomething.com','myother2@esomething.com'];
+
+        // Mail::send('emails.welcome', [], function($message) use ($emails)
+        // {    
+        //     $message->to($emails)->subject('This is test e-mail');    
+        // });
+        // var_dump( Mail:: failures());
+        // exit;
     }
 }
