@@ -13,24 +13,6 @@
 |
 */
 
-// use Illuminate\Support\Facades\Mail;
-
-// class_alias('Illuminate\Support\Facades\Config', 'Coba');
-
-// $data = array('name' => 'Arunkumar');
-// Mail::send('mail', $data, function ($message) {
-//     $message->to('xcz.ardiansyahputra2468@gmail.com', 'Arunkumar')->subject('Test Mail from Selva');
-//     $message->from('gamesonly.a2rj@gmail.com', 'Selvakumar');
-// });
-// echo 'Email Sent. Check your inbox.';
-
-// $data = [
-//     'coba' => "Berhasil"
-// ];
-
-// $pdf = PDF::loadView('pengajuan', $data);
-// return $pdf->download('pengajuan' . date("Y-m-d") . '.pdf');
-
 $router->get('/', function () use ($router) {
     return response()->json([
         'app_version' => $router->app->version(),
@@ -90,10 +72,13 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->group(['prefix' => 'user'], function () use ($router) {
         $router->get('/', 'UserController@index');
         $router->get('/rkatUser', 'UserController@rkatUser');
+        $router->get('/struktur', 'UserController@struktur');
         $router->get('/{params}', 'UserController@show');
         $router->get('/datauser/{params}', 'UserController@datauser');
+        $router->get('/sub_struktur/{params}', 'UserController@sub_struktur');
+        $router->get('/sub_sub_struktur/{params}', 'UserController@sub_sub_struktur');
         $router->post('/', 'UserController@store');
-        $router->put('/{params}', 'UserController@update');
+        $router->post('/{params}', 'UserController@update');
         $router->delete('/{params}', 'UserController@destroy');
     });
 

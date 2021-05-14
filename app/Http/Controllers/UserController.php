@@ -2,9 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\struktur_child1Model;
+use App\Models\struktur_child2Model;
+use App\Models\strukturModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\UserModel;
+use App\Models\User;
+// use App\User;
 
 class UserController extends Controller
 {
@@ -185,7 +190,7 @@ class UserController extends Controller
     {
         $this->validate($request, [
             "fullname" => "required",
-            "email" => "required|email|unique:user.email",
+            "email" => "required|email",
             "password" => "required|min:8",
             "id_struktur" => "required",
             "id_struktur_child1" => "nullable",
@@ -193,6 +198,30 @@ class UserController extends Controller
             "nomor_wa" => "required|numeric",
             "bank" => "required",
             "no_rek" => "required|numeric"
+        ]);
+    }
+
+    public function struktur()
+    {
+        return Response()->json([
+            'data' => strukturModel::where('id_struktur', 1)
+            ->orWhere('id_struktur', 2)
+            ->orWhere('id_struktur', 3)
+            ->select('id_struktur as value', 'nama_struktur as text')->get()
+        ]);
+    }
+
+    public function sub_struktur($params)
+    {
+        return Response()->json([
+            'data' => struktur_child1Model::where('id_struktur', $params)->where('nama_struktur_child1', '!=', '0')->select('id_struktur_child1 as value', 'nama_struktur_child1 as text')->get()
+        ]);
+    }
+
+    public function sub_sub_struktur($params)
+    {
+        return Response()->json([
+            'data' => struktur_child2Model::where('id_struktur_child1', $params)->where('nama_struktur_child2', '!=', '0')->select('id_struktur_child2 as value', 'nama_struktur_child2 as text')->get()
         ]);
     }
 }
