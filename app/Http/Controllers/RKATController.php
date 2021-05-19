@@ -64,7 +64,7 @@ class RKATController extends Controller
      */
     public function byKode($params)
     {
-        $data = RKATModel::where('kode_rkat', $params)->get();
+        $data = RKATModel::where('kode_rkat', $params)->first();
 
         return response()->json([
             'data' => $data ? $data : "Failed, data not found"

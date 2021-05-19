@@ -41,6 +41,8 @@ class PengajuanController extends Controller
         $this->validate($request, [
             "kode_rkat" => "required",
             "id_user" => "required",
+            "latar_belakang" => "required",
+            "sasaran" => "required",
             "target_capaian" => "required",
             "bentuk_pelaksanaan_program" => "required",
             "tempat_program" => "required",

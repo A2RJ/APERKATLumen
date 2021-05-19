@@ -109,7 +109,7 @@ class UserController extends Controller
      */
     public function update(Request $request, $params)
     {
-        $this->validation($request);
+        // $this->validation($request);
 
         $data = UserModel::find($params)->update($request->all());
         if ($request->input('password')) {
@@ -207,6 +207,7 @@ class UserController extends Controller
             'data' => strukturModel::where('id_struktur', 1)
             ->orWhere('id_struktur', 2)
             ->orWhere('id_struktur', 3)
+            ->orWhere('id_struktur', 4)
             ->select('id_struktur as value', 'nama_struktur as text')->get()
         ]);
     }
