@@ -281,21 +281,21 @@ class PengajuanController extends Controller
     public function statusNull($id_struktur, $id_pengajuan, $nomor = null)
     {
         if ($nomor == 1) {
-            $data = $data = validasiModel::join('pengajuan_history', 'validasi.id_pengajuan_history', 'pengajuan_history.id_pengajuan')
+            $data = validasiModel::join('pengajuan_history', 'validasi.id_pengajuan_history', 'pengajuan_history.id_pengajuan')
                 ->join('pengajuan', 'pengajuan_history.id', 'pengajuan.id_pengajuan')
                 ->where('validasi.id_struktur', $id_struktur)
                 ->where('pengajuan.id_pengajuan', $id_pengajuan)
                 ->where('validasi.status_validasi', '1')
                 ->first();
         } elseif ($nomor == 2) {
-            $data = $data = validasiModel::join('pengajuan_history', 'validasi.id_pengajuan_history', 'pengajuan_history.id_pengajuan')
+            $data = validasiModel::join('pengajuan_history', 'validasi.id_pengajuan_history', 'pengajuan_history.id_pengajuan')
                 ->join('pengajuan', 'pengajuan_history.id', 'pengajuan.id_pengajuan')
                 ->where('validasi.id_struktur', $id_struktur)
                 ->where('pengajuan.id_pengajuan', $id_pengajuan)
                 ->where('validasi.status_validasi', '2')
                 ->first();
         } elseif ($nomor == 3) {
-            $data = $data = validasiModel::join('pengajuan_history', 'validasi.id_pengajuan_history', 'pengajuan_history.id_pengajuan')
+            $data = validasiModel::join('pengajuan_history', 'validasi.id_pengajuan_history', 'pengajuan_history.id_pengajuan')
                 ->join('pengajuan', 'pengajuan_history.id', 'pengajuan.id_pengajuan')
                 ->where('validasi.id_struktur', $id_struktur)
                 ->where('pengajuan.id_pengajuan', $id_pengajuan)
@@ -303,8 +303,7 @@ class PengajuanController extends Controller
                 ->first();
         }
         
-        $data->status_validasi ? $data->status_validasi : false;
-        return $data;
+        return $data ? $data->status_validasi : false;
     }
 
     public function pencairan($id_struktur, $id_pengajuan)
