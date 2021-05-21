@@ -73,7 +73,7 @@ class PengajuanController extends Controller
     {
         if ($request->hasFile('file')) {
             $fileName = uniqid(40) . "." . $request->file('file')->getClientOriginalExtension();
-            $request->file('file')->move('../../', $fileName);
+            $request->file('file')->move('../', $fileName);
             return $fileName;
         } else {
             return false;
