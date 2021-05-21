@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 21 Apr 2021 pada 00.11
+-- Waktu pembuatan: 21 Bulan Mei 2021 pada 08.36
 -- Versi server: 10.4.18-MariaDB
 -- Versi PHP: 8.0.3
 
@@ -121,6 +121,9 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 CREATE TABLE `pengajuan` (
   `id_pengajuan` int(11) NOT NULL,
   `kode_rkat` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `id_user` int(11) NOT NULL,
+  `latar_belakang` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `sasaran` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `target_capaian` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `bentuk_pelaksanaan_program` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `tempat_program` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -132,6 +135,11 @@ CREATE TABLE `pengajuan` (
   `biaya_program` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `rab` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `status_pengajuan` enum('progress','approved') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `pencairan` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `lpj_kegiatan` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `lpj_keuangan` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `validasi_status` int(1) NOT NULL,
+  `nama_status` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -144,8 +152,11 @@ CREATE TABLE `pengajuan` (
 
 CREATE TABLE `pengajuan_history` (
   `id_pengajuan` int(11) NOT NULL,
-  `kode_rkat` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
   `id` int(11) NOT NULL,
+  `kode_rkat` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `id_user` int(11) NOT NULL,
+  `latar_belakang` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `sasaran` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `target_capaian` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `bentuk_pelaksanaan_program` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `tempat_program` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -157,21 +168,14 @@ CREATE TABLE `pengajuan_history` (
   `biaya_program` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `rab` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `status_pengajuan` enum('progress','approved') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `pencairan` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `lpj_kegiatan` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `lpj_keuangan` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `validasi_status` int(1) NOT NULL,
+  `nama_status` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Struktur dari tabel `relasi`
---
-
-CREATE TABLE `relasi` (
-  `id_relasi` int(11) NOT NULL,
-  `id_user` int(11) NOT NULL,
-  `id_struktur` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -195,9 +199,17 @@ CREATE TABLE `rkat` (
   `sumber_anggaran` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `rencara_anggaran` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `total_anggaran` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `sisa_anggaran` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` date NOT NULL,
   `updated_at` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data untuk tabel `rkat`
+--
+
+INSERT INTO `rkat` (`id_rkat`, `kode_rkat`, `id_user`, `sasaran_strategi`, `indikator_sasaran_strategi`, `nama_program`, `program_kerja`, `deskripsi`, `tujuan`, `mulai_program`, `selesai_program`, `tempat`, `sumber_anggaran`, `rencara_anggaran`, `total_anggaran`, `sisa_anggaran`, `created_at`, `updated_at`) VALUES
+(33, '2AA', 5, 'Tidak tahu HAHHA', 'Tidak tahu juga', 'Pembelian PC', 'Pembelian PC', 'tyt', 'Dukung penggunaan lab', '2021-05-19', '2021-05-19', 'Lab UTS', 'Dana Kampus', '1500000', '1500000', '0', '2021-05-19', '2021-05-19');
 
 -- --------------------------------------------------------
 
@@ -218,8 +230,8 @@ CREATE TABLE `struktur` (
 INSERT INTO `struktur` (`id_struktur`, `level`, `nama_struktur`) VALUES
 (1, 1, 'Rektor'),
 (2, 2, 'Warek'),
-(3, 3, 'Dir. Keuangan'),
-(4, 4, 'Warek III//Setniv'),
+(3, 3, 'Direktur Keuangan'),
+(4, 4, 'Sekniv'),
 (5, 4, 'Fakultas'),
 (9, 5, 'Prodi'),
 (10, 5, 'UPT');
@@ -241,11 +253,12 @@ CREATE TABLE `struktur_child1` (
 --
 
 INSERT INTO `struktur_child1` (`id_struktur_child1`, `id_struktur`, `nama_struktur_child1`) VALUES
-(5, 5, 'FTI'),
-(6, 5, 'FTB'),
+(5, 3, 'FTI'),
+(6, 3, 'FTB'),
 (7, 1, '0'),
 (8, 2, '0'),
-(9, 3, '0');
+(9, 3, '0'),
+(10, 4, '0');
 
 -- --------------------------------------------------------
 
@@ -269,7 +282,8 @@ INSERT INTO `struktur_child2` (`id_struktur_child2`, `id_struktur_child1`, `nama
 (28, 7, '0'),
 (29, 8, '0'),
 (30, 9, '0'),
-(31, 5, '0');
+(31, 5, '0'),
+(32, 10, '0');
 
 -- --------------------------------------------------------
 
@@ -287,6 +301,7 @@ CREATE TABLE `user` (
   `email` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `nomor_wa` varchar(15) COLLATE utf8mb4_unicode_ci NOT NULL,
   `bank` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `atn` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `no_rek` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL
@@ -296,12 +311,13 @@ CREATE TABLE `user` (
 -- Dumping data untuk tabel `user`
 --
 
-INSERT INTO `user` (`id_user`, `fullname`, `password`, `id_struktur`, `id_struktur_child1`, `id_struktur_child2`, `email`, `nomor_wa`, `bank`, `no_rek`, `created_at`, `updated_at`) VALUES
-(4, 'fakultas', '$2y$10$GCyWsVdzvohQqtFhmoj51.IjKpOFJN3G3pucYXKsmRYDZCN62E0V2', 3, 5, 31, 'fakultas@gmail.com', '980', 'Bank BNI', '8789789', '2021-03-28 17:49:34', '2021-04-04 18:08:12'),
-(5, 'prodi', '$2y$10$GCyWsVdzvohQqtFhmoj51.IjKpOFJN3G3pucYXKsmRYDZCN62E0V2', 3, 5, 25, 'prodi@gmail.com', '980', 'Bank BNI', '8789789', '2021-03-28 17:49:34', '2021-04-04 18:08:12'),
-(7, 'dir keuangan', '$2y$10$GCyWsVdzvohQqtFhmoj51.IjKpOFJN3G3pucYXKsmRYDZCN62E0V2', 3, 9, 30, 'keuangan@gmail.com', '980', 'Bank BNI', '8789789', '2021-03-28 17:49:34', '2021-04-04 18:08:12'),
-(8, 'warek', '$2y$10$GCyWsVdzvohQqtFhmoj51.IjKpOFJN3G3pucYXKsmRYDZCN62E0V2', 2, 8, 29, 'warek@gmail.com', '980', 'Bank BNI', '8789789', '2021-03-28 17:49:34', '2021-04-04 18:08:12'),
-(9, 'rektor', '$2y$10$GCyWsVdzvohQqtFhmoj51.IjKpOFJN3G3pucYXKsmRYDZCN62E0V2', 1, 7, 28, 'rektor@gmail.com', '980', 'Bank BNI', '8789789', '2021-03-28 17:49:34', '2021-04-04 18:08:12');
+INSERT INTO `user` (`id_user`, `fullname`, `password`, `id_struktur`, `id_struktur_child1`, `id_struktur_child2`, `email`, `nomor_wa`, `bank`, `atn`, `no_rek`, `created_at`, `updated_at`) VALUES
+(4, 'fakultas', '$2y$10$GCyWsVdzvohQqtFhmoj51.IjKpOFJN3G3pucYXKsmRYDZCN62E0V2', 3, 5, 31, 'fakultas@gmail.com', '980', 'Bank BNI', '', '8789789', '2021-03-28 17:49:34', '2021-04-04 18:08:12'),
+(5, 'prodi', '$2y$10$GCyWsVdzvohQqtFhmoj51.IjKpOFJN3G3pucYXKsmRYDZCN62E0V2', 3, 5, 25, 'prodi@gmail.com', '980', 'Bank BNI', 'wawan', '8789789', '2021-03-28 17:49:34', '2021-05-19 16:31:15'),
+(7, 'dir keuangan', '$2y$10$GCyWsVdzvohQqtFhmoj51.IjKpOFJN3G3pucYXKsmRYDZCN62E0V2', 3, 9, 30, 'keuangan@gmail.com', '980', 'Bank BNI', '', '8789789', '2021-03-28 17:49:34', '2021-04-04 18:08:12'),
+(8, 'warek', '$2y$10$GCyWsVdzvohQqtFhmoj51.IjKpOFJN3G3pucYXKsmRYDZCN62E0V2', 2, 8, 29, 'warek@gmail.com', '980', 'Bank BNI', '', '8789789', '2021-03-28 17:49:34', '2021-04-04 18:08:12'),
+(9, 'rektor', '$2y$10$GCyWsVdzvohQqtFhmoj51.IjKpOFJN3G3pucYXKsmRYDZCN62E0V2', 1, 7, 28, 'rektor@gmail.com', '980', 'Bank BNI', 'Admin', '8789789', '2021-03-28 17:49:34', '2021-05-19 01:57:25'),
+(10, 'sekniv', '$2y$10$GCyWsVdzvohQqtFhmoj51.IjKpOFJN3G3pucYXKsmRYDZCN62E0V2', 4, 10, 32, 'sekniv@gmail.com', '980', 'Bank BNI', 'sekniv', '8789789', '2021-05-02 10:46:00', '2021-05-02 10:46:00');
 
 -- --------------------------------------------------------
 
@@ -313,7 +329,7 @@ CREATE TABLE `validasi` (
   `id_validasi` int(11) NOT NULL,
   `id_pengajuan_history` int(11) NOT NULL,
   `id_struktur` int(11) NOT NULL,
-  `status_validasi` tinyint(5) NOT NULL,
+  `status_validasi` int(5) NOT NULL,
   `message` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL
@@ -368,12 +384,6 @@ ALTER TABLE `pengajuan_history`
   ADD KEY `id_iku_parent` (`id_iku_parent`),
   ADD KEY `id_iku_child1` (`id_iku_child1`),
   ADD KEY `id_iku_child2` (`id_iku_child2`);
-
---
--- Indeks untuk tabel `relasi`
---
-ALTER TABLE `relasi`
-  ADD PRIMARY KEY (`id_relasi`);
 
 --
 -- Indeks untuk tabel `rkat`
@@ -451,25 +461,19 @@ ALTER TABLE `migrations`
 -- AUTO_INCREMENT untuk tabel `pengajuan`
 --
 ALTER TABLE `pengajuan`
-  MODIFY `id_pengajuan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=127;
+  MODIFY `id_pengajuan` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT untuk tabel `pengajuan_history`
 --
 ALTER TABLE `pengajuan_history`
-  MODIFY `id_pengajuan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
-
---
--- AUTO_INCREMENT untuk tabel `relasi`
---
-ALTER TABLE `relasi`
-  MODIFY `id_relasi` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_pengajuan` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT untuk tabel `rkat`
 --
 ALTER TABLE `rkat`
-  MODIFY `id_rkat` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id_rkat` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- AUTO_INCREMENT untuk tabel `struktur`
@@ -481,25 +485,25 @@ ALTER TABLE `struktur`
 -- AUTO_INCREMENT untuk tabel `struktur_child1`
 --
 ALTER TABLE `struktur_child1`
-  MODIFY `id_struktur_child1` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id_struktur_child1` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT untuk tabel `struktur_child2`
 --
 ALTER TABLE `struktur_child2`
-  MODIFY `id_struktur_child2` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `id_struktur_child2` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT untuk tabel `user`
 --
 ALTER TABLE `user`
-  MODIFY `id_user` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id_user` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT untuk tabel `validasi`
 --
 ALTER TABLE `validasi`
-  MODIFY `id_validasi` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id_validasi` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)

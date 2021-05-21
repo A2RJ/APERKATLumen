@@ -32,7 +32,9 @@ class pengajuanModel extends Model
         "rab",
         "pencairan",
         "lpj_kegiatan",
-        "lpj_keuangan"
+        "lpj_keuangan",
+        "validasi_status",
+        "nama_status"
     ];
 
     /**
