@@ -263,6 +263,8 @@ class PengajuanController extends Controller
         $pengajuan->nama_status = $nama_struktur;
         $pengajuan->save();
 
+        $this->sendMail();
+
         return true;
     }
 
@@ -323,13 +325,50 @@ class PengajuanController extends Controller
         return $data ? $data->status_validasi : $data;
     }
 
+    public function getID($a, $b, $c)
+    {
+        $data =  UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+            ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+            ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+            ->where('struktur.nama_struktur', $a)
+            ->where("struktur_child1.nama_struktur_child1", $b)
+            ->where("struktur_child2.nama_struktur_child2", $c)
+            ->select('user.id_user')
+            ->first();
+        return $data->id_user;
+    }
+
+    public function getEmail($params)
+    {
+        $data =  UserModel::find($params);
+        return $data ? $data['email'] : null;
+    }
+
+    public function sendMail()
+    {
+        $data = $this->status(1);
+        $data = $data->original['data'];
+
+        $datab = array('name' => 'APERKAT - Universitas Teknologi Sumbawa');
+
+        for ($i = 0; $i < count((array)$data); $i++) {
+            $models = $this->getEmail($data[$i]['id_user']);
+            if ($models) {
+                Mail::send('mail', $datab, function ($message) use ($models) {
+                    $message->to($models, 'ardiansyahputra')->subject('coba send email');
+                    $message->from('gamesonly.a2rj@gmail.com', 'ardiansyah');
+                });
+            }
+        }
+    }
+
     public function status($params)
     {
         $pengajuan = pengajuanModel::join('user', 'pengajuan.id_user', 'user.id_user')
             ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
             ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
             ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-            ->select('pengajuan.id_pengajuan', 'user.id_struktur', 'user.id_struktur_child1', 'user.id_struktur_child2', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
+            ->select('pengajuan.id_pengajuan', 'user.id_struktur', 'user.email', 'user.id_struktur_child1', 'user.id_struktur_child2', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
             ->where('pengajuan.id_pengajuan', $params)
             ->first();
 
@@ -488,19 +527,6 @@ class PengajuanController extends Controller
         ]);
     }
 
-    public function getID($a, $b, $c)
-    {
-        $data =  UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
-            ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
-            ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-            ->where('struktur.nama_struktur', $a)
-            ->where("struktur_child1.nama_struktur_child1", $b)
-            ->where("struktur_child2.nama_struktur_child2", $c)
-            ->select('user.id_user')
-            ->first();
-        return $data->id_user;
-    }
-
     /**
      * Get submission bawahan by id user login
      */
@@ -549,8 +575,8 @@ class PengajuanController extends Controller
                     ->where('user.id_struktur_child1', '!=', 9)
                     ->select('user.id_user', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'rkat.created_at')
                     ->get();
-                } else {
-                    $data = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
+            } else {
+                $data = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
                     ->join('rkat', 'pengajuan.kode_rkat', 'rkat.kode_rkat')
                     ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                     ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
@@ -579,39 +605,5 @@ class PengajuanController extends Controller
 
         // $pdf = PDF::loadView('pengajuan', $data);
         // return $pdf->download('pengajuan-' . date("Y-m-d") . '.pdf');
-    }
-
-    public function sendMail()
-    {
-        // $loop = $this.status('1'); // id_pengajuan
-        $loop = [
-            'email' => 'xcz.ardiansyahputra2468@gmail.com',
-            'nama_struktur' => 'Rektor',
-            'subject' => 'APA'
-        ];
-
-        $from = [
-            'email' => 'gamesonly.a2rj@gmail.com',
-            'nama' => 'Universitas Teknologi Sumbawa'
-        ];
-
-        foreach ($loop as $to) {
-            $data = array('name' => 'APERKAT - Universitas Teknologi Sumbawa');
-            Mail::send('mail', $data, function ($message) use ($to, $from) {
-                $message->to($to['email'], $to['nama_struktur'])->subject($to['subject']);
-                $message->from($from['email'], $from['nama']);
-            });
-        }
-
-        echo 'Email Sent. Check your inbox.';
-
-        // $emails = ['myoneemail@esomething.com', 'myother@esomething.com','myother2@esomething.com'];
-
-        // Mail::send('emails.welcome', [], function($message) use ($emails)
-        // {    
-        //     $message->to($emails)->subject('This is test e-mail');    
-        // });
-        // var_dump( Mail:: failures());
-        // exit;
     }
 }

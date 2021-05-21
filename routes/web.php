@@ -37,6 +37,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
     $router->group(['prefix' => 'pengajuan'], function () use ($router) {
         $router->get('/', 'PengajuanController@index');
+        $router->get('/sendMail', 'PengajuanController@sendMail');
         $router->get('/{params}', 'PengajuanController@show');
         $router->get('/byUser/{params}', 'PengajuanController@byUser');
         $router->get('/status/{params}', 'PengajuanController@status');
