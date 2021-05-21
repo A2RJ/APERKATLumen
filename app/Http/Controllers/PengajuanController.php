@@ -302,7 +302,7 @@ class PengajuanController extends Controller
                 ->where('validasi.status_validasi', '3')
                 ->first();
         }
-        
+
         return $data ? $data->status_validasi : false;
     }
 
@@ -396,7 +396,7 @@ class PengajuanController extends Controller
                     "id_user" => $this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, '0'),
                     "id_struktur" => $pengajuan->id_struktur_child1,
                     "nama_struktur" => $pengajuan->nama_struktur_child1,
-                    "status" => $this->statusNull($pengajuan->id_struktur, $pengajuan->id_pengajuan, 1)
+                    "status" => $this->statusNull($pengajuan->id_struktur_child1, $pengajuan->id_pengajuan, 1)
                 ],
                 [
                     "id_user" => $struktur[1]->id_user,
@@ -529,6 +529,7 @@ class PengajuanController extends Controller
                 ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                ->where('user.id_struktur', '!=', 4)
                 ->select('user.id_user', 'pengajuan.id_pengajuan', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'rkat.created_at')
                 ->get();
         } elseif ($userStruktur->id_struktur == 3) {
@@ -541,10 +542,11 @@ class PengajuanController extends Controller
                     ->where('user.id_struktur', '!=', 1)
                     ->where('user.id_struktur', '!=', 2)
                     ->where('user.id_struktur', $userStruktur->id_struktur)
+                    ->where('user.id_struktur_child1', '!=', 9)
                     ->select('user.id_user', 'pengajuan.id_pengajuan', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'rkat.created_at')
                     ->get();
-            } else {
-                $data = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
+                } else {
+                    $data = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
                     ->join('rkat', 'pengajuan.kode_rkat', 'rkat.kode_rkat')
                     ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                     ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
@@ -553,6 +555,8 @@ class PengajuanController extends Controller
                     ->where('user.id_struktur', '!=', 2)
                     ->where('user.id_struktur', $userStruktur->id_struktur)
                     ->where('user.id_struktur_child1', $userStruktur->id_struktur_child1)
+                    ->where("struktur_child1.nama_struktur_child1", '!=', "0")
+                    ->where("struktur_child2.nama_struktur_child2", '!=', "0")
                     ->select('user.id_user', 'pengajuan.id_pengajuan', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'rkat.created_at')
                     ->get();
             }
