@@ -131,12 +131,7 @@ class PengajuanController extends Controller
         $this->autoProccess($request, $params);
 
         $data = pengajuanModel::find($params);
-        // $r = $data;
         $data ? $data->update($request->all()) : false;
-
-        // $rkat = RKATModel::where('kode_rkat', $request->kode_rkat)->first();
-        // $rkat->sisa_anggaran = (intval($rkat->total_anggaran) + intval($r->biaya_program)) - intval($request->biaya_program);
-        // $rkat->save();
 
         return response()->json([
             'data' => $data ? "Data was updated" : "Failed to update data not found"
@@ -266,6 +261,11 @@ class PengajuanController extends Controller
         $pengajuan->nama_status = $nama_struktur;
         $pengajuan->save();
 
+        if ($request->status == 3 && $request->message == "Sudah dilakukan pencairan") {
+            $rkat = RKATModel::where('kode_rkat', $request->kode_rkat)->first();
+            $rkat->sisa_anggaran = intval($rkat->sisa_anggaran) + intval($pengajuan->biaya_program);
+            $rkat->save();
+        }
         // $this->sendMail();
 
         return true;

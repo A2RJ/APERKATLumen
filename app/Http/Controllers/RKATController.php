@@ -122,10 +122,11 @@ class RKATController extends Controller
         ]);
     }
 
-    public function kodeRKAT()
+    public function kodeRKAT($params)
     {
         return Response()->json([
-            'data' => RKATModel::select('rkat.kode_rkat as value', 'rkat.kode_rkat as text')
+            'data' => RKATModel::where('id_user', $params)
+            ->select('rkat.kode_rkat as value', 'rkat.kode_rkat as text')
             ->get()
         ]);
     }
