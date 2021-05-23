@@ -29,10 +29,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         "id_struktur",
         "id_struktur_child1",
         "id_struktur_child2",
-        "nomor_wa",
-        "bank",
-        "atn",
-        "no_rek"
+        "nomor_wa"
     ];
 
     /**

@@ -52,6 +52,9 @@ class PengajuanController extends Controller
             "id_iku_child1" => "required",
             "id_iku_child2" => "required",
             "biaya_program" => "required",
+            "bank" => "required",
+            "atn" => "required",
+            "no_rek" => "required|numeric",
             "rab" => "nullable",
             "status_pengajuan" => "required"
         ]);
@@ -263,7 +266,7 @@ class PengajuanController extends Controller
         $pengajuan->nama_status = $nama_struktur;
         $pengajuan->save();
 
-        $this->sendMail();
+        // $this->sendMail();
 
         return true;
     }

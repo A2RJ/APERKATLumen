@@ -24,7 +24,7 @@ class UserController extends Controller
             'data' => UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                ->select('user.id_user', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'user.created_at')
+                ->select('user.id_user', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'user.created_at')
                 ->get()
         ]);
     }
@@ -48,7 +48,15 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $this->validation($request);
+        $this->validate($request, [
+            "fullname" => "required",
+            "email" => "required|email",
+            "password" => "required|min:8",
+            "id_struktur" => "required",
+            "id_struktur_child1" => "nullable",
+            "id_struktur_child2" => "nullable",
+            "nomor_wa" => "required|numeric",
+        ]);
 
         $data = UserModel::create($request->all());
         $data->password = Hash::make($request->input('password'));
@@ -179,25 +187,6 @@ class UserController extends Controller
 
         return response()->json([
             'data' => $data ? 'Success' : 'Failed'
-        ]);
-    }
-
-    public function resetEmailURL(Request $request)
-    {
-    }
-
-    public function validation($request)
-    {
-        $this->validate($request, [
-            "fullname" => "required",
-            "email" => "required|email",
-            "password" => "required|min:8",
-            "id_struktur" => "required",
-            "id_struktur_child1" => "nullable",
-            "id_struktur_child2" => "nullable",
-            "nomor_wa" => "required|numeric",
-            "bank" => "required",
-            "no_rek" => "required|numeric"
         ]);
     }
 
