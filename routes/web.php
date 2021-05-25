@@ -43,6 +43,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/status/{params}', 'PengajuanController@status');
         $router->get('/history/{params}', 'PengajuanController@history');
         $router->get('/validasi/{params}', 'PengajuanController@validasi');
+        $router->get('/getGrafik/{params}', 'PengajuanController@getGrafik');
         $router->get('/pengajuanSubordinate/{params}', 'PengajuanController@pengajuanSubordinate');
         $router->post('/', 'PengajuanController@store');
         $router->post('/upload', 'PengajuanController@upload');
