@@ -606,12 +606,11 @@ class PengajuanController extends Controller
             'data' => [
                 'rkat' => RKATModel::where('id_user', $params)->get(),
                 'total_rkat' => RKATModel::where('id_user', $params)->count(),
+                'total_rkat_diterima' => RKATModel::where('id_user', $params)->count('sisa_anggaran'),
+                'total_anggaran_rkat' => RKATModel::where('id_user', $params)->count('total_anggaran'),
+                'pengajuan' => pengajuanModel::where('id_user', $params)->orderBy('status_pengajuan', 'ASC')->get(),
                 'pengajuan_diterima' => pengajuanModel::where('id_user', $params)->where('status_pengajuan', 'approved')->count(),
                 'pengajuan_progress' => pengajuanModel::where('id_user', $params)->where('status_pengajuan', 'progress')->count(),
-                'total_rkat' => RKATModel::where('id_user', $params)->count(),
-                'total_anggaran_rkat' => RKATModel::where('id_user', $params)->count('total_anggaran'),
-                'total_rkat_diterima' => RKATModel::where('id_user', $params)->count('sisa_anggaran'),
-                'pengajuan' => pengajuanModel::where('id_user', $params)->orderBy('status_pengajuan', 'ASC')->get(),
             ]
         ]);
     }
