@@ -110,7 +110,7 @@ class PengajuanController extends Controller
      */
     public function show($params)
     {
-        $data = pengajuanModel::join('rkat', 'pengajuan.kode_rkat', '=', 'rkat.kode_rkat')
+        $data = pengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.kode_rkat')
             ->select("pengajuan.*")
             ->find($params);
 
@@ -602,15 +602,34 @@ class PengajuanController extends Controller
 
     public function getGrafik($params)
     {
+        $rkat = RKATModel::where('id_user', $params);
         return response()->json([
             'data' => [
-                'rkat' => RKATModel::where('id_user', $params)->get(),
-                'total_rkat' => RKATModel::where('id_user', $params)->count(),
-                'total_rkat_diterima' => RKATModel::where('id_user', $params)->count('sisa_anggaran'),
-                'total_anggaran_rkat' => RKATModel::where('id_user', $params)->count('total_anggaran'),
-                'pengajuan' => pengajuanModel::where('id_user', $params)->orderBy('status_pengajuan', 'ASC')->get(),
-                'pengajuan_diterima' => pengajuanModel::where('id_user', $params)->where('status_pengajuan', 'approved')->count(),
-                'pengajuan_progress' => pengajuanModel::where('id_user', $params)->where('status_pengajuan', 'progress')->count(),
+                'total_rkat' => $rkat->count(),
+                'total_rkat_diterima' => $rkat->sum('sisa_anggaran'),
+                'total_anggaran_rkat' => $rkat->sum('total_anggaran'),
+                'pengajuan_diterima' => pengajuanModel::where('id_user', $params)
+                    ->where('status_pengajuan', 'approved')->count(),
+
+                'pengajuan_progress' => pengajuanModel::where('id_user', $params)
+                    ->where('status_pengajuan', 'progress')->count(),
+
+                'rkat' => RKATModel::join('user', 'rkat.id_user', 'user.id_user')
+                    ->select('rkat.*', "user.fullname")
+                    ->get(),
+
+                'pengajuan' => pengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.kode_rkat')
+                    ->join('user', 'pengajuan.id_user', 'user.id_user')
+                    ->where('user.id_user', $params)
+                    ->orderBy('pengajuan.kode_rkat', 'ASC')
+                    ->get(),
+
+                'user' => UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                    ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                    ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                    ->select('user.*', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
+                    ->where('user.id_user', $params)
+                    ->first()
             ]
         ]);
     }
