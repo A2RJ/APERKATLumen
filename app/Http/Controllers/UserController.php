@@ -58,9 +58,20 @@ class UserController extends Controller
             "nomor_wa" => "required|numeric",
         ]);
 
+
         $data = UserModel::create($request->all());
         $data->password = Hash::make($request->input('password'));
         $data->save();
+        if ($data->id_struktur_child1 == 0) {
+            $id = struktur_child1Model::where('id_struktur', $request->id_struktur)->where('nama_struktur_child1', '0')->select('id_struktur_child1')->first();
+            $data->id_struktur_child1 = $id['id_struktur_child1'];
+            $data->save();
+        }
+        if ($data->id_struktur_child2 == 0) {
+            $id = struktur_child2Model::where('id_struktur_child1', $request->id_struktur_child1)->where('nama_struktur_child2', '0')->select('id_struktur_child2')->first();
+            $data->id_struktur_child2 = $id['id_struktur_child2'];
+            $data->save();
+        }
 
         return response()->json([
             'data' => $data ? "Success data was added" : "Failed add data"
@@ -85,11 +96,11 @@ class UserController extends Controller
     public function datauser($params)
     {
         $userStruktur = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
-        ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
-        ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-        ->select('user.*', 'struktur.*', 'user.id_struktur_child1', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
-        ->where('user.id_user', $params)
-        ->first();
+            ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+            ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+            ->select('user.*', 'struktur.*', 'user.id_struktur_child1', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
+            ->where('user.id_user', $params)
+            ->first();
         if ($userStruktur->nama_struktur == true && $userStruktur->nama_struktur_child1 == '0' && $userStruktur->nama_struktur_child2 == '0') {
             $id_struktur = $userStruktur->id_struktur;
             $nama_struktur = $userStruktur->nama_struktur;
@@ -194,10 +205,10 @@ class UserController extends Controller
     {
         return Response()->json([
             'data' => strukturModel::where('id_struktur', 1)
-            ->orWhere('id_struktur', 2)
-            ->orWhere('id_struktur', 3)
-            ->orWhere('id_struktur', 4)
-            ->select('id_struktur as value', 'nama_struktur as text')->get()
+                ->orWhere('id_struktur', 2)
+                ->orWhere('id_struktur', 3)
+                ->orWhere('id_struktur', 4)
+                ->select('id_struktur as value', 'nama_struktur as text')->get()
         ]);
     }
 

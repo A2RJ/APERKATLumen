@@ -14,6 +14,7 @@ use App\Models\pengajuanModel;
 use App\Models\struktur_child1Model;
 use App\Models\struktur_child2Model;
 use App\Models\pengajuanHistoryModel;
+use Illuminate\Support\Facades\DB;
 
 class PengajuanController extends Controller
 {
@@ -25,7 +26,7 @@ class PengajuanController extends Controller
     public function index()
     {
         return Response()->json([
-            'data' => pengajuanModel::join('rkat', 'pengajuan.kode_rkat', '=', 'rkat.kode_rkat')
+            'data' => pengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.kode_rkat')
                 ->paginate(15)
         ]);
     }
@@ -148,10 +149,6 @@ class PengajuanController extends Controller
     {
         $data = pengajuanModel::find($params);
 
-        // $rkat = RKATModel::where('kode_rkat', $data->kode_rkat)->first();
-        // $rkat->sisa_anggaran = intval($rkat->total_anggaran) + intval($data->biaya_program);
-        // $rkat->save();
-
         $data ? $data->delete() : false;
         $pengajuan = pengajuanHistoryModel::find($params);
         $pengajuan ? $pengajuan->delete() : false;
@@ -187,7 +184,6 @@ class PengajuanController extends Controller
     public function approve(Request $request, $params)
     {
         $data = $this->autoProccess($request, $params);
-
         return response()->json([
             'data' => $data ? "Submission was approved" : "Failed, data not found"
         ]);
@@ -261,9 +257,9 @@ class PengajuanController extends Controller
         $pengajuan->nama_status = $nama_struktur;
         $pengajuan->save();
 
-        if ($request->status == 3 && $request->message == "Sudah dilakukan pencairan") {
+        if ($request->message == "Sudah dilakukan pencairan" && $request->status == 3) {
             $rkat = RKATModel::where('kode_rkat', $request->kode_rkat)->first();
-            $rkat->sisa_anggaran = intval($rkat->sisa_anggaran) + intval($pengajuan->biaya_program);
+            $rkat->sisa_anggaran = pengajuanModel::where('kode_rkat', $request->kode_rkat)->where('validasi_status', $request->status)->sum('biaya_program');
             $rkat->save();
         }
         // $this->sendMail();
@@ -599,14 +595,71 @@ class PengajuanController extends Controller
             "data" => $data
         ]);
     }
+    public function getSubordinatesGrafik($params)
+    {
+        $userStruktur = UserModel::where('id_user', $params)->first();
+
+        if ($userStruktur->id_struktur == 1) {
+            $data = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                ->where('user.id_struktur', '!=', 1)
+                ->select('user.id_user', 'user.fullname', 'struktur_child1.nama_struktur_child1')
+                ->get();
+        } elseif ($userStruktur->id_struktur == 2) {
+            $data = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                ->where('user.id_struktur', '!=', 1)
+                ->where('user.id_struktur', '!=', 2)
+                ->select('user.id_user', 'user.fullname', 'struktur_child1.nama_struktur_child1')
+                ->get();
+        } elseif ($userStruktur->id_struktur == 4) {
+            $data = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                ->where('user.id_struktur', '!=', 4)
+                ->select('user.id_user', 'user.fullname', 'struktur_child1.nama_struktur_child1')
+                ->get();
+        } elseif ($userStruktur->id_struktur == 3) {
+            if ($userStruktur->id_struktur == 3 && $userStruktur->id_struktur_child1 == 9) {
+                $data = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                    ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                    ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                    ->where('user.id_struktur', '!=', 1)
+                    ->where('user.id_struktur', '!=', 2)
+                    ->where('user.id_struktur', $userStruktur->id_struktur)
+                    ->where('user.id_struktur_child1', '!=', 9)
+                    ->select('user.id_user', 'user.fullname', 'struktur_child1.nama_struktur_child1')
+                    ->get();
+            } else {
+                $data = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                    ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                    ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                    ->where('user.id_struktur', '!=', 1)
+                    ->where('user.id_struktur', '!=', 2)
+                    ->where('user.id_struktur', $userStruktur->id_struktur)
+                    ->where('user.id_struktur_child1', $userStruktur->id_struktur_child1)
+                    ->where("struktur_child1.nama_struktur_child1", '!=', "0")
+                    ->where("struktur_child2.nama_struktur_child2", '!=', "0")
+                    ->select('user.id_user', 'user.fullname', 'struktur_child1.nama_struktur_child1')
+                    ->get();
+            }
+        }
+
+        return response()->json([
+            "data" => $data
+        ]);
+    }
 
     public function getGrafik($params)
     {
         $rkat = RKATModel::where('id_user', $params);
+        $pengajuan = pengajuanModel::where('id_user', $params);
         return response()->json([
             'data' => [
                 'total_rkat' => $rkat->count(),
-                'total_rkat_diterima' => $rkat->sum('sisa_anggaran'),
+                'total_rkat_diterima' => $pengajuan->sum('biaya_program'),
                 'total_anggaran_rkat' => $rkat->sum('total_anggaran'),
                 'pengajuan_diterima' => pengajuanModel::where('id_user', $params)
                     ->where('status_pengajuan', 'approved')->count(),
@@ -616,6 +669,7 @@ class PengajuanController extends Controller
 
                 'rkat' => RKATModel::join('user', 'rkat.id_user', 'user.id_user')
                     ->select('rkat.*', "user.fullname")
+                    ->where('user.id_user', $params)
                     ->get(),
 
                 'pengajuan' => pengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.kode_rkat')
@@ -627,8 +681,9 @@ class PengajuanController extends Controller
                 'user' => UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                     ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                     ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                    ->select('user.*', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
                     ->where('user.id_user', $params)
+                    ->where('user.id_user', $params)
+                    ->select('user.*', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
                     ->first()
             ]
         ]);
