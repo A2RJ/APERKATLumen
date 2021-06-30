@@ -39,6 +39,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/', 'PengajuanController@index');
         $router->get('/sendMail', 'PengajuanController@sendMail');
         $router->get('/{params}', 'PengajuanController@show');
+        $router->get('/delete/{params}', 'PengajuanController@hapus');
         $router->get('/byUser/{params}', 'PengajuanController@byUser');
         $router->get('/status/{params}', 'PengajuanController@status');
         $router->get('/history/{params}', 'PengajuanController@history');
@@ -57,11 +58,11 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->group(['prefix' => 'rkat'], function () use ($router) {
         $router->get('/', 'RKATController@index');
         $router->get('/{params}', 'RKATController@show');
+        $router->get('/delete/{params}', 'RKATController@hapus');
         $router->get('/kodeRKAT/{params}', 'RKATController@kodeRKAT');
         $router->get('/byKode/{params}', 'RKATController@byKode');
         $router->post('/', 'RKATController@store');
         $router->post('/{params}', 'RKATController@update');
-        $router->delete('/{params}', 'RKATController@destroy');
     });
 
     $router->group(['prefix' => 'struktur'], function () use ($router) {
@@ -77,6 +78,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/rkatUser', 'UserController@rkatUser');
         $router->get('/struktur', 'UserController@struktur');
         $router->get('/{params}', 'UserController@show');
+        $router->get('/delete/{params}', 'UserController@hapus');
         $router->get('/datauser/{params}', 'UserController@datauser');
         $router->get('/sub_struktur/{params}', 'UserController@sub_struktur');
         $router->get('/sub_sub_struktur/{params}', 'UserController@sub_sub_struktur');

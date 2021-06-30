@@ -145,6 +145,12 @@ class PengajuanController extends Controller
      * @param  int  $params
      * @return \Illuminate\Http\Response
      */
+    public function hapus($params)
+    {
+        $data = pengajuanModel::find($params);
+
+        $data ? $data->delete() : false;
+    }
     public function destroy($params)
     {
         $data = pengajuanModel::find($params);

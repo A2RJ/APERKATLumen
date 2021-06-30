@@ -113,10 +113,17 @@ class RKATController extends Controller
     public function destroy($params)
     {
         $data = RKATModel::find($params);
-        if ($data) {
-            $data->delete();
-        }
-
+        if ($data) $data->delete();
+        
+        return response()->json([
+            'data' => $data ? "Success delete data" : "Failed, data not found"
+        ]);
+    }
+    public function hapus($params)
+    {
+        $data = RKATModel::find($params);
+        if ($data) $data->delete();
+        
         return response()->json([
             'data' => $data ? "Success delete data" : "Failed, data not found"
         ]);
