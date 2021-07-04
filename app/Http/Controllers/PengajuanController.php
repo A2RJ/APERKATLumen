@@ -289,45 +289,17 @@ class PengajuanController extends Controller
         return $data ? $data->status_validasi : null;
     }
 
-    public function statusNull($id_struktur, $id_pengajuan, $nomor = null)
-    {
-        if ($nomor == 1) {
-            $data = validasiModel::join('pengajuan_history', 'validasi.id_pengajuan_history', 'pengajuan_history.id_pengajuan')
-                ->join('pengajuan', 'pengajuan_history.id', 'pengajuan.id_pengajuan')
-                ->where('validasi.id_struktur', $id_struktur)
-                ->where('pengajuan.id_pengajuan', $id_pengajuan)
-                ->where('validasi.status_validasi', '1')
-                ->first();
-        } elseif ($nomor == 2) {
-            $data = validasiModel::join('pengajuan_history', 'validasi.id_pengajuan_history', 'pengajuan_history.id_pengajuan')
-                ->join('pengajuan', 'pengajuan_history.id', 'pengajuan.id_pengajuan')
-                ->where('validasi.id_struktur', $id_struktur)
-                ->where('pengajuan.id_pengajuan', $id_pengajuan)
-                ->where('validasi.status_validasi', '2')
-                ->first();
-        } elseif ($nomor == 3) {
-            $data = validasiModel::join('pengajuan_history', 'validasi.id_pengajuan_history', 'pengajuan_history.id_pengajuan')
-                ->join('pengajuan', 'pengajuan_history.id', 'pengajuan.id_pengajuan')
-                ->where('validasi.id_struktur', $id_struktur)
-                ->where('pengajuan.id_pengajuan', $id_pengajuan)
-                ->where('validasi.status_validasi', '3')
-                ->first();
-        }
-
-        return $data ? $data->status_validasi : false;
-    }
-
-    public function pencairan($id_struktur, $id_pengajuan)
+    public function statusNull($id_struktur, $id_pengajuan, $nomor)
     {
         $data = validasiModel::join('pengajuan_history', 'validasi.id_pengajuan_history', 'pengajuan_history.id_pengajuan')
             ->join('pengajuan', 'pengajuan_history.id', 'pengajuan.id_pengajuan')
             ->where('validasi.id_struktur', $id_struktur)
             ->where('pengajuan.id_pengajuan', $id_pengajuan)
-            ->where('validasi.status_validasi', '3')
+            ->where('validasi.status_validasi', $nomor)
             ->select('validasi.status_validasi')
             ->first();
 
-        return $data ? $data->status_validasi : $data;
+        return $data ? $data->status_validasi : false;
     }
 
     public function getID($a, $b, $c)
@@ -367,168 +339,146 @@ class PengajuanController extends Controller
         }
     }
 
+    public function getStruktur($params)
+    {
+        return UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+            ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+            ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+            ->where('struktur.level', $params)
+            ->where("struktur_child1.nama_struktur_child1", "0")
+            ->where("struktur_child2.nama_struktur_child2", "0")
+            ->first();
+    }
+
     public function status($params)
     {
         $pengajuan = pengajuanModel::join('user', 'pengajuan.id_user', 'user.id_user')
             ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
             ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
             ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-            ->select('pengajuan.id_pengajuan', 'user.id_struktur', 'user.email', 'user.id_struktur_child1', 'user.id_struktur_child2', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
             ->where('pengajuan.id_pengajuan', $params)
+            ->select('pengajuan.id_pengajuan', 'user.id_struktur', 'user.email', 'user.id_struktur_child1', 'user.id_struktur_child2', 'struktur.nama_struktur', 'struktur.level', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
             ->first();
 
-        $struktur = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+        $status = [];
+        if ($pengajuan->level == "1" || $pengajuan->level == "2") {
+            array_push($status, [
+                "id_user" => $this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, $pengajuan->nama_struktur_child2),
+                "id_struktur" => $pengajuan->id_struktur,
+                "nama_struktur" => $pengajuan->nama_struktur,
+                "status" => $this->statusNull($pengajuan->id_struktur, $pengajuan->id_pengajuan, 1)
+            ]);
+        } elseif ($pengajuan->level == "3" || $pengajuan->level == "4") {
+            if ($pengajuan->nama_struktur_child1 == "0") {
+                array_push(
+                    $status,
+                    [
+                        "id_user" => $this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, $pengajuan->nama_struktur_child2),
+                        "id_struktur" => $pengajuan->id_struktur,
+                        "nama_struktur" => $pengajuan->nama_struktur,
+                        "status" => $this->statusNull($pengajuan->id_struktur, $pengajuan->id_pengajuan, 1)
+                    ]
+                );
+            } else {
+                array_push(
+                    $status,
+                    [
+                        "id_user" => $this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, '0'),
+                        "id_struktur" => $pengajuan->id_struktur_child1,
+                        "nama_struktur" => $pengajuan->nama_struktur_child1,
+                        "status" => $this->statusNull($pengajuan->id_struktur_child1, $pengajuan->id_pengajuan, 2)
+                    ],
+                    [
+                        "id_user" => $this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, $pengajuan->nama_struktur_child2),
+                        "id_struktur" => $pengajuan->id_struktur,
+                        "nama_struktur" => $pengajuan->nama_struktur,
+                        "status" => $this->statusNull($pengajuan->id_struktur, $pengajuan->id_pengajuan, 1)
+                    ]
+                );
+            }
+        } elseif ($pengajuan->level == "5") {
+            if ($pengajuan->nama_struktur_child2 == "0") {
+                array_push(
+                    $status,
+                    [
+                        "id_user" => $this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, '0'),
+                        "id_struktur" => $pengajuan->id_struktur_child1,
+                        "nama_struktur" => $pengajuan->nama_struktur_child1,
+                        "status" => $this->statusNull($pengajuan->id_struktur_child1, $pengajuan->id_pengajuan, 2)
+                    ]
+                );
+            } else {
+                array_push(
+                    $status,
+                    [
+                        "id_user" => $this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, $pengajuan->nama_struktur_child2),
+                        "id_struktur" => $pengajuan->id_struktur_child2,
+                        "nama_struktur" => $pengajuan->nama_struktur_child2,
+                        "status" => $this->statusNull($pengajuan->id_struktur_child2, $pengajuan->id_pengajuan, 1)
+                    ],
+                    [
+                        "id_user" => $this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, '0'),
+                        "id_struktur" => $pengajuan->id_struktur_child1,
+                        "nama_struktur" => $pengajuan->nama_struktur_child1,
+                        "status" => $this->statusNull($pengajuan->id_struktur_child1, $pengajuan->id_pengajuan, 2)
+                    ]
+                );
+            }
+        }
+
+        // Untuk data yang double seperti Dir. keuangan maka ambil data pertama
+        //  dan kedua berdasarkan id_struktur dan status true
+        // 0 = tolak
+        // 1 = input/revisi
+        // 2 = terima
+        // 3 = upload bukti pencairan
+
+        $keuangan = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
             ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
             ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-            ->where('struktur.id_struktur', 1)
-            ->where("struktur_child1.nama_struktur_child1", "0")
-            ->where("struktur_child2.nama_struktur_child2", "0")
-            ->orWhere('struktur.id_struktur', 2)
-            ->where("struktur_child1.nama_struktur_child1", "0")
-            ->where("struktur_child2.nama_struktur_child2", "0")
-            ->orWhere('struktur.id_struktur', 3)
-            ->where("struktur_child1.nama_struktur_child1", "0")
-            ->where("struktur_child2.nama_struktur_child2", "0")
-            ->orWhere('struktur.id_struktur', 4)
-            ->where("struktur_child1.nama_struktur_child1", "0")
-            ->where("struktur_child2.nama_struktur_child2", "0")
-            ->orderBy('level', 'DESC')
-            ->get();
+            ->where('struktur_child1.child1_level', 1)
+            ->first();
 
-        // ambil data berdasarkan level users
-        // top level
-        if ($pengajuan->nama_struktur && $pengajuan->nama_struktur_child1 == "0" && $pengajuan->nama_struktur_child2 == "0") {
-            $data = [
-                [ // top level
-                    "id_user" => $this->getID($pengajuan->nama_struktur, '0', '0'),
-                    "id_struktur" => $pengajuan->id_struktur,
-                    "nama_struktur" => $pengajuan->nama_struktur,
-                    "status" => $this->statusNull($pengajuan->id_struktur, $pengajuan->id_pengajuan, 1)
-                ],
-                [
-                    "id_user" => $struktur[1]->id_user,
-                    "id_struktur" => $struktur[1]->id_struktur,
-                    "nama_struktur" => $struktur[1]->nama_struktur,
-                    "status" => $this->statusNull($struktur[1]->id_struktur, $pengajuan->id_pengajuan, 2)
-                ], // warek
-                [
-                    "id_user" => $struktur[2]->id_user,
-                    "id_struktur" => $struktur[2]->id_struktur,
-                    "nama_struktur" => $struktur[2]->nama_struktur,
-                    "status" => $this->statusNull($struktur[2]->id_struktur, $pengajuan->id_pengajuan, 2)
-                ], // rektor
-                [
-                    "id_user" => $struktur[3]->id_user,
-                    "id_struktur" => $struktur[3]->id_struktur,
-                    "nama_struktur" => $struktur[3]->nama_struktur,
-                    "status" => $this->statusNull($struktur[3]->id_struktur, $pengajuan->id_pengajuan, 2)
-                ], // keuangan / pencairan
-                [
-                    "id_user" => 9999,
-                    "id_struktur" => $struktur[1]->id_struktur,
-                    "nama_struktur" => $struktur[1]->nama_struktur,
-                    "status" => $this->statusNull($struktur[1]->id_struktur, $pengajuan->id_pengajuan, 3)
-                ], // sekniv
-                [
-                    "id_user" => $struktur[0]->id_user,
-                    "id_struktur" => $struktur[0]->id_struktur,
-                    "nama_struktur" => $struktur[0]->nama_struktur,
-                    "status" => $this->statusNull($struktur[0]->id_struktur, $pengajuan->id_pengajuan, 2)
-                ]
-            ];
-        }
-        // fakultas level
-        elseif ($pengajuan->nama_struktur && $pengajuan->nama_struktur_child1 !== "0" && $pengajuan->nama_struktur_child2 == "0") {
-            $data = [
-                [
-                    "id_user" => $this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, '0'),
-                    "id_struktur" => $pengajuan->id_struktur_child1,
-                    "nama_struktur" => $pengajuan->nama_struktur_child1,
-                    "status" => $this->statusNull($pengajuan->id_struktur_child1, $pengajuan->id_pengajuan, 1)
-                ],
-                [
-                    "id_user" => $struktur[1]->id_user,
-                    "id_struktur" => $struktur[1]->id_struktur,
-                    "nama_struktur" => $struktur[1]->nama_struktur,
-                    "status" => $this->statusNull($struktur[1]->id_struktur, $pengajuan->id_pengajuan, 2)
-                ], // warek
-                [
-                    "id_user" => $struktur[2]->id_user,
-                    "id_struktur" => $struktur[2]->id_struktur,
-                    "nama_struktur" => $struktur[2]->nama_struktur,
-                    "status" => $this->statusNull($struktur[2]->id_struktur, $pengajuan->id_pengajuan, 2)
-                ], // rektor
-                [
-                    "id_user" => $struktur[3]->id_user,
-                    "id_struktur" => $struktur[3]->id_struktur,
-                    "nama_struktur" => $struktur[3]->nama_struktur,
-                    "status" => $this->statusNull($struktur[3]->id_struktur, $pengajuan->id_pengajuan, 2)
-                ], // keuangan / pencairan
-                [
-                    "id_user" => 9999,
-                    "id_struktur" => $struktur[1]->id_struktur,
-                    "nama_struktur" => $struktur[1]->nama_struktur,
-                    "status" => $this->statusNull($struktur[1]->id_struktur, $pengajuan->id_pengajuan, 3)
-                ], // sekniv
-                [
-                    "id_user" => $struktur[0]->id_user,
-                    "id_struktur" => $struktur[0]->id_struktur,
-                    "nama_struktur" => $struktur[0]->nama_struktur,
-                    "status" => $this->statusNull($struktur[0]->id_struktur, $pengajuan->id_pengajuan, 2)
-                ]
-            ];
-        }
-        // prodi level
-        elseif ($pengajuan->nama_struktur && $pengajuan->nama_struktur_child1 !== "0" && $pengajuan->nama_struktur_child2 !== "0") {
+        $warek2 = $this->getStruktur(3);
+        $rektor = $this->getStruktur(2);
+        $sekniv = $this->getStruktur(1);
 
-            $data = [ // prodi
-                [
-                    "id_user" => $this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, $pengajuan->nama_struktur_child2),
-                    "id_struktur" => $pengajuan->id_struktur_child2,
-                    "nama_struktur" => $pengajuan->nama_struktur_child2,
-                    "status" => $this->statusNull($pengajuan->id_struktur_child2, $pengajuan->id_pengajuan, 1)
-                ], // fakultas
-                [
-                    "id_user" => $this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, '0'),
-                    "id_struktur" => $pengajuan->id_struktur_child1,
-                    "nama_struktur" => $pengajuan->nama_struktur_child1,
-                    "status" => $this->statusNull($pengajuan->id_struktur_child1, $pengajuan->id_pengajuan, 2)
-                ], // keuangan
-                [
-                    "id_user" => $struktur[1]->id_user,
-                    "id_struktur" => $struktur[1]->id_struktur,
-                    "nama_struktur" => $struktur[1]->nama_struktur,
-                    "status" => $this->statusNull($struktur[1]->id_struktur, $pengajuan->id_pengajuan, 2)
-                ], // warek
-                [
-                    "id_user" => $struktur[2]->id_user,
-                    "id_struktur" => $struktur[2]->id_struktur,
-                    "nama_struktur" => $struktur[2]->nama_struktur,
-                    "status" => $this->statusNull($struktur[2]->id_struktur, $pengajuan->id_pengajuan, 2)
-                ], // rektor
-                [
-                    "id_user" => $struktur[3]->id_user,
-                    "id_struktur" => $struktur[3]->id_struktur,
-                    "nama_struktur" => $struktur[3]->nama_struktur,
-                    "status" => $this->statusNull($struktur[3]->id_struktur, $pengajuan->id_pengajuan, 2)
-                ], // keuangan / pencairan
-                [
-                    "id_user" => 9999,
-                    "id_struktur" => $struktur[1]->id_struktur,
-                    "nama_struktur" => $struktur[1]->nama_struktur,
-                    "status" => $this->statusNull($struktur[1]->id_struktur, $pengajuan->id_pengajuan, 3)
-                ], // sekniv
-                [
-                    "id_user" => $struktur[0]->id_user,
-                    "id_struktur" => $struktur[0]->id_struktur,
-                    "nama_struktur" => $struktur[0]->nama_struktur,
-                    "status" => $this->statusNull($struktur[0]->id_struktur, $pengajuan->id_pengajuan, 2)
-                ]
-            ];
-        }
+        array_push(
+            $status,
+            [
+                "id_user" => $keuangan->id_user,
+                "id_struktur" => $keuangan->id_struktur,
+                "nama_struktur" => $keuangan->nama_struktur_child1,
+                "status" => $this->statusNull($keuangan->id_struktur, $pengajuan->id_pengajuan, 2)
+            ],
+            [
+                "id_user" => $warek2->id_user,
+                "id_struktur" => $warek2->id_struktur,
+                "nama_struktur" => $warek2->nama_struktur,
+                "status" => $this->statusNull($warek2->id_struktur, $pengajuan->id_pengajuan, 2)
+            ],
+            [
+                "id_user" => $rektor->id_user,
+                "id_struktur" => $rektor->id_struktur,
+                "nama_struktur" => $rektor->nama_struktur,
+                "status" => $this->statusNull($rektor->id_struktur, $pengajuan->id_pengajuan, 2)
+            ],
+            [
+                "id_user" => $keuangan->id_user,
+                "id_struktur" => $keuangan->id_struktur,
+                "nama_struktur" => $keuangan->nama_struktur_child1,
+                "status" => $this->statusNull($keuangan->id_struktur, $pengajuan->id_pengajuan, 3)
+            ],
+            [
+                "id_user" => $sekniv->id_user,
+                "id_struktur" => $sekniv->id_struktur,
+                "nama_struktur" => $sekniv->nama_struktur,
+                "status" => $this->statusNull($sekniv->id_struktur, $pengajuan->id_pengajuan, 2)
+            ]
+        );
 
         return response()->json([
-            "data" => $data
+            "data" => $status
         ]);
     }
 

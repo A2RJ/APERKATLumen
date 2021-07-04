@@ -42,6 +42,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/delete/{params}', 'PengajuanController@hapus');
         $router->get('/byUser/{params}', 'PengajuanController@byUser');
         $router->get('/status/{params}', 'PengajuanController@status');
+        $router->get('/revisiStatus/{params}', 'PengajuanController@revisiStatus');
         $router->get('/history/{params}', 'PengajuanController@history');
         $router->get('/validasi/{params}', 'PengajuanController@validasi');
         $router->get('/getGrafik/{params}', 'PengajuanController@getGrafik');
