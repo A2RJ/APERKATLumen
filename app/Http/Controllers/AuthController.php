@@ -78,37 +78,34 @@ class AuthController extends Controller
     public function me()
     {
         $login = auth()->user();
-        $userStruktur = UserModel::where('id_user', $login->id_user)->first();
-
-        if ($userStruktur->id_struktur == 1) {
-            $data = [
-                'level' => "rektor"
-            ];
-        } elseif ($userStruktur->id_struktur == 2) {
-            $data = [
-                'level' => "warek"
-            ];
-        } elseif ($userStruktur->id_struktur == 4) {
+        $userStruktur = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+            ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+            ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+            ->where('id_user', $login->id_user)
+            ->first();
+        if ($userStruktur->level == 1) {
             $data = [
                 'level' => "sekniv"
             ];
-        } else {
-            $data = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
-                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
-                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                ->select('user.id_struktur', 'user.id_struktur_child1', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
-                ->where('user.id_user', $login->id_user)
-                ->first();
-
-            if ($data->id_struktur == 3 && $data->id_struktur_child1 == 9) {
+        } else if ($userStruktur->level == 2) {
+            $data = [
+                'level' => "rektor"
+            ];
+        } else if ($userStruktur->level == 3 || $userStruktur->level == 4) {
+            if ($userStruktur->nama_struktur_child1 == "0" && $userStruktur->nama_struktur_child2 == '0' || $userStruktur->child1_level == "1") {
                 $data = [
-                    'level' => "dirKeuangan"
+                    'level' => 'warek'
                 ];
-            } else if ($data->nama_struktur_child1 == true && $data->nama_struktur_child2 == '0') {
+            }else if ($userStruktur->nama_struktur_child1 !== "0" && $userStruktur->nama_struktur_child2 == '0' || $userStruktur->child1_level !== "1") {
+                $data = [
+                    'level' => 'prodi'
+                ];
+            } 
+        } else if ($userStruktur->level == 5) {
+            if ($userStruktur->nama_struktur_child1 !== "0" && $userStruktur->nama_struktur_child2 == '0') {
                 $data = [
                     'level' => 'fakultas'
                 ];
-                // 'level' => $data->nama_struktur_child1 . $data->nama_struktur_child2
             } else {
                 $data = [
                     'level' => "prodi"
