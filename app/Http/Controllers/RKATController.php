@@ -133,6 +133,16 @@ class RKATController extends Controller
     {
         return Response()->json([
             'data' => RKATModel::where('id_user', $params)
+            ->orWhere('kode_rkat', $params)
+            ->select('rkat.kode_rkat as value', 'rkat.kode_rkat as text')
+            ->get()
+        ]);
+    }
+
+    public function kodeRKATByValue($params)
+    {
+        return Response()->json([
+            'data' => RKATModel::where('kode_rkat', $params)
             ->select('rkat.kode_rkat as value', 'rkat.kode_rkat as text')
             ->get()
         ]);

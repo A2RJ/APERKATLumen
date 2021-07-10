@@ -113,7 +113,7 @@ class AuthController extends Controller
             }
         }
 
-        return response()->json([$login, $data]);
+        return response()->json([$userStruktur, $data]);
     }
 
     /**

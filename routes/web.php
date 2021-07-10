@@ -61,6 +61,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/{params}', 'RKATController@show');
         $router->get('/delete/{params}', 'RKATController@hapus');
         $router->get('/kodeRKAT/{params}', 'RKATController@kodeRKAT');
+        $router->get('/kodeRKATByValue/{params}', 'RKATController@kodeRKATByValue');
         $router->get('/byKode/{params}', 'RKATController@byKode');
         $router->post('/', 'RKATController@store');
         $router->post('/{params}', 'RKATController@update');
