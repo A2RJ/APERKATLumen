@@ -511,7 +511,7 @@ class PengajuanController extends Controller
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                 ->where('struktur.level', '!=', $userStruktur->level)
                 ->where('user.id_user', '!=', $userStruktur->id_user)
-                ->select('user.id_user', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'rkat.created_at')
+                ->select('user.id_user', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'pengajuan.created_at')
                 ->get();
         } else if ($userStruktur->level == 2) {
             $data = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
@@ -521,7 +521,7 @@ class PengajuanController extends Controller
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                 ->where('struktur.level', '!=', 1)
                 ->where('user.id_user', '!=', $userStruktur->id_user)
-                ->select('user.id_user', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'rkat.created_at')
+                ->select('user.id_user', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'pengajuan.created_at')
                 ->get();
         } else if ($userStruktur->level == 3 || $userStruktur->level == 4) {
             if ($userStruktur->child1_level == "1" || $userStruktur->level == 3) {
@@ -531,7 +531,7 @@ class PengajuanController extends Controller
                     ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                     ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                     ->where('user.id_user', '!=', $userStruktur->id_user)
-                    ->select('user.id_user', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'rkat.created_at')
+                    ->select('user.id_user', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'pengajuan.created_at')
                     ->get();
             } else {
                 $data = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
@@ -541,7 +541,7 @@ class PengajuanController extends Controller
                     ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                     ->where('user.id_user', '!=', $userStruktur->id_user)
                     ->where('struktur.id_struktur', $userStruktur->id_struktur)
-                    ->select('user.id_user', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'rkat.created_at')
+                    ->select('user.id_user', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'pengajuan.created_at')
                     ->get();
             }
         } else if ($userStruktur->level == 5) {
@@ -553,7 +553,7 @@ class PengajuanController extends Controller
                 ->where('user.id_user', '!=', $userStruktur->id_user)
                 ->where('struktur.id_struktur', $userStruktur->id_struktur)
                 ->where('struktur_child1.id_struktur_child1', $userStruktur->id_struktur_child1)
-                ->select('user.id_user', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'rkat.created_at')
+                ->select('user.id_user', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur_child1.nama_struktur_child1', 'pengajuan.created_at')
                 ->get();
         }
 
@@ -570,7 +570,9 @@ class PengajuanController extends Controller
             ->first();
 
         if ($userStruktur->level == 1) {
-            $data = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+            $data = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
+                ->join('rkat', 'pengajuan.kode_rkat', 'rkat.kode_rkat')
+                ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                 ->where('struktur.level', '!=', $userStruktur->level)
@@ -578,7 +580,9 @@ class PengajuanController extends Controller
                 ->select('user.id_user', 'user.fullname', 'struktur_child1.nama_struktur_child1')
                 ->get();
         } else if ($userStruktur->level == 2) {
-            $data = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+            $data = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
+                ->join('rkat', 'pengajuan.kode_rkat', 'rkat.kode_rkat')
+                ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                 ->where('struktur.level', '!=', 1)
@@ -586,15 +590,19 @@ class PengajuanController extends Controller
                 ->select('user.id_user', 'user.fullname', 'struktur_child1.nama_struktur_child1')
                 ->get();
         } else if ($userStruktur->level == 3 || $userStruktur->level == 4) {
-            if ($userStruktur->child1_level == "1") {
-                $data = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+            if ($userStruktur->child1_level == "1" || $userStruktur->level == 3) {
+                $data = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
+                    ->join('rkat', 'pengajuan.kode_rkat', 'rkat.kode_rkat')
+                    ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                     ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                     ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                     ->where('user.id_user', '!=', $userStruktur->id_user)
                     ->select('user.id_user', 'user.fullname', 'struktur_child1.nama_struktur_child1')
                     ->get();
             } else {
-                $data = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                $data = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
+                    ->join('rkat', 'pengajuan.kode_rkat', 'rkat.kode_rkat')
+                    ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                     ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                     ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                     ->where('user.id_user', '!=', $userStruktur->id_user)
@@ -603,7 +611,9 @@ class PengajuanController extends Controller
                     ->get();
             }
         } else if ($userStruktur->level == 5) {
-            $data = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+            $data = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
+                ->join('rkat', 'pengajuan.kode_rkat', 'rkat.kode_rkat')
+                ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                 ->where('user.id_user', '!=', $userStruktur->id_user)
@@ -638,9 +648,9 @@ class PengajuanController extends Controller
                     ->where('user.id_user', $params)
                     ->get(),
 
-                'pengajuan' => pengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.kode_rkat')
-                    ->join('user', 'pengajuan.id_user', 'user.id_user')
+                'pengajuan' => pengajuanModel::join('user', 'pengajuan.id_user', 'user.id_user')
                     ->where('user.id_user', $params)
+                    ->select('user.fullname', 'pengajuan.id_pengajuan', 'pengajuan.kode_rkat', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'pengajuan.created_at')
                     ->orderBy('pengajuan.kode_rkat', 'ASC')
                     ->get(),
 
