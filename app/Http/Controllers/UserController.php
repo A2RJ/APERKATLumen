@@ -148,15 +148,16 @@ class UserController extends Controller
      * @param  int  $params
      * @return \Illuminate\Http\Response
      */
-    public function destroy($params)
+    public function destroy()
     {
-        $data = UserModel::find($params);
+        $data = UserModel::find();
         if ($data) $data->delete();
         
         return response()->json([
             'data' => $data ? "Success delete data" : "Failed, data not found"
         ]);
     }
+
     public function hapus($params)
     {
         $data = UserModel::find($params);

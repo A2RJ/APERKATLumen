@@ -38,6 +38,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->group(['prefix' => 'pengajuan'], function () use ($router) {
         $router->get('/', 'PengajuanController@index');
         $router->get('/sendMail', 'PengajuanController@sendMail');
+        $router->get('/destroy/{params}', 'PengajuanController@destroy');
         $router->get('/{params}', 'PengajuanController@show');
         $router->get('/delete/{params}', 'PengajuanController@hapus');
         $router->get('/byUser/{params}', 'PengajuanController@byUser');
@@ -53,11 +54,11 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->post('/approve/{params}', 'PengajuanController@approve');
         $router->post('/decline/{params}', 'PengajuanController@decline');
         $router->post('/{params}', 'PengajuanController@update');
-        $router->delete('/{params}', 'PengajuanController@destroy');
     });
 
     $router->group(['prefix' => 'rkat'], function () use ($router) {
         $router->get('/', 'RKATController@index');
+        $router->get('/destroy', 'RKATController@destroy');
         $router->get('/{params}', 'RKATController@show');
         $router->get('/delete/{params}', 'RKATController@hapus');
         $router->get('/kodeRKAT/{params}', 'RKATController@kodeRKAT');
@@ -77,6 +78,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
     $router->group(['prefix' => 'user'], function () use ($router) {
         $router->get('/', 'UserController@index');
+        $router->get('/destroy', 'UserController@destroy');
         $router->get('/rkatUser', 'UserController@rkatUser');
         $router->get('/struktur', 'UserController@struktur');
         $router->get('/{params}', 'UserController@show');
@@ -86,7 +88,6 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/sub_sub_struktur/{params}', 'UserController@sub_sub_struktur');
         $router->post('/', 'UserController@store');
         $router->post('/{params}', 'UserController@update');
-        $router->delete('/{params}', 'UserController@destroy');
     });
 
     $router->group(['prefix' => 'iku'], function () use ($router) {

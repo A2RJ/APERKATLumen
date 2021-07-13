@@ -5,14 +5,10 @@ namespace App\Http\Controllers;
 use PDF;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
-use App\Models\File;
 use App\Models\UserModel;
 use App\Models\RKATModel;
-use App\Models\strukturModel;
 use App\Models\validasiModel;
 use App\Models\pengajuanModel;
-use App\Models\struktur_child1Model;
-use App\Models\struktur_child2Model;
 use App\Models\pengajuanHistoryModel;
 use Illuminate\Support\Facades\DB;
 
@@ -133,7 +129,7 @@ class PengajuanController extends Controller
     {
         $data = pengajuanModel::find($params);
         $data ? $data->update($request->all()) : false;
-        
+
         $this->autoProccess($request, $params);
 
         return response()->json([
@@ -150,41 +146,37 @@ class PengajuanController extends Controller
     public function hapus($params)
     {
         $data = pengajuanModel::find($params);
-        $data ? $data->delete() : false;
-
-        $pengajuan = pengajuanHistoryModel::find($params);
-        $pengajuan ? $pengajuan->delete() : false;
-
-        $validasi = validasiModel::where('id_pengajuan_history', $params);
-        $validasi ? $validasi->delete() : false;
 
         $rkat = RKATModel::where('kode_rkat', $data->kode_rkat)->first();
         $rkat->sisa_anggaran = pengajuanModel::where('kode_rkat', $data->kode_rkat)->where('validasi_status', $data->status)->sum('biaya_program');
         $rkat->save();
-        
+
+        $pengajuan = DB::statement('DELETE pengajuan, pengajuan_history, validasi
+        FROM pengajuan
+        INNER JOIN pengajuan_history ON pengajuan.id_pengajuan = pengajuan_history.id
+        INNER JOIN validasi ON pengajuan_history.id_pengajuan = validasi.id_pengajuan_history
+        WHERE pengajuan.id_pengajuan = ' . $params);
+
         return response()->json([
-            'data' => $data
+            'data' => $pengajuan
                 ? "Success delete data"
                 : "Failed, data not found"
         ]);
     }
+
+    // By User
     public function destroy($params)
     {
-        $data = pengajuanModel::find($params);
-        $data ? $data->delete() : false;
+        $data = DB::statement('DELETE pengajuan, pengajuan_history, validasi
+        FROM pengajuan
+        INNER JOIN pengajuan_history ON pengajuan.id_pengajuan = pengajuan_history.id
+        INNER JOIN validasi ON pengajuan_history.id_pengajuan = validasi.id_pengajuan_history
+        WHERE pengajuan.id_user = ' . $params);
 
-        $pengajuan = pengajuanHistoryModel::find($params);
-        $pengajuan ? $pengajuan->delete() : false;
-
-        $validasi = validasiModel::where('id_pengajuan_history', $params);
-        $validasi ? $validasi->delete() : false;
-
-        $rkat = RKATModel::where('kode_rkat', $data->kode_rkat)->first();
-        $rkat->sisa_anggaran = pengajuanModel::where('kode_rkat', $data->kode_rkat)->where('validasi_status', $data->status)->sum('biaya_program');
-        $rkat->save();
+        $update = RKATModel::where('sisa_anggaran', '!=', '0')->update(['sisa_anggaran' => '0']);
 
         return response()->json([
-            'data' => $data
+            'data' => $data && $update
                 ? "Success delete data"
                 : "Failed, data not found"
         ]);

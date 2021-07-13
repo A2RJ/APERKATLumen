@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\pengajuanHistoryModel;
+use App\Models\pengajuanModel;
 use Illuminate\Http\Request;
 use App\Models\RKATModel;
+use App\Models\validasiModel;
+use Illuminate\Support\Facades\DB;
 
 class RKATController extends Controller
 {
@@ -16,10 +20,10 @@ class RKATController extends Controller
     {
         return Response()->json([
             'data' => RKATModel::join('user', 'rkat.id_user', 'user.id_user')
-            // ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
-            // ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
-            ->select('rkat.*', "user.fullname")
-            ->get()
+                // ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                // ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                ->select('rkat.*', "user.fullname")
+                ->get()
         ]);
     }
 
@@ -107,25 +111,32 @@ class RKATController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $params
+     * @param  int  $params by user
      * @return \Illuminate\Http\Response
      */
-    public function destroy($params)
+    public function destroy()
     {
-        $data = RKATModel::find($params);
-        if ($data) $data->delete();
-        
+        $data = DB::delete('DELETE rkat, pengajuan, pengajuan_history, validasi
+        FROM rkat
+        INNER JOIN pengajuan ON rkat.kode_rkat = pengajuan.kode_rkat
+        INNER JOIN pengajuan_history ON pengajuan.id_pengajuan = pengajuan_history.id
+        INNER JOIN validasi ON pengajuan_history.id_pengajuan = validasi.id_pengajuan_history');
+
         return response()->json([
-            'data' => $data ? "Success delete data" : "Failed, data not found"
+            'data' => $data ? $data : "Failed, data not found"
         ]);
     }
     public function hapus($params)
     {
-        $data = RKATModel::find($params);
-        if ($data) $data->delete();
-        
+        $data = DB::statement('DELETE rkat, pengajuan, pengajuan_history, validasi
+        FROM rkat
+        INNER JOIN pengajuan ON rkat.kode_rkat = pengajuan.kode_rkat
+        INNER JOIN pengajuan_history ON pengajuan.id_pengajuan = pengajuan_history.id
+        INNER JOIN validasi ON pengajuan_history.id_pengajuan = validasi.id_pengajuan_history
+        WHERE rkat.id_rkat = ' . $params);
+
         return response()->json([
-            'data' => $data ? "Success delete data" : "Failed, data not found"
+            'data' => $data ? $data : "Failed, data not found"
         ]);
     }
 
@@ -133,9 +144,9 @@ class RKATController extends Controller
     {
         return Response()->json([
             'data' => RKATModel::where('id_user', $params)
-            ->orWhere('kode_rkat', $params)
-            ->select('rkat.kode_rkat as value', 'rkat.kode_rkat as text')
-            ->get()
+                ->orWhere('kode_rkat', $params)
+                ->select('rkat.kode_rkat as value', 'rkat.kode_rkat as text')
+                ->get()
         ]);
     }
 
@@ -143,8 +154,8 @@ class RKATController extends Controller
     {
         return Response()->json([
             'data' => RKATModel::where('kode_rkat', $params)
-            ->select('rkat.kode_rkat as value', 'rkat.kode_rkat as text')
-            ->get()
+                ->select('rkat.kode_rkat as value', 'rkat.kode_rkat as text')
+                ->get()
         ]);
     }
 }
