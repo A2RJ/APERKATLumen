@@ -2,11 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\pengajuanHistoryModel;
-use App\Models\pengajuanModel;
 use Illuminate\Http\Request;
 use App\Models\RKATModel;
-use App\Models\validasiModel;
 use Illuminate\Support\Facades\DB;
 
 class RKATController extends Controller
@@ -68,7 +65,7 @@ class RKATController extends Controller
      */
     public function byKode($params)
     {
-        $data = RKATModel::where('kode_rkat', $params)->first();
+        $data = RKATModel::where('id_rkat', $params)->first();
 
         return response()->json([
             'data' => $data ? $data : "Failed, data not found"
@@ -116,11 +113,19 @@ class RKATController extends Controller
      */
     public function destroy()
     {
-        $data = DB::delete('DELETE rkat, pengajuan, pengajuan_history, validasi
-        FROM rkat
-        INNER JOIN pengajuan ON rkat.kode_rkat = pengajuan.kode_rkat
-        INNER JOIN pengajuan_history ON pengajuan.id_pengajuan = pengajuan_history.id
-        INNER JOIN validasi ON pengajuan_history.id_pengajuan = validasi.id_pengajuan_history');
+        $data = RKATModel::join('pengajuan', 'rkat.id_rkat', 'pengajuan.kode_rkat')
+            ->join('pengajuan_history', 'pengajuan.id_pengajuan', 'pengajuan_history.id')
+            ->join('validasi', 'pengajuan_history.id_pengajuan', 'validasi.id_pengajuan_history')
+            ->count();
+
+        if ($data) {
+            DB::statement('DELETE rkat, pengajuan, pengajuan_history, validasi FROM rkat
+                INNER JOIN pengajuan ON rkat.id_rkat = pengajuan.kode_rkat
+                INNER JOIN pengajuan_history ON pengajuan.id_pengajuan = pengajuan_history.id
+                INNER JOIN validasi ON pengajuan_history.id_pengajuan = validasi.id_pengajuan_history');
+        } else {
+            RKATModel::where('id_rkat', '!=', '0')->delete();
+        }
 
         return response()->json([
             'data' => $data ? $data : "Failed, data not found"
@@ -128,12 +133,20 @@ class RKATController extends Controller
     }
     public function hapus($params)
     {
-        $data = DB::statement('DELETE rkat, pengajuan, pengajuan_history, validasi
-        FROM rkat
-        INNER JOIN pengajuan ON rkat.kode_rkat = pengajuan.kode_rkat
-        INNER JOIN pengajuan_history ON pengajuan.id_pengajuan = pengajuan_history.id
-        INNER JOIN validasi ON pengajuan_history.id_pengajuan = validasi.id_pengajuan_history
-        WHERE rkat.id_rkat = ' . $params);
+        $data = RKATModel::join('pengajuan', 'rkat.id_rkat', 'pengajuan.kode_rkat')
+            ->join('pengajuan_history', 'pengajuan.id_pengajuan', 'pengajuan_history.id')
+            ->join('validasi', 'pengajuan_history.id_pengajuan', 'validasi.id_pengajuan_history')
+            ->count();
+
+        if ($data) {
+            DB::statement('DELETE rkat, pengajuan, pengajuan_history, validasi FROM rkat
+                INNER JOIN pengajuan ON rkat.id_rkat = pengajuan.kode_rkat
+                INNER JOIN pengajuan_history ON pengajuan.id_pengajuan = pengajuan_history.id
+                INNER JOIN validasi ON pengajuan_history.id_pengajuan = validasi.id_pengajuan_history
+                WHERE rkat.id_rkat = ' . $params);
+        } else {
+            RKATModel::where('id_rkat', $params)->delete();
+        }
 
         return response()->json([
             'data' => $data ? $data : "Failed, data not found"
@@ -145,7 +158,7 @@ class RKATController extends Controller
         return Response()->json([
             'data' => RKATModel::where('id_user', $params)
                 ->orWhere('kode_rkat', $params)
-                ->select('rkat.kode_rkat as value', 'rkat.kode_rkat as text')
+                ->select('rkat.id_rkat as value', 'rkat.kode_rkat as text')
                 ->get()
         ]);
     }
@@ -153,8 +166,8 @@ class RKATController extends Controller
     public function kodeRKATByValue($params)
     {
         return Response()->json([
-            'data' => RKATModel::where('kode_rkat', $params)
-                ->select('rkat.kode_rkat as value', 'rkat.kode_rkat as text')
+            'data' => RKATModel::where('id_rkat', $params)
+                ->select('rkat.id_rkat as value', 'rkat.kode_rkat as text')
                 ->get()
         ]);
     }
