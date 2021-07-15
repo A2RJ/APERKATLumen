@@ -113,43 +113,27 @@ class RKATController extends Controller
      */
     public function destroy()
     {
-        $data = RKATModel::join('pengajuan', 'rkat.id_rkat', 'pengajuan.kode_rkat')
-            ->join('pengajuan_history', 'pengajuan.id_pengajuan', 'pengajuan_history.id')
-            ->join('validasi', 'pengajuan_history.id_pengajuan', 'validasi.id_pengajuan_history')
-            ->count();
-
-        if ($data) {
-            DB::statement('DELETE rkat, pengajuan, pengajuan_history, validasi FROM rkat
+        $data = DB::statement('DELETE rkat, pengajuan, pengajuan_history, validasi FROM rkat
                 INNER JOIN pengajuan ON rkat.id_rkat = pengajuan.kode_rkat
                 INNER JOIN pengajuan_history ON pengajuan.id_pengajuan = pengajuan_history.id
                 INNER JOIN validasi ON pengajuan_history.id_pengajuan = validasi.id_pengajuan_history');
-        } else {
-            RKATModel::where('id_rkat', '!=', '0')->delete();
-        }
+        $data2 = RKATModel::where('id_rkat', '!=', '0')->delete();
 
         return response()->json([
-            'data' => $data ? $data : "Failed, data not found"
+            'data' => $data || $data2 ? "Success" : "Failed, data not found"
         ]);
     }
     public function hapus($params)
     {
-        $data = RKATModel::join('pengajuan', 'rkat.id_rkat', 'pengajuan.kode_rkat')
-            ->join('pengajuan_history', 'pengajuan.id_pengajuan', 'pengajuan_history.id')
-            ->join('validasi', 'pengajuan_history.id_pengajuan', 'validasi.id_pengajuan_history')
-            ->count();
-
-        if ($data) {
-            DB::statement('DELETE rkat, pengajuan, pengajuan_history, validasi FROM rkat
+        $data = DB::statement('DELETE rkat, pengajuan, pengajuan_history, validasi FROM rkat
                 INNER JOIN pengajuan ON rkat.id_rkat = pengajuan.kode_rkat
                 INNER JOIN pengajuan_history ON pengajuan.id_pengajuan = pengajuan_history.id
                 INNER JOIN validasi ON pengajuan_history.id_pengajuan = validasi.id_pengajuan_history
                 WHERE rkat.id_rkat = ' . $params);
-        } else {
-            RKATModel::where('id_rkat', $params)->delete();
-        }
+        $data2 = RKATModel::where('id_rkat', $params)->delete();
 
         return response()->json([
-            'data' => $data ? $data : "Failed, data not found"
+            'data' => $data || $data2 ? "Success" : "Failed, data not found"
         ]);
     }
 

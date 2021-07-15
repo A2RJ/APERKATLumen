@@ -21,6 +21,8 @@ $router->get('/', function () use ($router) {
         'about_API' => "API SUBMISSION"
     ]);
 });
+$router->get('/pdf', 'PengajuanController@PDF_RKAT');
+
 
 $router->group(['middleware' => 'auth', 'prefix' => 'api'], function ($router) {
     $router->get('me', 'AuthController@me');

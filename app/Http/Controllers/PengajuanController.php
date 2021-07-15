@@ -145,20 +145,19 @@ class PengajuanController extends Controller
      */
     public function hapus($params)
     {
-        $data = pengajuanModel::find($params);
+        $sisa_anggaran = pengajuanModel::find($params)->sum('biaya_program');
 
-        $rkat = RKATModel::where('kode_rkat', $data->kode_rkat)->first();
-        $rkat->sisa_anggaran = pengajuanModel::where('kode_rkat', $data->kode_rkat)->where('validasi_status', $data->status)->sum('biaya_program');
-        $rkat->save();
+        RKATModel::join('pengajuan', 'rkat.id_rkat', 'pengajuan.kode_rkat')
+            ->where('pengajuan.id_pengajuan', $params)
+            ->update(['sisa_anggaran' => $sisa_anggaran]);
 
-        $pengajuan = DB::statement('DELETE pengajuan, pengajuan_history, validasi
-        FROM pengajuan
+        DB::statement('DELETE pengajuan, pengajuan_history, validasi FROM pengajuan
         INNER JOIN pengajuan_history ON pengajuan.id_pengajuan = pengajuan_history.id
         INNER JOIN validasi ON pengajuan_history.id_pengajuan = validasi.id_pengajuan_history
         WHERE pengajuan.id_pengajuan = ' . $params);
 
         return response()->json([
-            'data' => $pengajuan
+            'data' => $sisa_anggaran
                 ? "Success delete data"
                 : "Failed, data not found"
         ]);
@@ -167,8 +166,7 @@ class PengajuanController extends Controller
     // By User
     public function destroy($params)
     {
-        $data = DB::statement('DELETE pengajuan, pengajuan_history, validasi
-        FROM pengajuan
+        $data = DB::statement('DELETE pengajuan, pengajuan_history, validasi FROM pengajuan
         INNER JOIN pengajuan_history ON pengajuan.id_pengajuan = pengajuan_history.id
         INNER JOIN validasi ON pengajuan_history.id_pengajuan = validasi.id_pengajuan_history
         WHERE pengajuan.id_user = ' . $params);
@@ -283,7 +281,7 @@ class PengajuanController extends Controller
             "message" => $nama_struktur . " - " . $request->message
         ]);
 
-        // $this->sendMail();
+        // $this->sendMail($params);
 
         return true;
     }
@@ -342,12 +340,12 @@ class PengajuanController extends Controller
     public function getEmail($params)
     {
         $data =  UserModel::find($params);
-        return $data ? $data['email'] : null;
+        return $data ? $data : null;
     }
 
-    public function sendMail()
+    public function sendMail($params)
     {
-        $data = $this->status(1);
+        $data = $this->status($params);
         $data = $data->original['data'];
 
         $datab = array('name' => 'APERKAT - Universitas Teknologi Sumbawa');
@@ -355,9 +353,9 @@ class PengajuanController extends Controller
         for ($i = 0; $i < count((array)$data); $i++) {
             $models = $this->getEmail($data[$i]['id_user']);
             if ($models) {
-                Mail::send('mail', $datab, function ($message) use ($models) {
-                    $message->to($models, 'ardiansyahputra')->subject('coba send email');
-                    $message->from('gamesonly.a2rj@gmail.com', 'ardiansyah');
+                Mail::send('mail', $datab, function ($message) use ($models, $data) {
+                    $message->to($models['email'], $models['fullname'])->subject('Pemberitahuan pengajuan oleh: ' . $data[0]['fullname']);
+                    $message->from('EMAIL_UTS', 'APERKAT');
                 });
             }
         }
@@ -681,13 +679,50 @@ class PengajuanController extends Controller
         ]);
     }
 
-    public function PDF()
+    // pdf pengajuan
+    public function PDF_Pengajuan($params)
     {
+        $pengajuan =  pengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+            ->join('user', 'pengajuan.id_user', 'user.id_user')
+            ->select('user.fullname', 'rkat.kode_rkat', 'pengajuan.latar_belakang', 'pengajuan.sasaran', 'pengajuan.target_capaian', 'pengajuan.bentuk_pelaksanaan_program', 'pengajuan.tempat_program', 'pengajuan.tanggal', 'pengajuan.bidang_terkait', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status')
+            ->where('pengajuan.id_pengajuan', $params)
+            ->get();
+
         $data = [
-            'coba' => "Berhasil"
+            'pengajuan' => $pengajuan,
+            'fullname' => $pengajuan[0]->fullname
         ];
 
         // $pdf = PDF::loadView('pengajuan', $data);
+        // return $pdf->download('pengajuan-' . date("Y-m-d") . '.pdf');
+    }
+
+    public function PDF_RKAT()
+    {
+        $rkat = UserModel::join('rkat', 'user.id_user', 'rkat.id_user')
+            ->select('user.fullname')->get();
+
+        $pengajuan = pengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+            ->join('user', 'pengajuan.id_user', 'user.id_user')
+            ->select('user.fullname', 'pengajuan.id_pengajuan', 'rkat.kode_rkat', 'rkat.program_kerja', 'rkat.deskripsi', 'rkat.mulai_program', 'rkat.selesai_program', 'rkat.tempat', 'rkat.total_anggaran')
+            ->orderBy('user.fullname')
+            ->get();
+
+        // foreach ($rkat as $key) {
+        //     echo $key->fullname . '<br>';
+        //     foreach ($pengajuan as $p) {
+        //         if ($p->fullname == $key->fullname) {
+        //             echo $p->id_pengajuan . ' '. $p->kode_rkat .' '. '<br>';
+        //         }
+        //     }
+        // }
+
+        $data = [
+            'rkat' => $rkat,
+            'pengajuan' => $pengajuan
+        ];
+
+        // $pdf = PDF::loadView('rkat', $data);
         // return $pdf->download('pengajuan-' . date("Y-m-d") . '.pdf');
     }
 }
