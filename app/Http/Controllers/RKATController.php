@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\RKATModel;
+use App\Models\UserModel;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade as PDF;
 
 class RKATController extends Controller
 {
@@ -154,5 +156,75 @@ class RKATController extends Controller
                 ->select('rkat.id_rkat as value', 'rkat.kode_rkat as text')
                 ->get()
         ]);
+    }
+
+    /**
+     * Download all RKAT
+     */
+    public function PDF_RKAT()
+    {
+        $user = UserModel::join('rkat', 'user.id_user', 'rkat.id_user')
+            ->select('user.fullname')->distinct()->get();
+
+        $rkat = UserModel::join('rkat', 'user.id_user', 'rkat.id_user')
+            ->select('user.fullname', 'rkat.kode_rkat', 'rkat.program_kerja', 'rkat.deskripsi', 'rkat.mulai_program', 'rkat.selesai_program', 'rkat.tempat', 'rkat.total_anggaran')
+            ->orderBy('user.fullname')
+            ->get();
+
+        $data = [
+            'user' => $user,
+            'rkat' => $rkat
+        ];
+
+        $pdf = PDF::loadView('rkat', $data);
+        return $pdf->download('RKAT-' . date("Y-m-d") . '.pdf');
+    }
+
+    /**
+     * Download RKAT by user
+     */
+    public function PDF_RKAT_Id($params)
+    {
+        $user = UserModel::join('rkat', 'user.id_user', 'rkat.id_user')
+            ->where('user.id_user', $params)
+            ->select('user.fullname')->distinct()->get();
+
+        $rkat = UserModel::join('rkat', 'user.id_user', 'rkat.id_user')
+            ->where('user.id_user', $params)
+            ->select('user.fullname', 'rkat.kode_rkat', 'rkat.program_kerja', 'rkat.deskripsi', 'rkat.mulai_program', 'rkat.selesai_program', 'rkat.tempat', 'rkat.total_anggaran')
+            ->orderBy('user.fullname')
+            ->get();
+
+        $data = [
+            'user' => $user,
+            'rkat' => $rkat
+        ];
+
+        $pdf = PDF::loadView('rkat', $data);
+        return $pdf->download('RKAT-' . date("Y-m-d") . '.pdf');
+    }
+
+    /**
+     * Download RKAT by kode rkat
+     */
+    public function pdf_kode_rkat($params)
+    {
+        $user = UserModel::join('rkat', 'user.id_user', 'rkat.id_user')
+            ->where('rkat.kode_rkat', $params)
+            ->select('user.fullname')->distinct()->get();
+
+        $rkat = UserModel::join('rkat', 'user.id_user', 'rkat.id_user')
+            ->where('rkat.kode_rkat', $params)
+            ->select('user.fullname', 'rkat.kode_rkat', 'rkat.program_kerja', 'rkat.deskripsi', 'rkat.mulai_program', 'rkat.selesai_program', 'rkat.tempat', 'rkat.total_anggaran')
+            ->orderBy('user.fullname')
+            ->get();
+
+        $data = [
+            'user' => $user,
+            'rkat' => $rkat
+        ];
+
+        $pdf = PDF::loadView('rkat', $data);
+        return $pdf->download('RKAT-' . date("Y-m-d") . '.pdf');
     }
 }

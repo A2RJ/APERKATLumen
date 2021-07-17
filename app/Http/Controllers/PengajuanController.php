@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use PDF;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Models\UserModel;
 use App\Models\RKATModel;
 use App\Models\validasiModel;
 use App\Models\pengajuanModel;
 use App\Models\pengajuanHistoryModel;
-use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade as PDF;
 
 class PengajuanController extends Controller
 {
@@ -145,11 +145,13 @@ class PengajuanController extends Controller
      */
     public function hapus($params)
     {
-        $sisa_anggaran = pengajuanModel::find($params)->sum('biaya_program');
+        $pengajuan = pengajuanModel::find($params);
+        $sisa_anggaran = pengajuanModel::where('id_pengajuan', $params)
+            ->where('validasi_status', 3)
+            ->orWhere('status_pengajuan', 'approved')
+            ->sum('biaya_program');
 
-        RKATModel::join('pengajuan', 'rkat.id_rkat', 'pengajuan.kode_rkat')
-            ->where('pengajuan.id_pengajuan', $params)
-            ->update(['sisa_anggaran' => $sisa_anggaran]);
+        RKATModel::where('kode_rkat', $pengajuan->kode_rkat)->update(['sisa_anggaran' => $sisa_anggaran]);
 
         DB::statement('DELETE pengajuan, pengajuan_history, validasi FROM pengajuan
         INNER JOIN pengajuan_history ON pengajuan.id_pengajuan = pengajuan_history.id
@@ -268,10 +270,18 @@ class PengajuanController extends Controller
         $pengajuan->nama_status = $nama_struktur;
         $pengajuan->save();
 
+        if ($userStruktur->level == 1 && $request->status == 2) {
+            pengajuanModel::where('id_pengajuan', $params)
+                ->update(['status_pengajuan' => 'approved']);
+        }
+
         if ($request->message == "Sudah dilakukan pencairan" && $request->status == 3) {
-            $rkat = RKATModel::where('kode_rkat', $request->kode_rkat)->first();
-            $rkat->sisa_anggaran = pengajuanModel::where('kode_rkat', $request->kode_rkat)->where('validasi_status', $request->status)->sum('biaya_program');
-            $rkat->save();
+            $sisa_anggaran = pengajuanModel::where('kode_rkat', $pengajuan->kode_rkat)
+                ->where('validasi_status', $request->status)
+                ->orWhere('status_pengajuan', 'approved')
+                ->sum('biaya_program');
+
+            RKATModel::where('kode_rkat', $pengajuan->kode_rkat)->update(['sisa_anggaran' => $sisa_anggaran]);
         }
 
         validasiModel::create([
@@ -281,7 +291,7 @@ class PengajuanController extends Controller
             "message" => $nama_struktur . " - " . $request->message
         ]);
 
-        // $this->sendMail($params);
+        // $this->sendMail($params, $request->status, $nama_struktur);
 
         return true;
     }
@@ -339,22 +349,31 @@ class PengajuanController extends Controller
 
     public function getEmail($params)
     {
-        $data =  UserModel::find($params);
+        $data =  UserModel::where('id_user', $params)->first();
         return $data ? $data : null;
     }
 
-    public function sendMail($params)
+    public function sendMail($params, $status, $struktur)
     {
         $data = $this->status($params);
         $data = $data->original['data'];
 
-        $datab = array('name' => 'APERKAT - Universitas Teknologi Sumbawa');
+        if ($status == '0') {
+            $status = ' Ditolak oleh:' . $struktur;
+        } else if ($status == '1') {
+            $status = ' Diinput/direvisi oleh:' . $struktur;
+        } else if ($status == '3') {
+            $status = ' Pencairan oleh:' . $struktur;
+        } else {
+            $status = ' Diterima oleh:' . $struktur;
+        }
 
-        for ($i = 0; $i < count((array)$data); $i++) {
+        for ($i = 0; $i < count($data); $i++) {
+            $datab = array('name' => 'Pemberitahuan pengajuan ' . $data[0]['nama_struktur'] . $status);
             $models = $this->getEmail($data[$i]['id_user']);
-            if ($models) {
-                Mail::send('mail', $datab, function ($message) use ($models, $data) {
-                    $message->to($models['email'], $models['fullname'])->subject('Pemberitahuan pengajuan oleh: ' . $data[0]['fullname']);
+            if ($models->email) {
+                Mail::send('mail', $datab, function ($message) use ($models) {
+                    $message->to($models->email, $models->fullname)->subject('APERKAT - Universitas Teknologi Sumbawa');
                     $message->from('EMAIL_UTS', 'APERKAT');
                 });
             }
@@ -592,6 +611,7 @@ class PengajuanController extends Controller
                 ->where('struktur.level', '!=', $userStruktur->level)
                 ->where('user.id_user', '!=', $userStruktur->id_user)
                 ->select('user.id_user', 'user.fullname', 'pengajuan.created_at', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
+                ->distinct()
                 ->get();
         } else if ($userStruktur->level == 2) {
             $data = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
@@ -602,6 +622,7 @@ class PengajuanController extends Controller
                 ->where('struktur.level', '!=', 1)
                 ->where('user.id_user', '!=', $userStruktur->id_user)
                 ->select('user.id_user', 'user.fullname', 'pengajuan.created_at', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
+                ->distinct()
                 ->get();
         } else if ($userStruktur->level == 3 || $userStruktur->level == 4) {
             if ($userStruktur->child1_level == "1" || $userStruktur->level == 3) {
@@ -612,6 +633,7 @@ class PengajuanController extends Controller
                     ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                     ->where('user.id_user', '!=', $userStruktur->id_user)
                     ->select('user.id_user', 'user.fullname', 'pengajuan.created_at', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
+                    ->distinct()
                     ->get();
             } else {
                 $data = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
@@ -622,6 +644,7 @@ class PengajuanController extends Controller
                     ->where('user.id_user', '!=', $userStruktur->id_user)
                     ->where('struktur.id_struktur', $userStruktur->id_struktur)
                     ->select('user.id_user', 'user.fullname', 'pengajuan.created_at', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
+                    ->distinct()
                     ->get();
             }
         } else if ($userStruktur->level == 5) {
@@ -634,6 +657,7 @@ class PengajuanController extends Controller
                 ->where('struktur.id_struktur', $userStruktur->id_struktur)
                 ->where('struktur_child1.id_struktur_child1', $userStruktur->id_struktur_child1)
                 ->select('user.id_user', 'user.fullname', 'pengajuan.created_at', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
+                ->distinct()
                 ->get();
         }
 
@@ -663,8 +687,9 @@ class PengajuanController extends Controller
                     ->get(),
 
                 'pengajuan' => pengajuanModel::join('user', 'pengajuan.id_user', 'user.id_user')
+                    ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
                     ->where('user.id_user', $params)
-                    ->select('user.fullname', 'pengajuan.id_pengajuan', 'pengajuan.kode_rkat', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'pengajuan.created_at')
+                    ->select('user.fullname', 'rkat.kode_rkat', 'pengajuan.id_pengajuan', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'pengajuan.created_at')
                     ->orderBy('pengajuan.kode_rkat', 'ASC')
                     ->get(),
 
@@ -686,43 +711,14 @@ class PengajuanController extends Controller
             ->join('user', 'pengajuan.id_user', 'user.id_user')
             ->select('user.fullname', 'rkat.kode_rkat', 'pengajuan.latar_belakang', 'pengajuan.sasaran', 'pengajuan.target_capaian', 'pengajuan.bentuk_pelaksanaan_program', 'pengajuan.tempat_program', 'pengajuan.tanggal', 'pengajuan.bidang_terkait', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status')
             ->where('pengajuan.id_pengajuan', $params)
-            ->get();
+            ->first();
 
         $data = [
             'pengajuan' => $pengajuan,
-            'fullname' => $pengajuan[0]->fullname
+            'fullname' => $pengajuan ? $pengajuan->fullname : null
         ];
 
-        // $pdf = PDF::loadView('pengajuan', $data);
-        // return $pdf->download('pengajuan-' . date("Y-m-d") . '.pdf');
-    }
-
-    public function PDF_RKAT()
-    {
-        $rkat = UserModel::join('rkat', 'user.id_user', 'rkat.id_user')
-            ->select('user.fullname')->get();
-
-        $pengajuan = pengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
-            ->join('user', 'pengajuan.id_user', 'user.id_user')
-            ->select('user.fullname', 'pengajuan.id_pengajuan', 'rkat.kode_rkat', 'rkat.program_kerja', 'rkat.deskripsi', 'rkat.mulai_program', 'rkat.selesai_program', 'rkat.tempat', 'rkat.total_anggaran')
-            ->orderBy('user.fullname')
-            ->get();
-
-        // foreach ($rkat as $key) {
-        //     echo $key->fullname . '<br>';
-        //     foreach ($pengajuan as $p) {
-        //         if ($p->fullname == $key->fullname) {
-        //             echo $p->id_pengajuan . ' '. $p->kode_rkat .' '. '<br>';
-        //         }
-        //     }
-        // }
-
-        $data = [
-            'rkat' => $rkat,
-            'pengajuan' => $pengajuan
-        ];
-
-        // $pdf = PDF::loadView('rkat', $data);
-        // return $pdf->download('pengajuan-' . date("Y-m-d") . '.pdf');
+        $pdf = PDF::loadView('pengajuan', $data)->setPaper('a4', 'landscape');
+        return $pdf->download('pengajuan-' . date("Y-m-d") . '.pdf');
     }
 }

@@ -21,6 +21,10 @@
             text-align: left;
             padding: 8px;
         }
+        .head{
+            text-align: center;
+            text-transform: uppercase;
+        }
     </style>
 </head>
 
@@ -36,31 +40,31 @@
                 <th>Sasaran</th>
                 <th>Target Capaian</th>
                 <th>Bentuk Pelaksanaan Program</th>
-                <th>Tempat/Waktu</th>
+                <th>Tempat / Waktu</th>
                 <th>Bidang Terkait</th>
                 <th>Status</th>
                 <th>Total Biaya</th>
             </tr>
-            @foreach ($pengajuan as $p)
             <tr>
-                <td>{{ $p->kode_rkat }}</td>
-                <td>{{ $p->latar_belakang }}</td>
-                <td>{{ $p->sasaran }}</td>
-                <td>{{ $p->target_capaian }}</td>
-                <td>{{ $p->bentuk_pelaksanaan_program }}</td>
-                <td>{{ $p->tempat_program }}/ {{ $p->tanggal }}</td>
-                <td>{{ $p->bidang_terkait }}</td>
+                <td>{{ $pengajuan->kode_rkat }}</td>
+                <td>{{ $pengajuan->latar_belakang }}</td>
+                <td>{{ $pengajuan->sasaran }}</td>
+                <td>{{ $pengajuan->target_capaian }}</td>
+                <td>{{ $pengajuan->bentuk_pelaksanaan_program }}</td>
+                <td>{{ $pengajuan->tempat_program }} / {{ $pengajuan->tanggal }}</td>
+                <td>{{ $pengajuan->bidang_terkait }}</td>
                 <td>
-                    @if ($p->validasi_status == 0)
+                    @if ($pengajuan->validasi_status == 0)
                     Ditolak oleh:
+                    @elseif ($pengajuan->validasi_status == 1)
+                    Input oleh:
                     @else
                     Diterima oleh:
                     @endif
-                    {{ $p->nama_status }}
+                    {{ $pengajuan->nama_status }}
                 </td>
-                <td>{{ $p->biaya_program }}</td>
+                <td>RP. {{ number_format($pengajuan->biaya_program) }}</td>
             </tr>
-            @endforeach
         </table>
     </div>
 </body>

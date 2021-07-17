@@ -21,8 +21,6 @@ $router->get('/', function () use ($router) {
         'about_API' => "API SUBMISSION"
     ]);
 });
-$router->get('/pdf', 'PengajuanController@PDF_RKAT');
-
 
 $router->group(['middleware' => 'auth', 'prefix' => 'api'], function ($router) {
     $router->get('me', 'AuthController@me');
@@ -40,6 +38,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->group(['prefix' => 'pengajuan'], function () use ($router) {
         $router->get('/', 'PengajuanController@index');
         $router->get('/sendMail', 'PengajuanController@sendMail');
+        $router->get('/pdf_pengajuan/{params}', 'PengajuanController@PDF_Pengajuan');
         $router->get('/destroy/{params}', 'PengajuanController@destroy');
         $router->get('/{params}', 'PengajuanController@show');
         $router->get('/delete/{params}', 'PengajuanController@hapus');
@@ -61,7 +60,10 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->group(['prefix' => 'rkat'], function () use ($router) {
         $router->get('/', 'RKATController@index');
         $router->get('/destroy', 'RKATController@destroy');
+        $router->get('/pdf_rkat', 'RKATController@PDF_RKAT');
         $router->get('/{params}', 'RKATController@show');
+        $router->get('/pdf_rkat_id/{params}', 'RKATController@PDF_RKAT_Id');
+        $router->get('/pdf_kode_rkat/{params}', 'RKATController@pdf_kode_rkat');
         $router->get('/delete/{params}', 'RKATController@hapus');
         $router->get('/kodeRKAT/{params}', 'RKATController@kodeRKAT');
         $router->get('/kodeRKATByValue/{params}', 'RKATController@kodeRKATByValue');

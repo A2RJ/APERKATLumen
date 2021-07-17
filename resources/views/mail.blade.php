@@ -1,2 +1,2 @@
-<h1>Hi, {{ $name }}</h1>
-<p>Sending Mail using Lumen.</p>
+<h1>Hi, User</h1>
+<p>{{ $name }}.</p>
