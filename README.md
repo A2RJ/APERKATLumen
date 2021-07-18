@@ -2,10 +2,10 @@
 # FOKUS
 - [s] Email (cek apakah valid email)
 - [s] Status jadi approve jika sudah disetujui sekniv
-- [s] Fungsi kurangi RKAT (jika sudah pencairan) dan tambah RKAT jika status sudah pencairan (hapus pengajuan)
 - [s] Fungsi download RKAT beserta semua data pengajuan
-- [x] Number format untuk form rupiah (nuxt)
-- [x] Upload RAB (Nuxt)
+- [s] Number format untuk form rupiah (nuxt)
+- [s] Upload RAB (Nuxt)
+- [x] Fungsi kurangi RKAT (jika sudah pencairan) dan tambah RKAT jika status sudah pencairan (hapus pengajuan)
 
 
 ## Build Setup

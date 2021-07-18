@@ -199,7 +199,7 @@ CREATE TABLE `rkat` (
   `sumber_anggaran` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `rencara_anggaran` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `total_anggaran` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `sisa_anggaran` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `anggaran_digunakan` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` date NOT NULL,
   `updated_at` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -208,7 +208,7 @@ CREATE TABLE `rkat` (
 -- Dumping data untuk tabel `rkat`
 --
 
-INSERT INTO `rkat` (`id_rkat`, `kode_rkat`, `id_user`, `sasaran_strategi`, `indikator_sasaran_strategi`, `nama_program`, `program_kerja`, `deskripsi`, `tujuan`, `mulai_program`, `selesai_program`, `tempat`, `sumber_anggaran`, `rencara_anggaran`, `total_anggaran`, `sisa_anggaran`, `created_at`, `updated_at`) VALUES
+INSERT INTO `rkat` (`id_rkat`, `kode_rkat`, `id_user`, `sasaran_strategi`, `indikator_sasaran_strategi`, `nama_program`, `program_kerja`, `deskripsi`, `tujuan`, `mulai_program`, `selesai_program`, `tempat`, `sumber_anggaran`, `rencara_anggaran`, `total_anggaran`, `anggaran_digunakan`, `created_at`, `updated_at`) VALUES
 (33, '2AA', 5, 'Tidak tahu HAHHA', 'Tidak tahu juga', 'Pembelian PC', 'Pembelian PC', 'tyt', 'Dukung penggunaan lab', '2021-05-19', '2021-05-19', 'Lab UTS', 'Dana Kampus', '1500000', '1500000', '0', '2021-05-19', '2021-05-19');
 
 -- --------------------------------------------------------

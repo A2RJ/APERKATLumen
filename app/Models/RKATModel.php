@@ -30,7 +30,7 @@ class RKATModel extends Model
         "sumber_anggaran",
         "rencara_anggaran",
         "total_anggaran",
-        "sisa_anggaran"
+        "anggaran_digunakan"
     ];
     // public $incrementing = false;
     /**

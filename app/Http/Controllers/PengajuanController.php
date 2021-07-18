@@ -61,7 +61,7 @@ class PengajuanController extends Controller
 
         // biaya program - total anggaran RKAT
         // $rkat = RKATModel::where('kode_rkat', $data->kode_rkat)->first();
-        // $rkat->sisa_anggaran = intval($rkat->total_anggaran) - intval($data->biaya_program);
+        // $rkat->anggaran_digunakan = intval($rkat->total_anggaran) - intval($data->biaya_program);
         // $rkat->save();
 
         return response()->json([
@@ -146,12 +146,13 @@ class PengajuanController extends Controller
     public function hapus($params)
     {
         $pengajuan = pengajuanModel::find($params);
-        $sisa_anggaran = pengajuanModel::where('id_pengajuan', $params)
+        $anggaran_digunakan = pengajuanModel::where('id_pengajuan', $params)
             ->where('validasi_status', 3)
-            ->orWhere('status_pengajuan', 'approved')
+            ->orWhere('id_pengajuan', $params)
+            ->where('status_pengajuan', 'approved')
             ->sum('biaya_program');
 
-        RKATModel::where('kode_rkat', $pengajuan->kode_rkat)->update(['sisa_anggaran' => $sisa_anggaran]);
+        RKATModel::where('id_rkat', $pengajuan->kode_rkat)->update(['anggaran_digunakan' => $anggaran_digunakan]);
 
         DB::statement('DELETE pengajuan, pengajuan_history, validasi FROM pengajuan
         INNER JOIN pengajuan_history ON pengajuan.id_pengajuan = pengajuan_history.id
@@ -159,7 +160,7 @@ class PengajuanController extends Controller
         WHERE pengajuan.id_pengajuan = ' . $params);
 
         return response()->json([
-            'data' => $sisa_anggaran
+            'data' => $anggaran_digunakan
                 ? "Success delete data"
                 : "Failed, data not found"
         ]);
@@ -173,7 +174,7 @@ class PengajuanController extends Controller
         INNER JOIN validasi ON pengajuan_history.id_pengajuan = validasi.id_pengajuan_history
         WHERE pengajuan.id_user = ' . $params);
 
-        $update = RKATModel::where('sisa_anggaran', '!=', '0')->update(['sisa_anggaran' => '0']);
+        $update = RKATModel::where('id_user', $params)->update(['anggaran_digunakan' => '0']);
 
         return response()->json([
             'data' => $data && $update
@@ -276,12 +277,13 @@ class PengajuanController extends Controller
         }
 
         if ($request->message == "Sudah dilakukan pencairan" && $request->status == 3) {
-            $sisa_anggaran = pengajuanModel::where('kode_rkat', $pengajuan->kode_rkat)
+            $anggaran_digunakan = pengajuanModel::where('kode_rkat', $request->kode_rkat)
                 ->where('validasi_status', $request->status)
-                ->orWhere('status_pengajuan', 'approved')
+                ->orWhere('kode_rkat', $request->kode_rkat)
+                ->where('status_pengajuan', 'approved')
                 ->sum('biaya_program');
 
-            RKATModel::where('kode_rkat', $pengajuan->kode_rkat)->update(['sisa_anggaran' => $sisa_anggaran]);
+            RKATModel::where('id_rkat', $request->kode_rkat)->update(['anggaran_digunakan' => $anggaran_digunakan]);
         }
 
         validasiModel::create([
@@ -552,7 +554,7 @@ class PengajuanController extends Controller
                 ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                ->where('struktur.level', '!=', 1)
+                // ->where('struktur.level', '!=', 1)
                 ->where('user.id_user', '!=', $userStruktur->id_user)
                 ->select('user.id_user', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at')
                 ->get();
@@ -619,7 +621,7 @@ class PengajuanController extends Controller
                 ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                ->where('struktur.level', '!=', 1)
+                // ->where('struktur.level', '!=', 1)
                 ->where('user.id_user', '!=', $userStruktur->id_user)
                 ->select('user.id_user', 'user.fullname', 'pengajuan.created_at', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
                 ->distinct()
