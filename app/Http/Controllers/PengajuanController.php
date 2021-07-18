@@ -283,7 +283,8 @@ class PengajuanController extends Controller
                 ->where('status_pengajuan', 'approved')
                 ->sum('biaya_program');
 
-            RKATModel::where('id_rkat', $request->kode_rkat)->update(['anggaran_digunakan' => $anggaran_digunakan]);
+            RKATModel::where('id_rkat', $request->kode_rkat)
+                ->update(['anggaran_digunakan' => $anggaran_digunakan]);
         }
 
         validasiModel::create([
