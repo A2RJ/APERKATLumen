@@ -215,10 +215,7 @@ class UserController extends Controller
     public function struktur()
     {
         return Response()->json([
-            'data' => strukturModel::where('id_struktur', 1)
-                ->orWhere('id_struktur', 2)
-                ->orWhere('id_struktur', 3)
-                ->orWhere('id_struktur', 4)
+            'data' => strukturModel::orderBy('level')
                 ->select('id_struktur as value', 'nama_struktur as text')->get()
         ]);
     }

@@ -21,7 +21,6 @@ $router->get('/', function () use ($router) {
         'about_API' => "API SUBMISSION"
     ]);
 });
-$router->get('/delete/{params}', 'PengajuanController@hapus');
 
 $router->group(['middleware' => 'auth', 'prefix' => 'api'], function ($router) {
     $router->get('me', 'AuthController@me');

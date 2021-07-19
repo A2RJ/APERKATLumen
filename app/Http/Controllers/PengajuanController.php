@@ -161,7 +161,7 @@ class PengajuanController extends Controller
         RKATModel::where('id_rkat', $pengajuan->kode_rkat)->update(['anggaran_digunakan' => $anggaran_digunakan]);
 
         return response()->json([
-            'data' => $anggaran_digunakan
+            'data' => $pengajuan
                 ? "Success delete data"
                 : "Failed, data not found"
         ]);
@@ -668,11 +668,16 @@ class PengajuanController extends Controller
     public function getGrafik($params)
     {
         $rkat = RKATModel::where('id_user', $params);
-        $pengajuan = pengajuanModel::where('id_user', $params);
+        $pengajuan = pengajuanModel::where('id_user', $params)
+            ->where('validasi_status', 3)
+            ->orWhere('id_user', $params)
+            ->where('status_pengajuan', 'approved')
+            ->sum('biaya_program');
+            
         return response()->json([
             'data' => [
                 'total_rkat' => $rkat->count(),
-                'total_rkat_diterima' => $pengajuan->sum('biaya_program'),
+                'total_rkat_diterima' => $pengajuan,
                 'total_anggaran_rkat' => $rkat->sum('total_anggaran'),
                 'pengajuan_diterima' => pengajuanModel::where('id_user', $params)
                     ->where('status_pengajuan', 'approved')->count(),
