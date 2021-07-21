@@ -40,6 +40,8 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/sendMail', 'PengajuanController@sendMail');
         $router->get('/pdf_pengajuan/{params}', 'PengajuanController@PDF_Pengajuan');
         $router->get('/destroy/{params}', 'PengajuanController@destroy');
+        $router->get('/countMessage/{params}', 'PengajuanController@countMessage');
+        $router->get('/countMessageSelf/{params}', 'PengajuanController@countMessageSelf');
         $router->get('/{params}', 'PengajuanController@show');
         $router->get('/delete/{params}', 'PengajuanController@hapus');
         $router->get('/byUser/{params}', 'PengajuanController@byUser');
@@ -50,6 +52,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/getGrafik/{params}', 'PengajuanController@getGrafik');
         $router->get('/pengajuanSubordinate/{params}', 'PengajuanController@pengajuanSubordinate');
         $router->get('/getSubordinatesGrafik/{params}', 'PengajuanController@getSubordinatesGrafik');
+        $router->get('/showPengajuan/{params1}/{params2}', 'PengajuanController@showPengajuan');
         $router->post('/', 'PengajuanController@store');
         $router->post('/upload', 'PengajuanController@upload');
         $router->post('/approve/{params}', 'PengajuanController@approve');
