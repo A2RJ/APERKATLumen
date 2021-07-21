@@ -70,10 +70,6 @@ class PengajuanController extends Controller
             ]);
         }
 
-        MessageModel::where('id_pengajuan', $data->id_pengajuan)
-            ->where('id_user', $id_user[0]["id_user"])
-            ->update(["status_message" => true]);
-
         $this->autoProccess($request, $data->id_pengajuan, "Input data pengajuan");
 
         return response()->json([
@@ -307,14 +303,14 @@ class PengajuanController extends Controller
             $userStruktur = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                ->select('user.*', 'struktur.*', 'user.id_struktur_child1', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
+                ->select('struktur.id_struktur', 'struktur.nama_struktur', 'user.id_struktur_child1', 'struktur_child1.nama_struktur_child1', 'struktur_child2.id_struktur_child2', 'struktur_child2.nama_struktur_child2')
                 ->where('user.id_user', $request->id_atasan)
                 ->first();
         } else {
             $userStruktur = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                ->select('user.*', 'struktur.*', 'user.id_struktur_child1', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
+                ->select('struktur.id_struktur', 'struktur.nama_struktur', 'user.id_struktur_child1', 'struktur_child1.nama_struktur_child1', 'struktur_child2.id_struktur_child2', 'struktur_child2.nama_struktur_child2')
                 ->where('user.id_user', $request->id_user)
                 ->first();
         }
@@ -331,12 +327,10 @@ class PengajuanController extends Controller
         }
 
         $pengajuan->validasi_status = $request->status;
-        $pengajuan->nama_status = $nama_struktur;
-        $pengajuan->save();
 
         if ($userStruktur->level == 1 && $request->status == 2) {
-            pengajuanModel::where('id_pengajuan', $params)
-                ->update(['status_pengajuan' => 'approved']);
+            $pengajuan->status_pengajuan = 'approved';
+            $pengajuan->save();
         }
 
         if ($request->message == "Sudah dilakukan pencairan" && $request->status == 3) {
@@ -349,11 +343,7 @@ class PengajuanController extends Controller
             RKATModel::where('id_rkat', $request->kode_rkat)
                 ->update(['anggaran_digunakan' => $anggaran_digunakan]);
 
-            MessageModel::where('id_pengajuan', $params)
-                ->where('id_user', $pengajuan->id_user)
-                ->update([
-                    "status_message" => false
-                ]);
+            $this->updateMessage($params, $pengajuan->id_user);
         }
 
         validasiModel::create([
@@ -460,17 +450,6 @@ class PengajuanController extends Controller
         }
     }
 
-    public function getStruktur($params)
-    {
-        return UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
-            ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
-            ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-            ->where('struktur.level', $params)
-            ->where("struktur_child1.nama_struktur_child1", "0")
-            ->where("struktur_child2.nama_struktur_child2", "0")
-            ->first();
-    }
-
     public function status($params)
     {
         $pengajuan = pengajuanModel::join('user', 'pengajuan.id_user', 'user.id_user')
@@ -478,7 +457,7 @@ class PengajuanController extends Controller
             ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
             ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
             ->where('pengajuan.id_pengajuan', $params)
-            ->select('pengajuan.id_pengajuan', 'user.id_user', 'user.id_struktur', 'user.email', 'user.id_struktur_child1', 'user.id_struktur_child2', 'struktur.nama_struktur', 'struktur.level', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
+            ->select('pengajuan.id_pengajuan', 'user.id_struktur', 'user.id_struktur_child1', 'user.id_struktur_child2', 'struktur.nama_struktur', 'struktur.level', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
             ->first();
 
         $warek = 0;
@@ -556,47 +535,49 @@ class PengajuanController extends Controller
         // 2 = terima
         // 3 = upload bukti pencairan
 
-        $keuangan = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+        $struktur = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
             ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
             ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-            ->where('struktur_child1.child1_level', 1)
-            ->first();
-
-        $warek2 = $this->getStruktur(3);
-        $rektor = $this->getStruktur(2);
-        $sekniv = $this->getStruktur(1);
+            ->where('struktur.level', '1')
+            ->orWhere('struktur.level', '2')
+            ->orWhere('struktur.level', '3')
+            ->where("struktur_child1.nama_struktur_child1", "0")
+            ->where("struktur_child2.nama_struktur_child2", "0")
+            ->orWhere('struktur_child1.child1_level', '1')
+            ->select('user.id_user', 'struktur.id_struktur', 'struktur.nama_struktur', 'struktur_child1.id_struktur_child1', 'struktur_child1.nama_struktur_child1')
+            ->get();
 
         array_push(
             $status,
             [
-                "id_user" => $keuangan->id_user,
-                "id_struktur" => $keuangan->id_struktur_child1,
-                "nama_struktur" => $keuangan->nama_struktur_child1,
-                "status" => $this->statusNull($keuangan->id_struktur_child1, $pengajuan->id_pengajuan, 2)
+                "id_user" => $struktur[3]->id_user,
+                "id_struktur" => $struktur[3]->id_struktur_child1,
+                "nama_struktur" => $struktur[3]->nama_struktur_child1,
+                "status" => $this->statusNull($struktur[3]->id_struktur_child1, $pengajuan->id_pengajuan, 2)
             ],
             [
-                "id_user" => $warek2->id_user,
-                "id_struktur" => $warek2->id_struktur,
-                "nama_struktur" => $warek2->nama_struktur,
-                "status" => $this->statusNull($warek2->id_struktur, $pengajuan->id_pengajuan, 2, $warek)
+                "id_user" => $struktur[2]->id_user,
+                "id_struktur" => $struktur[2]->id_struktur,
+                "nama_struktur" => $struktur[2]->nama_struktur,
+                "status" => $this->statusNull($struktur[2]->id_struktur, $pengajuan->id_pengajuan, 2, $warek)
             ],
             [
-                "id_user" => $rektor->id_user,
-                "id_struktur" => $rektor->id_struktur,
-                "nama_struktur" => $rektor->nama_struktur,
-                "status" => $this->statusNull($rektor->id_struktur, $pengajuan->id_pengajuan, 2)
+                "id_user" => $struktur[1]->id_user,
+                "id_struktur" => $struktur[1]->id_struktur,
+                "nama_struktur" => $struktur[1]->nama_struktur,
+                "status" => $this->statusNull($struktur[1]->id_struktur, $pengajuan->id_pengajuan, 2)
             ],
             [
-                "id_user" => $keuangan->id_user,
-                "id_struktur" => $keuangan->id_struktur_child1,
-                "nama_struktur" => $keuangan->nama_struktur_child1,
-                "status" => $this->statusNull($keuangan->id_struktur_child1, $pengajuan->id_pengajuan, 3)
+                "id_user" => $struktur[3]->id_user,
+                "id_struktur" => $struktur[3]->id_struktur_child1,
+                "nama_struktur" => $struktur[3]->nama_struktur_child1,
+                "status" => $this->statusNull($struktur[3]->id_struktur_child1, $pengajuan->id_pengajuan, 3)
             ],
             [
-                "id_user" => $sekniv->id_user,
-                "id_struktur" => $sekniv->id_struktur,
-                "nama_struktur" => $sekniv->nama_struktur,
-                "status" => $this->statusNull($sekniv->id_struktur, $pengajuan->id_pengajuan, 2)
+                "id_user" => $struktur[0]->id_user,
+                "id_struktur" => $struktur[0]->id_struktur,
+                "nama_struktur" => $struktur[0]->nama_struktur,
+                "status" => $this->statusNull($struktur[0]->id_struktur, $pengajuan->id_pengajuan, 2)
             ]
         );
 
