@@ -59,6 +59,8 @@ class PengajuanController extends Controller
 
         $data = pengajuanModel::create($request->all());
 
+        $this->autoProccess($request, $data->id_pengajuan, "Input data pengajuan");
+
         $id_user = $this->status($data->id_pengajuan);
         $id_user = $id_user->original['data'];
 
@@ -69,8 +71,6 @@ class PengajuanController extends Controller
                 "status_message" => false
             ]);
         }
-
-        $this->autoProccess($request, $data->id_pengajuan, "Input data pengajuan");
 
         return response()->json([
             'data' => $data ? $data : "Failed, data not saved"
@@ -130,7 +130,7 @@ class PengajuanController extends Controller
     {
         $data = pengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
             ->join('message', 'pengajuan.id_pengajuan', 'message.id_pengajuan')
-            ->where('pengajuan.id_pengajuan', $params1)
+            ->where('message.id_pengajuan', $params1)
             ->where('message.id_user', $params2)
             ->select("pengajuan.*", "message.status_message")
             ->first();
@@ -148,14 +148,14 @@ class PengajuanController extends Controller
 
     public function countMessage($params)
     {
-        $data = pengajuanModel::join('message', 'pengajuan.id_pengajuan', 'message.id_pengajuan')
+        $data = pengajuanModel::join('message', 'pengajuan.id_user', 'message.id_user')
             ->where('pengajuan.id_user', '!=', $params)
             ->where('message.id_user', $params)
             ->where('message.status_message', false)
             ->count();
 
         return response()->json([
-            'data' => $data ? $data : "0"
+            'data' => $data
         ]);
     }
 
@@ -168,7 +168,7 @@ class PengajuanController extends Controller
             ->count();
 
         return response()->json([
-            'data' => $data ? $data : "0"
+            'data' => $data
         ]);
     }
 
@@ -419,7 +419,7 @@ class PengajuanController extends Controller
 
     public function getEmail($params)
     {
-        $data =  UserModel::where('id_user', $params)->first();
+        $data =  UserModel::where('id_user', $params)->select('email', 'fullname')->first();
         return $data ? $data : null;
     }
 
@@ -444,7 +444,7 @@ class PengajuanController extends Controller
             if ($models->email) {
                 Mail::send('mail', $datab, function ($message) use ($models) {
                     $message->to($models->email, $models->fullname)->subject('APERKAT - Universitas Teknologi Sumbawa');
-                    $message->from('EMAIL_UTS', 'APERKAT');
+                    $message->from('admin.aperkat@uts.ac.id', 'APERKAT');
                 });
             }
         }
