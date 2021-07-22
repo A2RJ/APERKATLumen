@@ -12,6 +12,7 @@ use App\Models\pengajuanModel;
 use App\Models\MessageModel;
 use App\Models\pengajuanHistoryModel;
 use Barryvdh\DomPDF\Facade as PDF;
+use Illuminate\Support\Env;
 
 class PengajuanController extends Controller
 {
@@ -59,18 +60,20 @@ class PengajuanController extends Controller
 
         $data = pengajuanModel::create($request->all());
 
-        $this->autoProccess($request, $data->id_pengajuan, "Input data pengajuan");
-
         $id_user = $this->status($data->id_pengajuan);
-        $id_user = $id_user->original['data'];
+        $id_user = array_unique($id_user->original['data'], SORT_REGULAR);
 
-        for ($i = 0; $i < count($id_user); $i++) {
-            MessageModel::firstOrCreate([
+        $array = [];
+        foreach ($id_user as $key) {
+            $array[] = [
                 "id_pengajuan" => $data->id_pengajuan,
-                "id_user" => $id_user[$i]["id_user"],
+                "id_user" => $key["id_user"],
                 "status_message" => false
-            ]);
+            ];
         }
+        MessageModel::insert($array);
+
+        $this->autoProccess($request, $data->id_pengajuan, "Input data pengajuan");
 
         return response()->json([
             'data' => $data ? $data : "Failed, data not saved"
@@ -97,12 +100,16 @@ class PengajuanController extends Controller
     public function byUser($params)
     {
         $data = pengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+            ->join('message', 'pengajuan.id_pengajuan', 'message.id_pengajuan')
             ->join('user', 'pengajuan.id_user', 'user.id_user')
             ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
             ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
             ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-            ->select("pengajuan.*", "user.fullname", 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
-            ->where('pengajuan.id_user', $params)->paginate();
+            ->where('message.id_user', $params)
+            ->where('pengajuan.id_user', $params)
+            ->select('user.id_user', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
+            ->orderBy('pengajuan.id_pengajuan', 'DESC')
+            ->paginate();
 
         return response()->json([
             'data' => $data ? $data : "Failed, data not found"
@@ -117,9 +124,7 @@ class PengajuanController extends Controller
      */
     public function show($params)
     {
-        $data = pengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
-            ->select("pengajuan.*")
-            ->find($params);
+        $data = pengajuanModel::find($params);
 
         return response()->json([
             'data' => $data ? $data : "Failed, data not found"
@@ -128,27 +133,19 @@ class PengajuanController extends Controller
 
     public function showPengajuan($params1, $params2)
     {
-        $data = pengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
-            ->join('message', 'pengajuan.id_pengajuan', 'message.id_pengajuan')
-            ->where('message.id_pengajuan', $params1)
-            ->where('message.id_user', $params2)
-            ->select("pengajuan.*", "message.status_message")
-            ->first();
-
-        if ($data->status_message !== 1) {
-            MessageModel::where('id_pengajuan', $params1)
-                ->where('id_user', $params2)
-                ->update(["status_message" => true]);
-        }
+        $data = MessageModel::where('id_pengajuan', $params1)
+            ->where('id_user', $params2)
+            ->where('status_message', false)
+            ->update(['status_message' => 1]);
 
         return response()->json([
-            'data' => $data ? $data : "Failed, data not found"
+            'data' => $data
         ]);
     }
 
     public function countMessage($params)
     {
-        $data = pengajuanModel::join('message', 'pengajuan.id_user', 'message.id_user')
+        $data = pengajuanModel::join('message', 'pengajuan.id_pengajuan', 'message.id_pengajuan')
             ->where('pengajuan.id_user', '!=', $params)
             ->where('message.id_user', $params)
             ->where('message.status_message', false)
@@ -161,7 +158,7 @@ class PengajuanController extends Controller
 
     public function countMessageSelf($params)
     {
-        $data = pengajuanModel::join('message', 'pengajuan.id_user', 'message.id_user')
+        $data = pengajuanModel::join('message', 'pengajuan.id_pengajuan', 'message.id_pengajuan')
             ->where('pengajuan.id_user', $params)
             ->where('message.id_user', $params)
             ->where('message.status_message', false)
@@ -172,6 +169,12 @@ class PengajuanController extends Controller
         ]);
     }
 
+    public function updateMessage($params1, $params2)
+    {
+        MessageModel::where('id_pengajuan', $params1)
+            ->where('id_user', $params2)
+            ->update(["status_message" => false]);
+    }
     /**
      * Update the specified resource in storage.
      *
@@ -184,7 +187,7 @@ class PengajuanController extends Controller
         $data = pengajuanModel::find($params);
         $data ? $data->update($request->all()) : false;
 
-        // $this->updateMessage($params, $request->id_user);
+        $this->updateMessage($params, $request->id_user);
         $this->autoProccess($request, $params);
 
         return response()->json([
@@ -207,6 +210,7 @@ class PengajuanController extends Controller
         INNER JOIN validasi ON pengajuan_history.id_pengajuan = validasi.id_pengajuan_history
         WHERE pengajuan.id_pengajuan = ' . $params);
         DB::statement('DELETE pengajuan FROM pengajuan WHERE pengajuan.id_pengajuan = ' . $params);
+        DB::statement('DELETE message FROM pengajuan WHERE message.id_pengajuan = ' . $params);
 
         $anggaran_digunakan = pengajuanModel::where('kode_rkat', $pengajuan->kode_rkat)
             ->where('validasi_status', 3)
@@ -231,6 +235,7 @@ class PengajuanController extends Controller
         INNER JOIN validasi ON pengajuan_history.id_pengajuan = validasi.id_pengajuan_history
         WHERE pengajuan.id_user = ' . $params);
         DB::statement('DELETE pengajuan FROM pengajuan WHERE pengajuan.id_user = ' . $params);
+        // Lakukan join untuk hapus data message berdasarkan id_pengajuan
         $update = RKATModel::where('id_user', $params)->update(['anggaran_digunakan' => '0']);
 
         return response()->json([
@@ -297,7 +302,7 @@ class PengajuanController extends Controller
             });
 
         $pengajuan = pengajuanModel::find($params);
-        $pengajuan_history = pengajuanHistoryModel::where('kode_rkat', $pengajuan->kode_rkat)->latest()->first();
+        $pengajuan_history = pengajuanHistoryModel::where('kode_rkat', $request->kode_rkat)->latest()->first();
 
         if ($request->id_atasan) {
             $userStruktur = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
@@ -326,12 +331,12 @@ class PengajuanController extends Controller
             $nama_struktur = $userStruktur->nama_struktur_child2;
         }
 
-        $pengajuan->validasi_status = $request->status;
-
         if ($userStruktur->level == 1 && $request->status == 2) {
             $pengajuan->status_pengajuan = 'approved';
-            $pengajuan->save();
         }
+        $pengajuan->validasi_status = $request->status;
+        $pengajuan->nama_status = $nama_struktur;
+        $pengajuan->save();
 
         if ($request->message == "Sudah dilakukan pencairan" && $request->status == 3) {
             $anggaran_digunakan = pengajuanModel::where('kode_rkat', $request->kode_rkat)
@@ -343,7 +348,7 @@ class PengajuanController extends Controller
             RKATModel::where('id_rkat', $request->kode_rkat)
                 ->update(['anggaran_digunakan' => $anggaran_digunakan]);
 
-            $this->updateMessage($params, $pengajuan->id_user);
+            $this->updateMessage($params, $request->id_user);
         }
 
         validasiModel::create([
@@ -356,15 +361,6 @@ class PengajuanController extends Controller
         // $this->sendMail($params, $request->status, $nama_struktur);
 
         return true;
-    }
-
-    public function updateMessage($params1, $params2)
-    {
-        MessageModel::where('id_pengajuan', $params1)
-            ->where('id_user', $params2)
-            ->update([
-                "status_message" => false
-            ]);
     }
 
     /**
@@ -425,9 +421,6 @@ class PengajuanController extends Controller
 
     public function sendMail($params, $status, $struktur)
     {
-        $data = $this->status($params);
-        $data = $data->original['data'];
-
         if ($status == '0') {
             $status = ' Ditolak oleh:' . $struktur;
         } else if ($status == '1') {
@@ -438,13 +431,17 @@ class PengajuanController extends Controller
             $status = ' Diterima oleh:' . $struktur;
         }
 
-        for ($i = 0; $i < count($data); $i++) {
+        $data = $this->status($params);
+        $data = array_unique($data->original['data'], SORT_REGULAR);
+
+        foreach ($data as $key) {
             $datab = array('name' => 'Pemberitahuan pengajuan ' . $data[0]['nama_struktur'] . $status);
-            $models = $this->getEmail($data[$i]['id_user']);
+            $models = $this->getEmail($key['id_user']);
+            
             if ($models->email) {
                 Mail::send('mail', $datab, function ($message) use ($models) {
                     $message->to($models->email, $models->fullname)->subject('APERKAT - Universitas Teknologi Sumbawa');
-                    $message->from('admin.aperkat@uts.ac.id', 'APERKAT');
+                    $message->from(Env('MAIL_USERNAME'), 'APERKAT');
                 });
             }
         }

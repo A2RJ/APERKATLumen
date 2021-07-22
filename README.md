@@ -12,9 +12,9 @@
 - [OK] Saat login maka otomatis mengambil data jumlah notif berdasarkan id_user setiap 2 detik
 - [OK] List pengajuan join message where message.id_user = id_user atasan
 - [OK] List Abu untuk data message.status_message = false (Belum terbaca)
-- [OK] Saat atasan membuka detail pengajuan, kirim id_user & id_pengajuan & set status_message = true (Sudah terbaca)
-- [x] Saat atasan melakukan aksi maka set message.status_message pemilik pengajuan = false
-- [x] Hitung pengajuan dia sendiri where message.status_message = false && pengajuan.id_user = id_user pemilik
+- [OK] Saat atasan membuka detail pengajuan, setelah halaman selesai diload maka jalankan fungsi kirim id_user & id_pengajuan & set status_message = true (Sudah terbaca)
+- [OK] Hitung pengajuan dia sendiri
+- [OK] Saat atasan melakukan aksi maka set message.status_message pemilik pengajuan = false
 
 ## Build Setup
 
