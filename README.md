@@ -16,6 +16,8 @@
 - [OK] Hitung pengajuan dia sendiri
 - [OK] Saat atasan melakukan aksi maka set message.status_message pemilik pengajuan = false
 
+# 23/07/2021
+- Kelola struktur
 ## Build Setup
 
 ```bash

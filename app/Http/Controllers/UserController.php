@@ -59,22 +59,31 @@ class UserController extends Controller
         ]);
 
 
-        $data = UserModel::create($request->all());
-        $data->password = Hash::make($request->input('password'));
-        $data->save();
-        if ($data->id_struktur_child1 == 0) {
+        $dataUser = UserModel::create($request->all());
+        $dataUser->password = Hash::make($request->input('password'));
+        $dataUser->save();
+
+        if ($request->id_struktur_child1 == 0 && $request->id_struktur_child2 == 0) {
             $id = struktur_child1Model::where('id_struktur', $request->id_struktur)->where('nama_struktur_child1', '0')->select('id_struktur_child1')->first();
-            $data->id_struktur_child1 = $id['id_struktur_child1'];
+            $data = UserModel::find($dataUser->id_user);
+            $data->id_struktur_child1 = $id->id_struktur_child1;
             $data->save();
+            if ($request->id_struktur_child2 == 0) {
+                $id = struktur_child2Model::where('id_struktur_child1', $id->id_struktur_child1)->where('nama_struktur_child2', '0')->select('id_struktur_child2')->first();
+                $data = UserModel::find($dataUser->id_user);
+                $data->id_struktur_child2 = $id->id_struktur_child2;
+                $data->save();
+            }
         }
-        if ($data->id_struktur_child2 == 0) {
+        if ($request->id_struktur_child1 !== 0 && $request->id_struktur_child2 == 0) {
             $id = struktur_child2Model::where('id_struktur_child1', $request->id_struktur_child1)->where('nama_struktur_child2', '0')->select('id_struktur_child2')->first();
-            $data->id_struktur_child2 = $id['id_struktur_child2'];
+            $data = UserModel::find($dataUser->id_user);
+            $data->id_struktur_child2 = $id->id_struktur_child2;
             $data->save();
         }
 
         return response()->json([
-            'data' => $data ? "Success data was added" : "Failed add data"
+            'data' => $dataUser ? "Success data was added" : "Failed add data"
         ]);
     }
 
@@ -152,7 +161,7 @@ class UserController extends Controller
     {
         $data = UserModel::find();
         if ($data) $data->delete();
-        
+
         return response()->json([
             'data' => $data ? "Success delete data" : "Failed, data not found"
         ]);
@@ -162,7 +171,7 @@ class UserController extends Controller
     {
         $data = UserModel::find($params);
         if ($data) $data->delete();
-        
+
         return response()->json([
             'data' => $data ? "Success delete data" : "Failed, data not found"
         ]);

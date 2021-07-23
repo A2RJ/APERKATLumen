@@ -12,7 +12,6 @@ use App\Models\pengajuanModel;
 use App\Models\MessageModel;
 use App\Models\pengajuanHistoryModel;
 use Barryvdh\DomPDF\Facade as PDF;
-use Illuminate\Support\Env;
 
 class PengajuanController extends Controller
 {
@@ -435,13 +434,13 @@ class PengajuanController extends Controller
         $data = array_unique($data->original['data'], SORT_REGULAR);
 
         foreach ($data as $key) {
-            $datab = array('name' => 'Pemberitahuan pengajuan ' . $data[0]['nama_struktur'] . $status);
+            $data = array('name' => 'Pemberitahuan pengajuan ' . $data[0]['nama_struktur'] . $status);
             $models = $this->getEmail($key['id_user']);
             
             if ($models->email) {
-                Mail::send('mail', $datab, function ($message) use ($models) {
+                Mail::send('mail', $data, function ($message) use ($models) {
                     $message->to($models->email, $models->fullname)->subject('APERKAT - Universitas Teknologi Sumbawa');
-                    $message->from(Env('MAIL_USERNAME'), 'APERKAT');
+                    $message->from(env('MAIL_USERNAME'), 'APERKAT');
                 });
             }
         }
