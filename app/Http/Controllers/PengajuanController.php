@@ -72,10 +72,10 @@ class PengajuanController extends Controller
         }
         MessageModel::insert($array);
 
-        $this->autoProccess($request, $data->id_pengajuan, "Input data pengajuan");
+        $this->autoProccess($request, $data->id_pengajuan);
 
         return response()->json([
-            'data' => $data ? $data : "Failed, data not saved"
+            'data' => $data
         ]);
     }
 
@@ -291,6 +291,23 @@ class PengajuanController extends Controller
      */
     public function autoProccess($request, $params)
     {
+        $pengajuan = pengajuanModel::find($params);
+        $pengajuan->status_pengajuan = $request->status_pengajuan;
+        $pengajuan->validasi_status = $request->status;
+        $pengajuan->nama_status = $request->nama;
+        $pengajuan->save();
+
+        if ($request->status == 3) {
+            $anggaran_digunakan = pengajuanModel::where('kode_rkat', $request->kode_rkat)
+                ->where('pencairan', '!=', null)
+                ->sum('biaya_program');
+
+            RKATModel::where('id_rkat', $request->kode_rkat)
+                ->update(['anggaran_digunakan' => $anggaran_digunakan]);
+
+            $this->updateMessage($params, $request->id_user);
+        }
+
         pengajuanModel::query()
             ->where('id_pengajuan', $params)
             ->each(function ($oldPost) {
@@ -300,66 +317,17 @@ class PengajuanController extends Controller
                 $newPost->save();
             });
 
-        $pengajuan = pengajuanModel::find($params);
-        $pengajuan_history = pengajuanHistoryModel::where('kode_rkat', $request->kode_rkat)->latest()->first();
-
-        if ($request->id_atasan) {
-            $userStruktur = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
-                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
-                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                ->select('struktur.id_struktur', 'struktur.nama_struktur', 'user.id_struktur_child1', 'struktur_child1.nama_struktur_child1', 'struktur_child2.id_struktur_child2', 'struktur_child2.nama_struktur_child2')
-                ->where('user.id_user', $request->id_atasan)
-                ->first();
-        } else {
-            $userStruktur = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
-                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
-                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                ->select('struktur.id_struktur', 'struktur.nama_struktur', 'user.id_struktur_child1', 'struktur_child1.nama_struktur_child1', 'struktur_child2.id_struktur_child2', 'struktur_child2.nama_struktur_child2')
-                ->where('user.id_user', $request->id_user)
-                ->first();
-        }
-
-        if ($userStruktur->nama_struktur == true && $userStruktur->nama_struktur_child1 == '0' && $userStruktur->nama_struktur_child2 == '0') {
-            $id_struktur = $userStruktur->id_struktur;
-            $nama_struktur = $userStruktur->nama_struktur;
-        } else if ($userStruktur->nama_struktur == true && $userStruktur->nama_struktur_child1 == true && $userStruktur->nama_struktur_child2 == '0') {
-            $id_struktur = $userStruktur->id_struktur_child1;
-            $nama_struktur = $userStruktur->nama_struktur_child1;
-        } else if ($userStruktur->nama_struktur == true && $userStruktur->nama_struktur_child1 == true && $userStruktur->nama_struktur_child2 == true) {
-            $id_struktur = $userStruktur->id_struktur_child2;
-            $nama_struktur = $userStruktur->nama_struktur_child2;
-        }
-
-        if ($userStruktur->level == 1 && $request->status == 2) {
-            $pengajuan->status_pengajuan = 'approved';
-        }
-        $pengajuan->validasi_status = $request->status;
-        $pengajuan->nama_status = $nama_struktur;
-        $pengajuan->save();
-
-        if ($request->message == "Sudah dilakukan pencairan" && $request->status == 3) {
-            $anggaran_digunakan = pengajuanModel::where('kode_rkat', $request->kode_rkat)
-                ->where('validasi_status', $request->status)
-                ->orWhere('kode_rkat', $request->kode_rkat)
-                ->where('status_pengajuan', 'approved')
-                ->sum('biaya_program');
-
-            RKATModel::where('id_rkat', $request->kode_rkat)
-                ->update(['anggaran_digunakan' => $anggaran_digunakan]);
-
-            $this->updateMessage($params, $request->id_user);
-        }
+        $pengajuan_history = pengajuanHistoryModel::where('kode_rkat', $request->kode_rkat)
+            ->select('id_pengajuan')->latest()->first();
 
         validasiModel::create([
             "id_pengajuan_history" => $pengajuan_history->id_pengajuan,
-            "id_struktur" => $id_struktur,
+            "id_struktur" => $request->id_struktur,
             "status_validasi" => $request->status,
-            "message" => $nama_struktur . " - " . $request->message
+            "message" => $request->nama . " - " . $request->message
         ]);
 
-        // $this->sendMail($params, $request->status, $nama_struktur);
-
-        return true;
+        $this->sendMail($params, $request->status, $request->nama);
     }
 
     /**
@@ -412,38 +380,35 @@ class PengajuanController extends Controller
         return $data->id_user;
     }
 
-    public function getEmail($params)
-    {
-        $data =  UserModel::where('id_user', $params)->select('email', 'fullname')->first();
-        return $data ? $data : null;
-    }
-
-    public function sendMail($params, $status, $struktur)
+    public function sendMail($params, $status, $nama)
     {
         if ($status == '0') {
-            $status = ' Ditolak oleh:' . $struktur;
+            $status = ' telah ditolak oleh:' . $nama;
         } else if ($status == '1') {
-            $status = ' Diinput/direvisi oleh:' . $struktur;
+            $status = ' telah diinput/direvisi oleh:' . $nama;
         } else if ($status == '3') {
-            $status = ' Pencairan oleh:' . $struktur;
+            $status = ' Pencairan oleh:' . $nama;
         } else {
-            $status = ' Diterima oleh:' . $struktur;
+            $status = ' telah diterima oleh:' . $nama;
         }
 
         $data = $this->status($params);
         $data = array_unique($data->original['data'], SORT_REGULAR);
-
+        $values = [];
         foreach ($data as $key) {
-            $data = array('name' => 'Pemberitahuan pengajuan ' . $data[0]['nama_struktur'] . $status);
-            $models = $this->getEmail($key['id_user']);
-            
-            if ($models->email) {
-                Mail::send('mail', $data, function ($message) use ($models) {
-                    $message->to($models->email, $models->fullname)->subject('APERKAT - Universitas Teknologi Sumbawa');
-                    $message->from(env('MAIL_USERNAME'), 'APERKAT');
-                });
-            }
+            $values[] = $key['id_user'];
         }
+        $values = UserModel::whereIn('id_user', $values)->where('email', '!=', '')->select('email')->get();
+        $email = [];
+        foreach ($values as $key) {
+            $email[] = $key['email'];
+        }
+        $template = array('name' => $nama, 'pesan' => 'Pemberitahuan pengajuan ' . $data[0]['nama_struktur'] . $status);
+
+        Mail::send('mail', $template, function ($message) use ($email) {
+            $message->to($email)->subject('APERKAT - Universitas Teknologi Sumbawa');
+            $message->from(env('MAIL_USERNAME'), 'Notif APERKAT');
+        });
     }
 
     public function status($params)
@@ -461,9 +426,8 @@ class PengajuanController extends Controller
         if ($pengajuan->level == "1" || $pengajuan->level == "2") {
             array_push($status, [
                 "id_user" => $this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, $pengajuan->nama_struktur_child2),
-                "id_struktur" => $pengajuan->id_struktur,
                 "nama_struktur" => $pengajuan->nama_struktur,
-                "status" => $this->statusNull($pengajuan->id_struktur, $pengajuan->id_pengajuan, 1)
+                "status" => $this->statusNull($this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, $pengajuan->nama_struktur_child2), $pengajuan->id_pengajuan, 1)
             ]);
         } elseif ($pengajuan->level == "3" || $pengajuan->level == "4") {
             if ($pengajuan->nama_struktur_child1 == "0") {
@@ -471,9 +435,8 @@ class PengajuanController extends Controller
                     $status,
                     [
                         "id_user" => $this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, $pengajuan->nama_struktur_child2),
-                        "id_struktur" => $pengajuan->id_struktur,
                         "nama_struktur" => $pengajuan->nama_struktur,
-                        "status" => $this->statusNull($pengajuan->id_struktur, $pengajuan->id_pengajuan, 1)
+                        "status" => $this->statusNull($this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, $pengajuan->nama_struktur_child2), $pengajuan->id_pengajuan, 1)
                     ]
                 );
             } else {
@@ -481,15 +444,13 @@ class PengajuanController extends Controller
                     $status,
                     [
                         "id_user" => $this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, '0'),
-                        "id_struktur" => $pengajuan->id_struktur_child1,
                         "nama_struktur" => $pengajuan->nama_struktur_child1,
-                        "status" => $this->statusNull($pengajuan->id_struktur_child1, $pengajuan->id_pengajuan, 1)
+                        "status" => $this->statusNull($this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, '0'), $pengajuan->id_pengajuan, 1)
                     ],
                     [
                         "id_user" => $this->getID($pengajuan->nama_struktur, '0', '0'),
-                        "id_struktur" => $pengajuan->id_struktur,
                         "nama_struktur" => $pengajuan->nama_struktur,
-                        "status" => $this->statusNull($pengajuan->id_struktur, $pengajuan->id_pengajuan, 2, $pengajuan->level == 3 ? $warek : false)
+                        "status" => $this->statusNull($this->getID($pengajuan->nama_struktur, '0', '0'), $pengajuan->id_pengajuan, 2, $pengajuan->level == 3 ? $warek : false)
                     ]
                 );
                 if ($pengajuan->level == 3) $warek = $warek + 1;
@@ -500,9 +461,8 @@ class PengajuanController extends Controller
                     $status,
                     [
                         "id_user" => $this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, '0'),
-                        "id_struktur" => $pengajuan->id_struktur_child1,
                         "nama_struktur" => $pengajuan->nama_struktur_child1,
-                        "status" => $this->statusNull($pengajuan->id_struktur_child1, $pengajuan->id_pengajuan, 1)
+                        "status" => $this->statusNull($this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, '0'), $pengajuan->id_pengajuan, 1)
                     ]
                 );
             } else {
@@ -510,15 +470,13 @@ class PengajuanController extends Controller
                     $status,
                     [
                         "id_user" => $this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, $pengajuan->nama_struktur_child2),
-                        "id_struktur" => $pengajuan->id_struktur_child2,
                         "nama_struktur" => $pengajuan->nama_struktur_child2,
-                        "status" => $this->statusNull($pengajuan->id_struktur_child2, $pengajuan->id_pengajuan, 1)
+                        "status" => $this->statusNull($this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, $pengajuan->nama_struktur_child2), $pengajuan->id_pengajuan, 1)
                     ],
                     [
                         "id_user" => $this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, '0'),
-                        "id_struktur" => $pengajuan->id_struktur_child1,
                         "nama_struktur" => $pengajuan->nama_struktur_child1,
-                        "status" => $this->statusNull($pengajuan->id_struktur_child1, $pengajuan->id_pengajuan, 2)
+                        "status" => $this->statusNull($this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, '0'), $pengajuan->id_pengajuan, 2)
                     ]
                 );
             }
@@ -547,33 +505,28 @@ class PengajuanController extends Controller
             $status,
             [
                 "id_user" => $struktur[3]->id_user,
-                "id_struktur" => $struktur[3]->id_struktur_child1,
                 "nama_struktur" => $struktur[3]->nama_struktur_child1,
-                "status" => $this->statusNull($struktur[3]->id_struktur_child1, $pengajuan->id_pengajuan, 2)
+                "status" => $this->statusNull($struktur[3]->id_user, $pengajuan->id_pengajuan, 2)
             ],
             [
                 "id_user" => $struktur[2]->id_user,
-                "id_struktur" => $struktur[2]->id_struktur,
                 "nama_struktur" => $struktur[2]->nama_struktur,
-                "status" => $this->statusNull($struktur[2]->id_struktur, $pengajuan->id_pengajuan, 2, $warek)
+                "status" => $this->statusNull($struktur[2]->id_user, $pengajuan->id_pengajuan, 2, $warek)
             ],
             [
                 "id_user" => $struktur[1]->id_user,
-                "id_struktur" => $struktur[1]->id_struktur,
                 "nama_struktur" => $struktur[1]->nama_struktur,
-                "status" => $this->statusNull($struktur[1]->id_struktur, $pengajuan->id_pengajuan, 2)
+                "status" => $this->statusNull($struktur[1]->id_user, $pengajuan->id_pengajuan, 2)
             ],
             [
                 "id_user" => $struktur[3]->id_user,
-                "id_struktur" => $struktur[3]->id_struktur_child1,
                 "nama_struktur" => $struktur[3]->nama_struktur_child1,
-                "status" => $this->statusNull($struktur[3]->id_struktur_child1, $pengajuan->id_pengajuan, 3)
+                "status" => $this->statusNull($struktur[3]->id_user, $pengajuan->id_pengajuan, 3)
             ],
             [
                 "id_user" => $struktur[0]->id_user,
-                "id_struktur" => $struktur[0]->id_struktur,
                 "nama_struktur" => $struktur[0]->nama_struktur,
-                "status" => $this->statusNull($struktur[0]->id_struktur, $pengajuan->id_pengajuan, 2)
+                "status" => $this->statusNull($struktur[0]->id_user, $pengajuan->id_pengajuan, 2)
             ]
         );
 

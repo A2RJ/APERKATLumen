@@ -18,6 +18,9 @@
 
 # 23/07/2021
 - Kelola struktur
+
+# 24/07/2021
+- Disable tombol submit saat proses input data
 ## Build Setup
 
 ```bash

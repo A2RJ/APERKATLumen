@@ -1,2 +1,2 @@
-<h1>Hi, User</h1>
-<p>{{ $name }}.</p>
+<h1>Hi, {{ $name}} </h1>
+<p>{{ $pesan }}.</p>

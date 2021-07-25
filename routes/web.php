@@ -21,6 +21,7 @@ $router->get('/', function () use ($router) {
         'about_API' => "API SUBMISSION"
     ]);
 });
+$router->get('/sendMail/{params}', 'PengajuanController@sendMail');
 
 $router->group(['middleware' => 'auth', 'prefix' => 'api'], function ($router) {
     $router->get('me', 'AuthController@me');
@@ -37,7 +38,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
     $router->group(['prefix' => 'pengajuan'], function () use ($router) {
         $router->get('/', 'PengajuanController@index');
-        $router->get('/sendMail', 'PengajuanController@sendMail');
+        $router->get('/sendMail/{params}', 'PengajuanController@sendMail');
         $router->get('/pdf_pengajuan/{params}', 'PengajuanController@PDF_Pengajuan');
         $router->get('/destroy/{params}', 'PengajuanController@destroy');
         $router->get('/countMessage/{params}', 'PengajuanController@countMessage');
