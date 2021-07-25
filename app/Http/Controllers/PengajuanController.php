@@ -403,7 +403,7 @@ class PengajuanController extends Controller
         foreach ($values as $key) {
             $email[] = $key['email'];
         }
-        $template = array('name' => $nama, 'pesan' => 'Pemberitahuan pengajuan ' . $data[0]['nama_struktur'] . $status);
+        $template = array('name' => '', 'pesan' => 'Pemberitahuan pengajuan ' . $data[0]['nama_struktur'] . $status);
 
         Mail::send('mail', $template, function ($message) use ($email) {
             $message->to($email)->subject('APERKAT - Universitas Teknologi Sumbawa');
