@@ -327,7 +327,7 @@ class PengajuanController extends Controller
             "message" => $request->nama . " - " . $request->message
         ]);
 
-        $this->sendMail($params, $request->status, $request->nama);
+        // $this->sendMail($params, $request->status, $request->nama);
     }
 
     /**
