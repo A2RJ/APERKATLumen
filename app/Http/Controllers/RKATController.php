@@ -82,7 +82,9 @@ class RKATController extends Controller
      */
     public function show($params)
     {
-        $data = RKATModel::find($params);
+        $data = RKATModel::join('user', 'rkat.id_user', 'user.id_user')
+        ->select('rkat.*', 'user.fullname')
+        ->find($params);
 
         return response()->json([
             'data' => $data ? $data : "Failed, data not found"
@@ -144,7 +146,7 @@ class RKATController extends Controller
         return Response()->json([
             'data' => RKATModel::where('id_user', $params)
                 ->orWhere('kode_rkat', $params)
-                ->select('rkat.id_rkat as value', 'rkat.kode_rkat as text')
+                ->select('rkat.id_rkat as code', 'rkat.kode_rkat as label')
                 ->get()
         ]);
     }

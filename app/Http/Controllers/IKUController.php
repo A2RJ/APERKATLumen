@@ -19,7 +19,7 @@ class IKUController extends Controller
     {
         return Response()->json([
             'data' => DB::table('iku_parent')
-                ->select('id_iku_parent as value', 'iku_parent as text')
+                ->select('id_iku_parent as code', 'iku_parent as label')
                 ->get()
         ]);
     }
@@ -54,7 +54,7 @@ class IKUController extends Controller
     {
         $data = DB::table('iku_child1')
             ->where('id_iku_parent', $params)
-            ->select('id_iku_child1 as value', 'iku_child1 as text')
+            ->select('id_iku_child1 as code', 'iku_child1 as label')
             ->get();
 
         return response()->json([
@@ -68,7 +68,7 @@ class IKUController extends Controller
     {
         $data = DB::table('iku_child1')
             ->where('id_iku_child1', $params)
-            ->select('id_iku_child1 as value', 'iku_child1 as text')
+            ->select('id_iku_child1 as code', 'iku_child1 as label')
             ->first();
 
         return response()->json([
@@ -82,7 +82,7 @@ class IKUController extends Controller
     {
         $data = DB::table('iku_child2')
             ->where('id_iku_child1', $params)
-            ->select('id_iku_child2 as value', 'iku_child2 as text')
+            ->select('id_iku_child2 as code', 'iku_child2 as label')
             ->get();
 
         return response()->json([
@@ -96,7 +96,7 @@ class IKUController extends Controller
     {
         $data = DB::table('iku_child2')
             ->where('id_iku_child2', $params)
-            ->select('id_iku_child2 as value', 'iku_child2 as text')
+            ->select('id_iku_child2 as code', 'iku_child2 as label')
             ->first();
 
         return response()->json([

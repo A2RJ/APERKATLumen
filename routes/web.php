@@ -94,6 +94,9 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/datauser/{params}', 'UserController@datauser');
         $router->get('/sub_struktur/{params}', 'UserController@sub_struktur');
         $router->get('/sub_sub_struktur/{params}', 'UserController@sub_sub_struktur');
+        $router->get('/getStruktur/{params}', 'UserController@getStruktur');
+        $router->get('/getSub_struktur/{params}', 'UserController@getSub_struktur');
+        $router->get('/getSub_sub_struktur/{params}', 'UserController@getSub_sub_struktur');
         $router->post('/', 'UserController@store');
         $router->post('/{params}', 'UserController@update');
     });

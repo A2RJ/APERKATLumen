@@ -34,7 +34,7 @@ class UserController extends Controller
         return Response()->json([
             'data' => UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
-                ->select('user.id_user as value', 'user.fullname as text')
+                ->select('user.id_user as code', 'user.fullname as label')
                 ->get()
         ]);
     }
@@ -225,21 +225,54 @@ class UserController extends Controller
     {
         return Response()->json([
             'data' => strukturModel::orderBy('level')
-                ->select('id_struktur as value', 'nama_struktur as text')->get()
+                ->select('id_struktur as code', 'nama_struktur as label')->get()
+        ]);
+    }
+
+    public function getStruktur($params)
+    {
+        return Response()->json([
+            'data' => strukturModel::orderBy('level')
+                ->where('id_struktur', $params)
+                ->select('id_struktur as code', 'nama_struktur as label')->get()
         ]);
     }
 
     public function sub_struktur($params)
     {
         return Response()->json([
-            'data' => struktur_child1Model::where('id_struktur', $params)->where('nama_struktur_child1', '!=', '0')->select('id_struktur_child1 as value', 'nama_struktur_child1 as text')->get()
+            'data' => struktur_child1Model::where('id_struktur', $params)
+                ->where('nama_struktur_child1', '!=', '0')
+                ->select('id_struktur_child1 as code', 'nama_struktur_child1 as label')
+                ->get()
+        ]);
+    }
+
+    public function getSub_struktur($params)
+    {
+        return Response()->json([
+            'data' => struktur_child1Model::where('id_struktur_child1', $params)
+                ->select('id_struktur_child1 as code', 'nama_struktur_child1 as label')
+                ->get()
         ]);
     }
 
     public function sub_sub_struktur($params)
     {
         return Response()->json([
-            'data' => struktur_child2Model::where('id_struktur_child1', $params)->where('nama_struktur_child2', '!=', '0')->select('id_struktur_child2 as value', 'nama_struktur_child2 as text')->get()
+            'data' => struktur_child2Model::where('id_struktur_child1', $params)
+                ->where('nama_struktur_child2', '!=', '0')
+                ->select('id_struktur_child2 as code', 'nama_struktur_child2 as label')
+                ->get()
+        ]);
+    }
+
+    public function getSub_sub_struktur($params)
+    {
+        return Response()->json([
+            'data' => struktur_child2Model::where('id_struktur_child2', $params)
+                ->select('id_struktur_child2 as code', 'nama_struktur_child2 as label')
+                ->get()
         ]);
     }
 }
