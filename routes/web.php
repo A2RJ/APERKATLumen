@@ -53,6 +53,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/getGrafik/{params}', 'PengajuanController@getGrafik');
         $router->get('/pengajuanSubordinate/{params}', 'PengajuanController@pengajuanSubordinate');
         $router->get('/getSubordinatesGrafik/{params}', 'PengajuanController@getSubordinatesGrafik');
+        $router->get('/uploadrkat/{params}', 'PengajuanController@uploadrkat');
         $router->get('/showPengajuan/{params1}/{params2}', 'PengajuanController@showPengajuan');
         $router->post('/', 'PengajuanController@store');
         $router->post('/upload', 'PengajuanController@upload');
@@ -73,6 +74,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/kodeRKATByValue/{params}', 'RKATController@kodeRKATByValue');
         $router->get('/byKode/{params}', 'RKATController@byKode');
         $router->post('/', 'RKATController@store');
+        $router->post('/uploadRKAT', 'RKATController@uploadRKAT');
         $router->post('/{params}', 'RKATController@update');
     });
 

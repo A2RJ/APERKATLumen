@@ -69,6 +69,7 @@ $app->singleton(
 );
 // Aliases
 $app->alias('mailer', \Illuminate\Contracts\Mail\Mailer::class);
+$app->alias('FastExcel', Rap2hpoutre\FastExcel\Facades\FastExcel::class);
 // Make Queue
 $app->make('queue');
 

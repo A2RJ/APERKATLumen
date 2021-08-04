@@ -209,7 +209,7 @@ class PengajuanController extends Controller
         INNER JOIN validasi ON pengajuan_history.id_pengajuan = validasi.id_pengajuan_history
         WHERE pengajuan.id_pengajuan = ' . $params);
         DB::statement('DELETE pengajuan FROM pengajuan WHERE pengajuan.id_pengajuan = ' . $params);
-        DB::statement('DELETE message FROM pengajuan WHERE message.id_pengajuan = ' . $params);
+        // DB::statement('DELETE message FROM pengajuan WHERE message.id_pengajuan = ' . $params);
 
         $anggaran_digunakan = pengajuanModel::where('kode_rkat', $pengajuan->kode_rkat)
             ->where('validasi_status', 3)

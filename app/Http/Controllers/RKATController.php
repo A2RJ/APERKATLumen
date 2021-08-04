@@ -7,6 +7,7 @@ use App\Models\RKATModel;
 use App\Models\UserModel;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade as PDF;
+use Rap2hpoutre\FastExcel\FastExcel;
 
 class RKATController extends Controller
 {
@@ -83,8 +84,8 @@ class RKATController extends Controller
     public function show($params)
     {
         $data = RKATModel::join('user', 'rkat.id_user', 'user.id_user')
-        ->select('rkat.*', 'user.fullname')
-        ->find($params);
+            ->select('rkat.*', 'user.fullname')
+            ->find($params);
 
         return response()->json([
             'data' => $data ? $data : "Failed, data not found"
@@ -228,5 +229,62 @@ class RKATController extends Controller
 
         $pdf = PDF::loadView('rkat', $data);
         return $pdf->download('RKAT-' . date("Y-m-d") . '.pdf');
+    }
+
+    public function uploadRKAT(Request $request)
+    {
+        if ($request->hasFile('file')) {
+            $fileName = uniqid(40) . "." . $request->file('file')->getClientOriginalExtension();
+            $request->file('file')->move('import', $fileName);
+
+            $collection = (new FastExcel)->import('import/' . $fileName);
+            $array = [];
+            foreach ($collection as $value) {
+                $array[] = [
+                    "id_user" => $value["id_user"],
+                    "kode_rkat" => $value["No"],
+                    "sasaran_strategi" => "-",
+                    "indikator_sasaran_strategi" => "-",
+                    "nama_program" => "-",
+                    "program_kerja" => $value["Program Kerja"],
+                    "deskripsi" => $value["Deskripsi Program Kerja"],
+                    "tujuan" => "-",
+                    "mulai_program" => is_string($value["Mulai"]) ? str_ireplace("/","-",$value["Mulai"]) : $value["Mulai"]->format('d-m-Y'),
+                    "selesai_program" => is_string($value["Selesai"]) ? str_ireplace("/","-",$value["Selesai"]) : $value["Selesai"]->format('d-m-Y'),
+                    "tempat" => $value["Tempat"],
+                    "sumber_anggaran" => "-",
+                    "rencara_anggaran" => "-",
+                    "total_anggaran" => $value["Total Anggaran"],
+                    "anggaran_digunakan" => "-",
+                ];
+            }
+
+            return response()->json(['data' => $array]);
+        } else {
+            return false;
+        }
+    }
+
+    public function exportXls()
+    {
+        return (new FastExcel(RKATModel::all()))->download('export/RKAT.xlsx', function ($rkat) {
+            return [
+                "id_user" => $rkat["id_user"],
+                "kode_rkat" => $rkat["kode_rkat"],
+                "sasaran_strategi" => $rkat["sasaran_strategi"],
+                "indikator_sasaran_strategi" => $rkat["indikator_sasaran_strategi"],
+                "nama_program" => $rkat["nama_program"],
+                "program_kerja" => $rkat["program_kerja"],
+                "deskripsi" => $rkat["deskripsi"],
+                "tujuan" => $rkat["tujuan"],
+                "mulai_program" => $rkat["mulai_program"],
+                "selesai_program" => $rkat["selesai_program"],
+                "tempat" => $rkat["tempat"],
+                "sumber_anggaran" => $rkat["sumber_anggaran"],
+                "rencara_anggaran" => $rkat["rencara_anggaran"],
+                "total_anggaran" => $rkat["total_anggaran"],
+                "anggaran_digunakan" => $rkat["anggaran_digunakan"]
+            ];
+        });
     }
 }
