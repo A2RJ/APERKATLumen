@@ -32,14 +32,14 @@ class PengajuanController extends Controller
     {
         return Response()->json([
             'data' => UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
-            ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
-            ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
-            ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
-            ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-            ->where('pengajuan.pencairan', '!=', null)
-            ->select('user.id_user', 'pengajuan.id_pengajuan', 'pengajuan.pencairan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at')
-            ->orderBy('pengajuan.id_pengajuan', 'DESC')
-            ->get()
+                ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+                ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                ->where('pengajuan.pencairan', '!=', null)
+                ->select('user.id_user', 'pengajuan.id_pengajuan', 'pengajuan.pencairan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at')
+                ->orderBy('pengajuan.id_pengajuan', 'DESC')
+                ->get()
         ]);
     }
 
@@ -392,7 +392,7 @@ class PengajuanController extends Controller
             ->where("struktur_child2.nama_struktur_child2", $c)
             ->select('user.id_user')
             ->first();
-        return $data->id_user;
+        return $data ? $data->id_user : null;
     }
 
     public function sendMail($params, $status, $nama)
@@ -433,29 +433,33 @@ class PengajuanController extends Controller
             ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
             ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
             ->where('pengajuan.id_pengajuan', $params)
-            ->select('pengajuan.id_pengajuan', 'user.id_struktur', 'user.id_struktur_child1', 'user.id_struktur_child2', 'struktur.nama_struktur', 'struktur.level', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
+            ->select('pengajuan.id_pengajuan', 'struktur.level', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
             ->first();
-
+        // return response()->json([
+        //     "data" => $pengajuan
+        // ]);
+        $sekniv = 0;
         $warek = 0;
         $status = [];
         if ($pengajuan->level == "1" || $pengajuan->level == "2") {
-            if ($pengajuan->nama_struktur_child1 == "0"){
+            if ($pengajuan->nama_struktur_child1 == "0") {
                 array_push($status, [
                     "id_user" => $this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, $pengajuan->nama_struktur_child2),
                     "nama_struktur" => $pengajuan->nama_struktur,
                     "status" => $this->statusNull($this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, $pengajuan->nama_struktur_child2), $pengajuan->id_pengajuan, 1)
                 ]);
-            }else{
+            } else {
                 array_push($status, [
                     "id_user" => $this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, '0'),
                     "nama_struktur" => $pengajuan->nama_struktur_child1,
                     "status" => $this->statusNull($this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, '0'), $pengajuan->id_pengajuan, 1)
                 ],
                 [
-                    "id_user" => $this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, $pengajuan->nama_struktur_child2),
+                    "id_user" => $this->getID($pengajuan->nama_struktur, '0', '0'),
                     "nama_struktur" => $pengajuan->nama_struktur,
-                    "status" => $this->statusNull($this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, $pengajuan->nama_struktur_child2), $pengajuan->id_pengajuan, 2)
+                    "status" => $this->statusNull($this->getID($pengajuan->nama_struktur, '0', '0'), $pengajuan->id_pengajuan, 2, $pengajuan->level == 1 ? $sekniv : false)
                 ]);
+                if ($pengajuan->level == 1) $sekniv = $sekniv + 1;
             }
         } elseif ($pengajuan->level == "3" || $pengajuan->level == "4") {
             if ($pengajuan->nama_struktur_child1 == "0") {
@@ -558,7 +562,7 @@ class PengajuanController extends Controller
             [
                 "id_user" => $struktur[0]->id_user,
                 "nama_struktur" => $struktur[0]->nama_struktur,
-                "status" => $this->statusNull($struktur[0]->id_user, $pengajuan->id_pengajuan, 2)
+                "status" => $this->statusNull($struktur[0]->id_user, $pengajuan->id_pengajuan, 2, $sekniv)
             ]
         );
 
@@ -585,7 +589,6 @@ class PengajuanController extends Controller
                 ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                ->where('struktur.level', '!=', $userStruktur->level)
                 ->where('user.id_user', '!=', $userStruktur->id_user)
                 ->where('message.id_user', $userStruktur->id_user)
                 ->select('user.id_user', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
@@ -598,7 +601,6 @@ class PengajuanController extends Controller
                 ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                // ->where('struktur.level', '!=', 1)
                 ->where('user.id_user', '!=', $userStruktur->id_user)
                 ->where('message.id_user', $userStruktur->id_user)
                 ->select('user.id_user', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
@@ -664,7 +666,7 @@ class PengajuanController extends Controller
                 ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                ->where('struktur.level', '!=', $userStruktur->level)
+                // ->where('struktur.level', '!=', $userStruktur->level)
                 ->where('user.id_user', '!=', $userStruktur->id_user)
                 ->select('user.id_user', 'user.fullname', 'rkat.created_at', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
                 ->distinct()

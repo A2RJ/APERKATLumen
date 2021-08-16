@@ -3,7 +3,8 @@
 - [OK] level dir keuangan
 - [OK] level user UPT dibawah Sekniv = prodi
 - [OK] Bug status
-- [NEXT] Custom halaman dir keuangan
+- [OK] Custom halaman dir keuangan
+- [NEXT] Print All pengajuan yg ready di tabel custom halaman
 - Testing revisi diatas
 - Kelola struktur (belakangan saja)
 
