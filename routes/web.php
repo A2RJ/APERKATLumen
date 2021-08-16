@@ -38,6 +38,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
     $router->group(['prefix' => 'pengajuan'], function () use ($router) {
         $router->get('/', 'PengajuanController@index');
+        $router->get('/pengajuanSelesai', 'PengajuanController@pengajuanSelesai');
         $router->get('/sendMail/{params}', 'PengajuanController@sendMail');
         $router->get('/pdf_pengajuan/{params}', 'PengajuanController@PDF_Pengajuan');
         $router->get('/destroy/{params}', 'PengajuanController@destroy');

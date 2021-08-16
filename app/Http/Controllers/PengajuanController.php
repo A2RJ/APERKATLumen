@@ -28,6 +28,21 @@ class PengajuanController extends Controller
         ]);
     }
 
+    public function pengajuanSelesai()
+    {
+        return Response()->json([
+            'data' => UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
+            ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+            ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+            ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+            ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+            ->where('pengajuan.pencairan', '!=', null)
+            ->select('user.id_user', 'pengajuan.id_pengajuan', 'pengajuan.pencairan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at')
+            ->orderBy('pengajuan.id_pengajuan', 'DESC')
+            ->get()
+        ]);
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -327,7 +342,7 @@ class PengajuanController extends Controller
             "message" => $request->nama . " - " . $request->message
         ]);
 
-        $this->sendMail($params, $request->status, $request->nama);
+        // $this->sendMail($params, $request->status, $request->nama);
     }
 
     /**
@@ -424,11 +439,24 @@ class PengajuanController extends Controller
         $warek = 0;
         $status = [];
         if ($pengajuan->level == "1" || $pengajuan->level == "2") {
-            array_push($status, [
-                "id_user" => $this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, $pengajuan->nama_struktur_child2),
-                "nama_struktur" => $pengajuan->nama_struktur,
-                "status" => $this->statusNull($this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, $pengajuan->nama_struktur_child2), $pengajuan->id_pengajuan, 1)
-            ]);
+            if ($pengajuan->nama_struktur_child1 == "0"){
+                array_push($status, [
+                    "id_user" => $this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, $pengajuan->nama_struktur_child2),
+                    "nama_struktur" => $pengajuan->nama_struktur,
+                    "status" => $this->statusNull($this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, $pengajuan->nama_struktur_child2), $pengajuan->id_pengajuan, 1)
+                ]);
+            }else{
+                array_push($status, [
+                    "id_user" => $this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, '0'),
+                    "nama_struktur" => $pengajuan->nama_struktur_child1,
+                    "status" => $this->statusNull($this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, '0'), $pengajuan->id_pengajuan, 1)
+                ],
+                [
+                    "id_user" => $this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, $pengajuan->nama_struktur_child2),
+                    "nama_struktur" => $pengajuan->nama_struktur,
+                    "status" => $this->statusNull($this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, $pengajuan->nama_struktur_child2), $pengajuan->id_pengajuan, 2)
+                ]);
+            }
         } elseif ($pengajuan->level == "3" || $pengajuan->level == "4") {
             if ($pengajuan->nama_struktur_child1 == "0") {
                 array_push(
@@ -493,7 +521,11 @@ class PengajuanController extends Controller
             ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
             ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
             ->where('struktur.level', '1')
+            ->where("struktur_child1.nama_struktur_child1", "0")
+            ->where("struktur_child2.nama_struktur_child2", "0")
             ->orWhere('struktur.level', '2')
+            ->where("struktur_child1.nama_struktur_child1", "0")
+            ->where("struktur_child2.nama_struktur_child2", "0")
             ->orWhere('struktur.level', '3')
             ->where("struktur_child1.nama_struktur_child1", "0")
             ->where("struktur_child2.nama_struktur_child2", "0")

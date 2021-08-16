@@ -1,10 +1,12 @@
-# LumenSubmissionAPI
 # FOKUS
-# 23/07/2021
-- Kelola struktur
+# 15/08/2021
+- [OK] level dir keuangan
+- [OK] level user UPT dibawah Sekniv = prodi
+- [OK] Bug status
+- [NEXT] Custom halaman dir keuangan
+- Testing revisi diatas
+- Kelola struktur (belakangan saja)
 
-# 24/07/2021
-- loading function submit saat proses input data dan sending email
 ## Build Setup
 
 ```bash
@@ -15,7 +17,4 @@ $ npm install
 $ npm run dev
 
 ```
-# Input data user di phpmyadmin
-# Input data pengajuan di phpmyadmin
-# testing API/pengajuan/status
 

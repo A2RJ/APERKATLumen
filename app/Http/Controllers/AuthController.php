@@ -85,16 +85,16 @@ class AuthController extends Controller
             ->first();
         if ($userStruktur->level == 1) {
             $data = [
-                'level' => "sekniv"
+                'level' => $userStruktur->nama_struktur_child1 == "0" ? "sekniv" : "prodi"
             ];
         } else if ($userStruktur->level == 2) {
             $data = [
-                'level' => "rektor"
+                'level' => $userStruktur->nama_struktur_child1 == "0" ? "rektor" : "prodi"
             ];
         } else if ($userStruktur->level == 3 || $userStruktur->level == 4) {
             if ($userStruktur->nama_struktur_child1 == "0" && $userStruktur->nama_struktur_child2 == '0' || $userStruktur->child1_level == "1") {
                 $data = [
-                    'level' => 'warek'
+                    'level' => $userStruktur->child1_level == "1" ? 'dirKeuangan' : 'warek'
                 ];
             }else if ($userStruktur->nama_struktur_child1 !== "0" && $userStruktur->nama_struktur_child2 == '0' || $userStruktur->child1_level !== "1") {
                 $data = [
