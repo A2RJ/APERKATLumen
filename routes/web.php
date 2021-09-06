@@ -76,6 +76,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/byKode/{params}', 'RKATController@byKode');
         $router->post('/', 'RKATController@store');
         $router->post('/uploadRKAT', 'RKATController@uploadRKAT');
+        $router->post('/postImport/{params}', 'RKATController@postImport');
         $router->post('/{params}', 'RKATController@update');
     });
 
