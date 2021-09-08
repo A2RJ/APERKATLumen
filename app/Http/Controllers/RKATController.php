@@ -8,6 +8,7 @@ use App\Models\UserModel;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade as PDF;
 use Rap2hpoutre\FastExcel\FastExcel;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class RKATController extends Controller
 {
@@ -234,24 +235,24 @@ class RKATController extends Controller
     public function uploadRKAT(Request $request)
     {
         if ($request->hasFile('file')) {
-            // $fileName = uniqid(40) . "." . $request->file('file')->getClientOriginalExtension();
-            // $request->file('file')->move('import', $fileName);
-
             $collection = (new FastExcel)->import($request->file('file'));
             $array = [];
             $no = 1;
             foreach ($collection as $value) {
-                $array[] = [
-                    "no" => $no,
-                    "kode_rkat" => $value["No"],
-                    "program_kerja" => $value["Program Kerja"],
-                    "deskripsi" => $value["Deskripsi Program Kerja"],
-                    "mulai_program" => is_string($value["Mulai"]) ? str_ireplace("/", "-", $value["Mulai"]) : $value["Mulai"]->format('d-m-Y'),
-                    "selesai_program" => is_string($value["Selesai"]) ? str_ireplace("/", "-", $value["Selesai"]) : $value["Selesai"]->format('d-m-Y'),
-                    "tempat" => $value["Tempat"],
-                    "total_anggaran" => $value["Total Anggaran"]
-                ];
-                $no++;
+                $dataRKAT = RKATModel::where('kode_rkat', $value["No"])->select('kode_rkat')->first();
+                if ($dataRKAT == null) {
+                    $array[] = [
+                        "no" => $no,
+                        "kode_rkat" => $value["No"],
+                        "program_kerja" => $value["Program Kerja"],
+                        "deskripsi" => $value["Deskripsi Program Kerja"],
+                        "mulai_program" => is_string($value["Mulai"]) ? str_ireplace("/", "-", $value["Mulai"]) : $value["Mulai"]->format('d-m-Y'),
+                        "selesai_program" => is_string($value["Selesai"]) ? str_ireplace("/", "-", $value["Selesai"]) : $value["Selesai"]->format('d-m-Y'),
+                        "tempat" => $value["Tempat"],
+                        "total_anggaran" => $value["Total Anggaran"]
+                    ];
+                    $no++;
+                }
             }
 
             return response()->json(['data' => $array]);
@@ -278,17 +279,21 @@ class RKATController extends Controller
                 "program_kerja" => $value["program_kerja"],
                 "deskripsi" => $value["deskripsi"],
                 "tujuan" => "-",
-                "mulai_program" => $value["mulai_program"],
-                "selesai_program" => $value["selesai_program"],
+                "mulai_program" => date('Y-m-d', strtotime($value["mulai_program"])),
+                "selesai_program" => date('Y-m-d', strtotime($value["selesai_program"])),
                 "tempat" => $value["tempat"],
                 "sumber_anggaran" => "-",
                 "rencara_anggaran" => $value["total_anggaran"],
                 "anggaran_digunakan" => "0",
-                "total_anggaran" => $value["total_anggaran"],
+                "total_anggaran" => $value["total_anggaran"]
             ];
         }
-        
-        // return response()->json(['data' => $array]);
-        RKATModel::insert($array);
+
+        try {
+            RKATModel::insert($array);
+            return response()->json([true]);
+        } catch (ModelNotFoundException $th) {
+            return response()->json([false]);
+        }
     }
 }
