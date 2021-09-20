@@ -185,6 +185,30 @@ class RKATController extends Controller
     }
 
     /**
+     * Download all RKAT
+     */
+    public function pdf_selected_rkat(Request $request)
+    {
+        $user = UserModel::join('rkat', 'user.id_user', 'rkat.id_user')
+            ->whereIn('rkat.id_rkat', $request->all())
+            ->select('user.fullname')->distinct()->get();
+
+        $rkat = UserModel::join('rkat', 'user.id_user', 'rkat.id_user')
+            ->whereIn('rkat.id_rkat', $request->all())
+            ->select('user.fullname', 'rkat.kode_rkat', 'rkat.program_kerja', 'rkat.deskripsi', 'rkat.mulai_program', 'rkat.selesai_program', 'rkat.tempat', 'rkat.total_anggaran')
+            ->orderBy('user.fullname')
+            ->get();
+
+        $data = [
+            'user' => $user,
+            'rkat' => $rkat
+        ];
+        return response()->json([
+           $data
+        ]);
+    }
+
+    /**
      * Download RKAT by user
      */
     public function PDF_RKAT_Id($params)
@@ -285,7 +309,9 @@ class RKATController extends Controller
                 "sumber_anggaran" => "-",
                 "rencara_anggaran" => $value["total_anggaran"],
                 "anggaran_digunakan" => "0",
-                "total_anggaran" => $value["total_anggaran"]
+                "total_anggaran" => $value["total_anggaran"],
+                "created_at" => date('Y-m-d'),
+                "updated_at" => date('Y-m-d')
             ];
         }
 

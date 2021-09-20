@@ -41,6 +41,8 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/pengajuanSelesai', 'PengajuanController@pengajuanSelesai');
         $router->get('/sendMail/{params}', 'PengajuanController@sendMail');
         $router->get('/pdf_pengajuan/{params}', 'PengajuanController@PDF_Pengajuan');
+        $router->get('/pdf_all_pengajuan/{params}', 'PengajuanController@PDF_ALL_Pengajuan');
+        $router->get('/pdf_selected_pengajuan/{params}', 'PengajuanController@pdf_selected_pengajuan');
         $router->get('/destroy/{params}', 'PengajuanController@destroy');
         $router->get('/countMessage/{params}', 'PengajuanController@countMessage');
         $router->get('/countMessageSelf/{params}', 'PengajuanController@countMessageSelf');
@@ -77,6 +79,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->post('/', 'RKATController@store');
         $router->post('/uploadRKAT', 'RKATController@uploadRKAT');
         $router->post('/postImport/{params}', 'RKATController@postImport');
+        $router->post('/pdf_selected_rkat', 'RKATController@pdf_selected_rkat');
         $router->post('/{params}', 'RKATController@update');
     });
 
