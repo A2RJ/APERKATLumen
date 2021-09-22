@@ -79,7 +79,8 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->post('/', 'RKATController@store');
         $router->post('/uploadRKAT', 'RKATController@uploadRKAT');
         $router->post('/postImport/{params}', 'RKATController@postImport');
-        $router->post('/pdf_selected_rkat', 'RKATController@pdf_selected_rkat');
+        $router->post('/printRows', 'RKATController@printRows');
+        $router->post('/deleteRows', 'RKATController@deleteRows');
         $router->post('/{params}', 'RKATController@update');
     });
 

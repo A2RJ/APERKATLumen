@@ -185,9 +185,9 @@ class RKATController extends Controller
     }
 
     /**
-     * Download all RKAT
+     * print selected RKAT
      */
-    public function pdf_selected_rkat(Request $request)
+    public function printRows(Request $request)
     {
         $user = UserModel::join('rkat', 'user.id_user', 'rkat.id_user')
             ->whereIn('rkat.id_rkat', $request->all())
@@ -203,8 +203,21 @@ class RKATController extends Controller
             'user' => $user,
             'rkat' => $rkat
         ];
+        
+        $pdf = PDF::loadView('rkat', $data);
+        return $pdf->download('RKAT-' . date("Y-m-d") . '.pdf');
+    }
+
+    /**
+     * delete selected RKAT
+     */
+    public function deleteRows(Request $request)
+    {
+        $data = RKATModel::find($request->all());
+        $data ? $data->each->delete() : false;
+
         return response()->json([
-           $data
+            $data
         ]);
     }
 
