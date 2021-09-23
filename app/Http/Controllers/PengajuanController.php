@@ -779,7 +779,6 @@ class PengajuanController extends Controller
         ]);
     }
 
-    // pdf pengajuan by id
     public function pdfById($params)
     {
         $user = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
@@ -805,10 +804,6 @@ class PengajuanController extends Controller
 
     public function pdfByUSer(Request $request)
     {
-        /**
-         * Get list user by id pengajuan
-         * Get list pengajuan
-         */
         $user = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
             ->select('user.fullname')
             ->orderBy('user.fullname')
