@@ -260,6 +260,19 @@ class PengajuanController extends Controller
     }
 
     /**
+     * delete selected pengajuan
+     */
+    public function deleteRows(Request $request)
+    {
+        $data = pengajuanModel::find($request->all());
+        $data ? $data->each->delete() : false;
+
+        return response()->json([
+            $data
+        ]);
+    }
+
+    /**
      * Get the specified history from storage.
      *
      * @param  int  $params
@@ -449,16 +462,19 @@ class PengajuanController extends Controller
                     "status" => $this->statusNull($this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, $pengajuan->nama_struktur_child2), $pengajuan->id_pengajuan, 1)
                 ]);
             } else {
-                array_push($status, [
-                    "id_user" => $this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, '0'),
-                    "nama_struktur" => $pengajuan->nama_struktur_child1,
-                    "status" => $this->statusNull($this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, '0'), $pengajuan->id_pengajuan, 1)
-                ],
-                [
-                    "id_user" => $this->getID($pengajuan->nama_struktur, '0', '0'),
-                    "nama_struktur" => $pengajuan->nama_struktur,
-                    "status" => $this->statusNull($this->getID($pengajuan->nama_struktur, '0', '0'), $pengajuan->id_pengajuan, 2, $pengajuan->level == 1 ? $sekniv : false)
-                ]);
+                array_push(
+                    $status,
+                    [
+                        "id_user" => $this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, '0'),
+                        "nama_struktur" => $pengajuan->nama_struktur_child1,
+                        "status" => $this->statusNull($this->getID($pengajuan->nama_struktur, $pengajuan->nama_struktur_child1, '0'), $pengajuan->id_pengajuan, 1)
+                    ],
+                    [
+                        "id_user" => $this->getID($pengajuan->nama_struktur, '0', '0'),
+                        "nama_struktur" => $pengajuan->nama_struktur,
+                        "status" => $this->statusNull($this->getID($pengajuan->nama_struktur, '0', '0'), $pengajuan->id_pengajuan, 2, $pengajuan->level == 1 ? $sekniv : false)
+                    ]
+                );
                 if ($pengajuan->level == 1) $sekniv = $sekniv + 1;
             }
         } elseif ($pengajuan->level == "3" || $pengajuan->level == "4") {
@@ -763,52 +779,51 @@ class PengajuanController extends Controller
         ]);
     }
 
-    // pdf pengajuan
-    public function PDF_Pengajuan($params)
+    // pdf pengajuan by id
+    public function pdfById($params)
     {
-        $pengajuan =  pengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
-            ->join('user', 'pengajuan.id_user', 'user.id_user')
-            ->select('user.fullname', 'rkat.kode_rkat', 'pengajuan.latar_belakang', 'pengajuan.sasaran', 'pengajuan.target_capaian', 'pengajuan.bentuk_pelaksanaan_program', 'pengajuan.tempat_program', 'pengajuan.tanggal', 'pengajuan.bidang_terkait', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status')
+        $user = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
+            ->select('user.fullname')
+            ->orderBy('user.fullname')
             ->where('pengajuan.id_pengajuan', $params)
-            ->first();
+            ->get();
+        $pengajuan = pengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+            ->join('user', 'pengajuan.id_user', 'user.id_user')
+            ->select('user.fullname', 'rkat.kode_rkat', 'pengajuan.latar_belakang', 'pengajuan.sasaran', 'pengajuan.target_capaian', 'pengajuan.bentuk_pelaksanaan_program', 'pengajuan.tempat_program', 'pengajuan.tanggal', 'pengajuan.bidang_terkait', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status')
+            ->orderBy('user.fullname')
+            ->where('pengajuan.id_pengajuan', $params)
+            ->get();
 
         $data = [
+            'user' => $user,
             'pengajuan' => $pengajuan,
-            'fullname' => $pengajuan ? $pengajuan->fullname : null
         ];
 
         $pdf = PDF::loadView('pengajuan', $data)->setPaper('a4', 'landscape');
         return $pdf->download('pengajuan-' . date("Y-m-d") . '.pdf');
     }
 
-    public function PDF_ALL_Pengajuan($params)
+    public function pdfByUSer(Request $request)
     {
-        $pengajuan =  pengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+        /**
+         * Get list user by id pengajuan
+         * Get list pengajuan
+         */
+        $user = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
+            ->select('user.fullname')
+            ->orderBy('user.fullname')
+            ->whereIn('pengajuan.id_pengajuan', $request->all())
+            ->get();
+        $pengajuan = pengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
             ->join('user', 'pengajuan.id_user', 'user.id_user')
             ->select('user.fullname', 'rkat.kode_rkat', 'pengajuan.latar_belakang', 'pengajuan.sasaran', 'pengajuan.target_capaian', 'pengajuan.bentuk_pelaksanaan_program', 'pengajuan.tempat_program', 'pengajuan.tanggal', 'pengajuan.bidang_terkait', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status')
-            ->where('pengajuan.id_user', $params)
-            ->first();
+            ->orderBy('user.fullname')
+            ->whereIn('pengajuan.id_pengajuan', $request->all())
+            ->get();
 
         $data = [
+            'user' => $user,
             'pengajuan' => $pengajuan,
-            'fullname' => $pengajuan ? $pengajuan->fullname : null
-        ];
-
-        $pdf = PDF::loadView('pengajuan', $data)->setPaper('a4', 'landscape');
-        return $pdf->download('pengajuan-' . date("Y-m-d") . '.pdf');
-    }
-
-    public function PDF_Selected_Pengajuan($params)
-    {
-        $pengajuan =  pengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
-            ->join('user', 'pengajuan.id_user', 'user.id_user')
-            ->select('user.fullname', 'rkat.kode_rkat', 'pengajuan.latar_belakang', 'pengajuan.sasaran', 'pengajuan.target_capaian', 'pengajuan.bentuk_pelaksanaan_program', 'pengajuan.tempat_program', 'pengajuan.tanggal', 'pengajuan.bidang_terkait', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status')
-            ->whereIn('pengajuan.id_pengajuan', $params)
-            ->first();
-
-        $data = [
-            'pengajuan' => $pengajuan,
-            'fullname' => $pengajuan ? $pengajuan->fullname : null
         ];
 
         $pdf = PDF::loadView('pengajuan', $data)->setPaper('a4', 'landscape');

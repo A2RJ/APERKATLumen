@@ -40,9 +40,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/', 'PengajuanController@index');
         $router->get('/pengajuanSelesai', 'PengajuanController@pengajuanSelesai');
         $router->get('/sendMail/{params}', 'PengajuanController@sendMail');
-        $router->get('/pdf_pengajuan/{params}', 'PengajuanController@PDF_Pengajuan');
-        $router->get('/pdf_all_pengajuan/{params}', 'PengajuanController@PDF_ALL_Pengajuan');
-        $router->get('/pdf_selected_pengajuan/{params}', 'PengajuanController@pdf_selected_pengajuan');
+        $router->get('/pdf_pengajuan/{params}', 'PengajuanController@pdfById');
         $router->get('/destroy/{params}', 'PengajuanController@destroy');
         $router->get('/countMessage/{params}', 'PengajuanController@countMessage');
         $router->get('/countMessageSelf/{params}', 'PengajuanController@countMessageSelf');
@@ -60,6 +58,8 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/showPengajuan/{params1}/{params2}', 'PengajuanController@showPengajuan');
         $router->post('/', 'PengajuanController@store');
         $router->post('/upload', 'PengajuanController@upload');
+        $router->post('/pdfByUSer', 'PengajuanController@pdfByUSer');
+        $router->post('/deleteRows', 'PengajuanController@deleteRows');
         $router->post('/approve/{params}', 'PengajuanController@approve');
         $router->post('/decline/{params}', 'PengajuanController@decline');
         $router->post('/{params}', 'PengajuanController@update');
