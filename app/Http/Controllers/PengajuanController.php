@@ -779,35 +779,13 @@ class PengajuanController extends Controller
         ]);
     }
 
-    public function pdfById($params)
-    {
-        $user = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
-            ->select('user.fullname')
-            ->orderBy('user.fullname')
-            ->where('pengajuan.id_pengajuan', $params)
-            ->get();
-        $pengajuan = pengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
-            ->join('user', 'pengajuan.id_user', 'user.id_user')
-            ->select('user.fullname', 'rkat.kode_rkat', 'pengajuan.latar_belakang', 'pengajuan.sasaran', 'pengajuan.target_capaian', 'pengajuan.bentuk_pelaksanaan_program', 'pengajuan.tempat_program', 'pengajuan.tanggal', 'pengajuan.bidang_terkait', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status')
-            ->orderBy('user.fullname')
-            ->where('pengajuan.id_pengajuan', $params)
-            ->get();
-
-        $data = [
-            'user' => $user,
-            'pengajuan' => $pengajuan,
-        ];
-
-        $pdf = PDF::loadView('pengajuan', $data)->setPaper('a4', 'landscape');
-        return $pdf->download('pengajuan-' . date("Y-m-d") . '.pdf');
-    }
-
     public function pdfByUSer(Request $request)
     {
         $user = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
             ->select('user.fullname')
             ->orderBy('user.fullname')
             ->whereIn('pengajuan.id_pengajuan', $request->all())
+            ->distinct()
             ->get();
         $pengajuan = pengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
             ->join('user', 'pengajuan.id_user', 'user.id_user')

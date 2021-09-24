@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Laporan Pengajuan {{ $fullname }}</title>
+    <title>Laporan Pengajuan</title>
 
     <style>
         table {
@@ -31,7 +31,7 @@
 
 <body>
     <div class="head">
-        <h3>PENGAJUAN {{ $fullname }} TAHUN {{ date("Y") }}</h3>
+        <h3>PENGAJUAN TAHUN {{ date("Y") }}</h3>
     </div>
     <div class="container">
         @foreach ($user as $u)
@@ -71,7 +71,7 @@
                 </td>
                 <td>RP. {{ number_format($p->biaya_program) }}</td>
             </tr>
-            {{$total += $r->biaya_program}}
+            {{$total += $p->biaya_program}}
             @endif
             @endforeach
             <tr>
