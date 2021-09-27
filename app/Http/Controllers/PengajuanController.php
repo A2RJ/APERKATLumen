@@ -448,9 +448,7 @@ class PengajuanController extends Controller
             ->where('pengajuan.id_pengajuan', $params)
             ->select('pengajuan.id_pengajuan', 'struktur.level', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
             ->first();
-        // return response()->json([
-        //     "data" => $pengajuan
-        // ]);
+            
         $sekniv = 0;
         $warek = 0;
         $status = [];

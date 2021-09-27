@@ -84,6 +84,19 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->post('/{params}', 'RKATController@update');
     });
 
+    $router->group(['prefix' => 'nonrkat'], function () use ($router) {
+        $router->get('/destroy', 'NonRKATController@destroy');
+        $router->get('/{params}', 'NonRKATController@index');
+        $router->get('/id/{params}', 'NonRKATController@show');
+        $router->get('/deleteByUser/{params}', 'NonRKATController@deleteByUser');
+        $router->get('/subdivisi/{params}', 'NonRKATController@subDivisi');
+        $router->post('/', 'NonRKATController@store');
+        $router->post('/delete', 'NonRKATController@delete');
+        $router->post('/approved', 'NonRKATController@approved');
+        $router->post('/declined', 'NonRKATController@declined');
+        $router->post('/{params}', 'NonRKATController@update');
+    });
+
     $router->group(['prefix' => 'struktur'], function () use ($router) {
         $router->get('/', 'StrukturController@index');
         $router->get('/{params}', 'StrukturController@show');
