@@ -17,6 +17,7 @@ class NonRKATModel extends Model
      */
     protected $fillable = [
         "id_user",
+        "next",
         "nama_kegiatan",
         "tujuan",
         "latar_belakang",

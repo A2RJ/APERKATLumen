@@ -12,6 +12,7 @@ use App\Models\pengajuanModel;
 use App\Models\MessageModel;
 use App\Models\pengajuanHistoryModel;
 use Barryvdh\DomPDF\Facade as PDF;
+use Illuminate\Support\Arr;
 
 class PengajuanController extends Controller
 {
@@ -294,6 +295,14 @@ class PengajuanController extends Controller
     public function approve(Request $request, $params)
     {
         $this->updateMessage($params, $request->id_user);
+
+        $pengajuan = pengajuanModel::find($params);
+        $pengajuan->status_pengajuan = $request->status_pengajuan;
+        $pengajuan->validasi_status = $request->status;
+        $pengajuan->nama_status = $request->nama;
+        $pengajuan->next = $request->next;
+        $pengajuan->save();
+
         $data = $this->autoProccess($request, $params);
         return response()->json([
             'data' => $data ? "Submission was approved" : "Failed, data not found"
@@ -448,7 +457,7 @@ class PengajuanController extends Controller
             ->where('pengajuan.id_pengajuan', $params)
             ->select('pengajuan.id_pengajuan', 'struktur.level', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
             ->first();
-            
+
         $sekniv = 0;
         $warek = 0;
         $status = [];
@@ -667,6 +676,94 @@ class PengajuanController extends Controller
             "data" => $data
         ]);
     }
+
+    public function pengajuanNeedApproved($params)
+    {
+        $userStruktur = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+            ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+            ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+            ->where('id_user', $params)
+            ->first();
+
+        if ($userStruktur->level == 1) {
+            $data = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
+                ->join('message', 'pengajuan.id_pengajuan', 'message.id_pengajuan')
+                ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+                ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                ->where('pengajuan.next', $userStruktur->id_user)
+                ->where('user.id_user', '!=', $userStruktur->id_user)
+                ->where('message.id_user', $userStruktur->id_user)
+                ->where('pengajuan.lpj_kegiatan', '!=', null)
+                ->where('pengajuan.lpj_keuangan', '!=', null)
+                ->select('user.id_user', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
+                ->orderBy('pengajuan.id_pengajuan', 'DESC')
+                ->get();
+        } else if ($userStruktur->level == 2) {
+            $data = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
+                ->join('message', 'pengajuan.id_pengajuan', 'message.id_pengajuan')
+                ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+                ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                ->where('pengajuan.next', $userStruktur->id_user)
+                ->where('user.id_user', '!=', $userStruktur->id_user)
+                ->where('message.id_user', $userStruktur->id_user)
+                ->select('user.id_user', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
+                ->orderBy('pengajuan.id_pengajuan', 'DESC')
+                ->get();
+        } else if ($userStruktur->level == 3 || $userStruktur->level == 4) {
+            if ($userStruktur->child1_level == "1" || $userStruktur->level == 3) {
+                $data = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
+                    ->join('message', 'pengajuan.id_pengajuan', 'message.id_pengajuan')
+                    ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+                    ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                    ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                    ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                    ->where('pengajuan.next', $userStruktur->id_user)
+                    ->where('user.id_user', '!=', $userStruktur->id_user)
+                    ->where('message.id_user', $userStruktur->id_user)
+                    ->select('user.id_user', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
+                    ->orderBy('pengajuan.id_pengajuan', 'DESC')
+                    ->get();
+            } else {
+                $data = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
+                    ->join('message', 'pengajuan.id_pengajuan', 'message.id_pengajuan')
+                    ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+                    ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                    ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                    ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                    ->where('pengajuan.next', $userStruktur->id_user)
+                    ->where('user.id_user', '!=', $userStruktur->id_user)
+                    ->where('struktur.id_struktur', $userStruktur->id_struktur)
+                    ->where('message.id_user', $userStruktur->id_user)
+                    ->select('user.id_user', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
+                    ->orderBy('pengajuan.id_pengajuan', 'DESC')
+                    ->get();
+            }
+        } else if ($userStruktur->level == 5) {
+            $data = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
+                ->join('message', 'pengajuan.id_pengajuan', 'message.id_pengajuan')
+                ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+                ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                ->where('pengajuan.next', $userStruktur->id_user)
+                ->where('user.id_user', '!=', $userStruktur->id_user)
+                ->where('struktur.id_struktur', $userStruktur->id_struktur)
+                ->where('struktur_child1.id_struktur_child1', $userStruktur->id_struktur_child1)
+                ->where('message.id_user', $userStruktur->id_user)
+                ->select('user.id_user', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
+                ->orderBy('pengajuan.id_pengajuan', 'DESC')
+                ->get();
+        }
+
+        return response()->json([
+            "data" => $data
+        ]);
+    }
+
     public function getSubordinatesGrafik($params)
     {
         $userStruktur = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
@@ -785,6 +882,7 @@ class PengajuanController extends Controller
             ->whereIn('pengajuan.id_pengajuan', $request->all())
             ->distinct()
             ->get();
+
         $pengajuan = pengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
             ->join('user', 'pengajuan.id_user', 'user.id_user')
             ->select('user.fullname', 'rkat.kode_rkat', 'pengajuan.latar_belakang', 'pengajuan.sasaran', 'pengajuan.target_capaian', 'pengajuan.bentuk_pelaksanaan_program', 'pengajuan.tempat_program', 'pengajuan.tanggal', 'pengajuan.bidang_terkait', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status')

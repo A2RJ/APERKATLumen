@@ -79,6 +79,7 @@ class NonRKATController extends Controller
 
         $data = NonRKATModel::create($request->all());
         $this->createValidasi($data, $request->message, true);
+        $this->sendMail($data->id_nonrkat, $request->validasi_status, $request->nama_status);
         return response()->json([
             'data' => $data
         ]);
@@ -93,9 +94,16 @@ class NonRKATController extends Controller
     public function update(Request $request, $params)
     {
         $data = NonRKATModel::find($params)->update($request->all());
+        NonRKATvalidasiModel::create([
+            "nonrkat_id" => $params,
+            "id_struktur" => $request->id_user,
+            "status_validasi" => $request->validasi_status,
+            "message" => $request->nama_status . " - " . $request->message
+        ]);
+        $this->sendMail($params, $request->validasi_status, $request->nama_status);
 
         return response()->json([
-            'data' => [$params, $request->all()]
+            'data' => $data
         ]);
     }
 
@@ -203,6 +211,76 @@ class NonRKATController extends Controller
                 ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                ->where('user.id_user', '!=', $userStruktur->id_user)
+                ->where('struktur.id_struktur', $userStruktur->id_struktur)
+                ->where('struktur_child1.id_struktur_child1', $userStruktur->id_struktur_child1)
+                ->select('user.id_user', 'nonrkat.id_nonrkat', 'nonrkat.validasi_status', 'nonrkat.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'nonrkat.created_at')
+                ->orderBy('nonrkat.id_nonrkat', 'DESC')
+                ->get();
+        }
+
+        return response()->json([
+            "data" => $data
+        ]);
+    }
+
+    public function subDivisiNeed($params)
+    {
+        $userStruktur = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+            ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+            ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+            ->where('id_user', $params)
+            ->first();
+
+        if ($userStruktur->level == 1) {
+            $data = NonRKATModel::join('user', 'nonrkat.id_user', 'user.id_user')
+                ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                ->where('nonrkat.next', $userStruktur->id_user)
+                ->where('user.id_user', '!=', $userStruktur->id_user)
+                ->select('user.id_user', 'nonrkat.id_nonrkat', 'nonrkat.validasi_status', 'nonrkat.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'nonrkat.created_at')
+                ->orderBy('nonrkat.id_nonrkat', 'DESC')
+                ->get();
+        } else if ($userStruktur->level == 2) {
+            $data = NonRKATModel::join('user', 'nonrkat.id_user', 'user.id_user')
+                ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                ->where('nonrkat.next', $userStruktur->id_user)
+                ->where('user.id_user', '!=', $userStruktur->id_user)
+                ->select('user.id_user', 'nonrkat.id_nonrkat', 'nonrkat.validasi_status', 'nonrkat.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'nonrkat.created_at')
+                ->orderBy('nonrkat.id_nonrkat', 'DESC')
+                ->get();
+        } else if ($userStruktur->level == 3 || $userStruktur->level == 4) {
+            if ($userStruktur->child1_level == "1" || $userStruktur->level == 3) {
+                $data = NonRKATModel::join('user', 'nonrkat.id_user', 'user.id_user')
+                    ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                    ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                    ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                    ->where('nonrkat.next', $userStruktur->id_user)
+                    ->where('user.id_user', '!=', $userStruktur->id_user)
+                    ->select('user.id_user', 'nonrkat.id_nonrkat', 'nonrkat.validasi_status', 'nonrkat.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'nonrkat.created_at')
+                    ->orderBy('nonrkat.id_nonrkat', 'DESC')
+                    ->get();
+            } else {
+                $data = NonRKATModel::join('user', 'nonrkat.id_user', 'user.id_user')
+                    ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                    ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                    ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                    ->where('nonrkat.next', $userStruktur->id_user)
+                    ->where('user.id_user', '!=', $userStruktur->id_user)
+                    ->where('struktur.id_struktur', $userStruktur->id_struktur)
+                    ->select('user.id_user', 'nonrkat.id_nonrkat', 'nonrkat.validasi_status', 'nonrkat.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'nonrkat.created_at')
+                    ->orderBy('nonrkat.id_nonrkat', 'DESC')
+                    ->get();
+            }
+        } else if ($userStruktur->level == 5) {
+            $data = NonRKATModel::join('user', 'nonrkat.id_user', 'user.id_user')
+                ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                ->where('nonrkat.next', $userStruktur->id_user)
                 ->where('user.id_user', '!=', $userStruktur->id_user)
                 ->where('struktur.id_struktur', $userStruktur->id_struktur)
                 ->where('struktur_child1.id_struktur_child1', $userStruktur->id_struktur_child1)
@@ -386,7 +464,8 @@ class NonRKATController extends Controller
     {
         $data = NonRKATModel::where('id_nonrkat', $request->id)->update([
             "validasi_status" => $request->validasi_status,
-            "nama_status" => $request->nama_status
+            "nama_status" => $request->nama_status,
+            "next" => $request->next
         ]);
         NonRKATvalidasiModel::create([
             "nonrkat_id" => $request->id,
@@ -394,6 +473,7 @@ class NonRKATController extends Controller
             "status_validasi" => $request->validasi_status,
             "message" => $request->nama_status . " - " . $request->message
         ]);
+        $this->sendMail($request->id, $request->validasi_status, $request->nama_status);
 
         return response()->json([
             'data' => $data ? "Data was updated" : "Failed to update data"
@@ -415,7 +495,7 @@ class NonRKATController extends Controller
             "status_validasi" => $request->validasi_status,
             "message" => $request->nama_status . " - " . $request->message
         ]);
-
+        $this->sendMail($request->id, $request->validasi_status, $request->nama_status);
         return response()->json([
             'data' => $data ? "Data was updated" : "Failed to update data"
         ]);
@@ -426,33 +506,33 @@ class NonRKATController extends Controller
      */
     public function sendMail($params, $status, $nama)
     {
-        if ($status == '0') {
-            $status = ' telah ditolak oleh:' . $nama;
-        } else if ($status == '1') {
-            $status = ' telah diinput/direvisi oleh:' . $nama;
-        } else if ($status == '3') {
-            $status = ' Pencairan oleh:' . $nama;
-        } else {
-            $status = ' telah diterima oleh:' . $nama;
-        }
+        // if ($status == '0') {
+        //     $status = ' telah ditolak oleh:' . $nama;
+        // } else if ($status == '1') {
+        //     $status = ' telah diinput/direvisi oleh:' . $nama;
+        // } else if ($status == '3') {
+        //     $status = ' Pencairan oleh:' . $nama;
+        // } else {
+        //     $status = ' telah diterima oleh:' . $nama;
+        // }
 
-        $data = $this->status($params);
-        $data = array_unique($data->original['data'], SORT_REGULAR);
-        $values = [];
-        foreach ($data as $key) {
-            $values[] = $key['id_user'];
-        }
-        $values = UserModel::whereIn('id_user', $values)->where('email', '!=', '')->select('email')->get();
-        $email = [];
-        foreach ($values as $key) {
-            $email[] = $key['email'];
-        }
-        $template = array('name' => '', 'pesan' => 'Pemberitahuan pengajuan ' . $data[0]['nama_struktur'] . $status);
+        // $data = $this->status($params);
+        // $data = array_unique($data->original['data'], SORT_REGULAR);
+        // $values = [];
+        // foreach ($data as $key) {
+        //     $values[] = $key['id_user'];
+        // }
+        // $values = UserModel::whereIn('id_user', $values)->where('email', '!=', '')->select('email')->get();
+        // $email = [];
+        // foreach ($values as $key) {
+        //     $email[] = $key['email'];
+        // }
+        // $template = array('name' => '', 'pesan' => 'Pemberitahuan pengajuan ' . $data[0]['nama_struktur'] . $status);
 
-        Mail::send('mail', $template, function ($message) use ($email) {
-            $message->to($email)->subject('APERKAT - Universitas Teknologi Sumbawa');
-            $message->from(env('MAIL_USERNAME'), 'Notif APERKAT');
-        });
+        // Mail::send('mail', $template, function ($message) use ($email) {
+        //     $message->to($email)->subject('APERKAT - Universitas Teknologi Sumbawa');
+        //     $message->from(env('MAIL_USERNAME'), 'Notif APERKAT');
+        // });
     }
 
     /**

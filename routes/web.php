@@ -2,6 +2,9 @@
 
 /** @var \Laravel\Lumen\Routing\Router $router */
 
+use App\Models\RKATModel;
+use App\Models\validasiModel;
+
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -53,6 +56,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/validasi/{params}', 'PengajuanController@validasi');
         $router->get('/getGrafik/{params}', 'PengajuanController@getGrafik');
         $router->get('/pengajuanSubordinate/{params}', 'PengajuanController@pengajuanSubordinate');
+        $router->get('/pengajuanNeedApproved/{params}', 'PengajuanController@pengajuanNeedApproved');
         $router->get('/getSubordinatesGrafik/{params}', 'PengajuanController@getSubordinatesGrafik');
         $router->get('/uploadrkat/{params}', 'PengajuanController@uploadrkat');
         $router->get('/showPengajuan/{params1}/{params2}', 'PengajuanController@showPengajuan');
@@ -90,6 +94,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/id/{params}', 'NonRKATController@show');
         $router->get('/deleteByUser/{params}', 'NonRKATController@deleteByUser');
         $router->get('/subdivisi/{params}', 'NonRKATController@subDivisi');
+        $router->get('/subDivisiNeed/{params}', 'NonRKATController@subDivisiNeed');
         $router->post('/', 'NonRKATController@store');
         $router->post('/delete', 'NonRKATController@delete');
         $router->post('/approved', 'NonRKATController@approved');
