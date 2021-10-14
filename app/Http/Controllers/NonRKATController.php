@@ -78,7 +78,7 @@ class NonRKATController extends Controller
         ]);
 
         $data = NonRKATModel::create($request->all());
-        $this->createValidasi($data, $request->message, true);
+        $this->NonRKATvalidasiModel($data->id_nonrkat, $request->id_user, $request->validasi_status, $request->nama_status, $request->message);
         $this->sendMail($data->id_nonrkat, $request->validasi_status, $request->nama_status);
         return response()->json([
             'data' => $data
@@ -94,26 +94,12 @@ class NonRKATController extends Controller
     public function update(Request $request, $params)
     {
         $data = NonRKATModel::find($params)->update($request->all());
-        NonRKATvalidasiModel::create([
-            "nonrkat_id" => $params,
-            "id_struktur" => $request->id_user,
-            "status_validasi" => $request->validasi_status,
-            "message" => $request->nama_status . " - " . $request->message
-        ]);
+
+        $this->NonRKATvalidasiModel($params, $request->id_user, $request->validasi_status, $request->nama_status, $request->message);
         $this->sendMail($params, $request->validasi_status, $request->nama_status);
 
         return response()->json([
             'data' => $data
-        ]);
-    }
-
-    public function createValidasi($data, $message, $status)
-    {
-        return NonRKATvalidasiModel::create([
-            "nonrkat_id" => $data->id_nonrkat,
-            "id_struktur" => $data->id_user,
-            "status_validasi" => $status,
-            "message" => $data->nama_status . " - " . $message
         ]);
     }
 
@@ -467,12 +453,7 @@ class NonRKATController extends Controller
             "nama_status" => $request->nama_status,
             "next" => $request->next
         ]);
-        NonRKATvalidasiModel::create([
-            "nonrkat_id" => $request->id,
-            "id_struktur" => $request->id_struktur,
-            "status_validasi" => $request->validasi_status,
-            "message" => $request->nama_status . " - " . $request->message
-        ]);
+        $this->NonRKATvalidasiModel($request->id, $request->id_struktur, $request->validasi_status, $request->nama_status, $request->message);
         $this->sendMail($request->id, $request->validasi_status, $request->nama_status);
 
         return response()->json([
@@ -487,17 +468,24 @@ class NonRKATController extends Controller
     {
         $data = NonRKATModel::where('id_nonrkat', $request->id)->update([
             "validasi_status" => $request->validasi_status,
-            "nama_status" => $request->nama_status
+            "nama_status" => $request->nama_status,
+            "next" => $request->next
         ]);
-        NonRKATvalidasiModel::create([
-            "nonrkat_id" => $request->id,
-            "id_struktur" => $request->id_struktur,
-            "status_validasi" => $request->validasi_status,
-            "message" => $request->nama_status . " - " . $request->message
-        ]);
+
+        $this->NonRKATvalidasiModel($request->id, $request->id_struktur, $request->validasi_status, $request->nama_status, $request->message);
         $this->sendMail($request->id, $request->validasi_status, $request->nama_status);
         return response()->json([
             'data' => $data ? "Data was updated" : "Failed to update data"
+        ]);
+    }
+
+    public function NonRKATvalidasiModel($param1, $param2, $param3, $param4, $param5)
+    {
+        NonRKATvalidasiModel::create([
+            "nonrkat_id" => $param1,
+            "id_struktur" => $param2,
+            "status_validasi" => $param3,
+            "message" => $param4 . " - " . $param5
         ]);
     }
 
@@ -506,33 +494,33 @@ class NonRKATController extends Controller
      */
     public function sendMail($params, $status, $nama)
     {
-        // if ($status == '0') {
-        //     $status = ' telah ditolak oleh:' . $nama;
-        // } else if ($status == '1') {
-        //     $status = ' telah diinput/direvisi oleh:' . $nama;
-        // } else if ($status == '3') {
-        //     $status = ' Pencairan oleh:' . $nama;
-        // } else {
-        //     $status = ' telah diterima oleh:' . $nama;
-        // }
+        if ($status == '0') {
+            $status = ' telah ditolak oleh:' . $nama;
+        } else if ($status == '1') {
+            $status = ' telah diinput/direvisi oleh:' . $nama;
+        } else if ($status == '3') {
+            $status = ' Pencairan oleh:' . $nama;
+        } else {
+            $status = ' telah diterima oleh:' . $nama;
+        }
 
-        // $data = $this->status($params);
-        // $data = array_unique($data->original['data'], SORT_REGULAR);
-        // $values = [];
-        // foreach ($data as $key) {
-        //     $values[] = $key['id_user'];
-        // }
-        // $values = UserModel::whereIn('id_user', $values)->where('email', '!=', '')->select('email')->get();
-        // $email = [];
-        // foreach ($values as $key) {
-        //     $email[] = $key['email'];
-        // }
-        // $template = array('name' => '', 'pesan' => 'Pemberitahuan pengajuan ' . $data[0]['nama_struktur'] . $status);
+        $data = $this->status($params);
+        $data = array_unique($data->original['data'], SORT_REGULAR);
+        $values = [];
+        foreach ($data as $key) {
+            $values[] = $key['id_user'];
+        }
+        $values = UserModel::whereIn('id_user', $values)->where('email', '!=', '')->select('email')->get();
+        $email = [];
+        foreach ($values as $key) {
+            $email[] = $key['email'];
+        }
+        $template = array('name' => '', 'pesan' => 'Pemberitahuan pengajuan ' . $data[0]['nama_struktur'] . $status);
 
-        // Mail::send('mail', $template, function ($message) use ($email) {
-        //     $message->to($email)->subject('APERKAT - Universitas Teknologi Sumbawa');
-        //     $message->from(env('MAIL_USERNAME'), 'Notif APERKAT');
-        // });
+        Mail::send('mail', $template, function ($message) use ($email) {
+            $message->to($email)->subject('APERKAT - Universitas Teknologi Sumbawa');
+            $message->from(env('MAIL_USERNAME'), 'Notif APERKAT');
+        });
     }
 
     /**
