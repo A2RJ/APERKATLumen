@@ -744,18 +744,98 @@ class PengajuanController extends Controller
         ]);
     }
 
-    public function pengajuanSelesai()
+    public function pengajuanSelesai($params)
     {
-        return Response()->json([
-            'data' => UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
+        $userStruktur = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+            ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+            ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+            ->where('id_user', $params)
+            ->first();
+
+        if ($userStruktur->level == 1) {
+            $data = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
+                ->join('message', 'pengajuan.id_pengajuan', 'message.id_pengajuan')
                 ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
                 ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                ->where('pengajuan.pencairan', '!=', null)
-                ->select('user.id_user', 'pengajuan.id_pengajuan', 'pengajuan.pencairan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at')
+                ->where('pengajuan.next', $params)
+                ->where('user.id_user', '!=', $userStruktur->id_user)
+                ->where('message.id_user', $userStruktur->id_user)
+                ->where('pengajuan.lpj_kegiatan', '!=', null)
+                ->where('pengajuan.lpj_keuangan', '!=', null)
+                ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.next', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
                 ->orderBy('pengajuan.id_pengajuan', 'DESC')
-                ->get()
+                ->get();
+        } else if ($userStruktur->level == 2) {
+            $data = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
+                ->join('message', 'pengajuan.id_pengajuan', 'message.id_pengajuan')
+                ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+                ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                ->where('pengajuan.next', $params)
+                ->where('user.id_user', '!=', $userStruktur->id_user)
+                ->where('message.id_user', $userStruktur->id_user)
+                ->where('pengajuan.lpj_kegiatan', '!=', null)
+                ->where('pengajuan.lpj_keuangan', '!=', null)
+                ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.next', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
+                ->orderBy('pengajuan.id_pengajuan', 'DESC')
+                ->get();
+        } else if ($userStruktur->level == 3 || $userStruktur->level == 4) {
+            if ($userStruktur->child1_level == "1" || $userStruktur->level == 3) {
+                $data = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
+                    ->join('message', 'pengajuan.id_pengajuan', 'message.id_pengajuan')
+                    ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+                    ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                    ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                    ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                    ->where('pengajuan.next', $params)
+                    ->where('user.id_user', '!=', $userStruktur->id_user)
+                    ->where('message.id_user', $userStruktur->id_user)
+                    ->where('pengajuan.lpj_kegiatan', '!=', null)
+                    ->where('pengajuan.lpj_keuangan', '!=', null)
+                    ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.next', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
+                    ->orderBy('pengajuan.id_pengajuan', 'DESC')
+                    ->get();
+            } else {
+                $data = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
+                    ->join('message', 'pengajuan.id_pengajuan', 'message.id_pengajuan')
+                    ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+                    ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                    ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                    ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                    ->where('pengajuan.next', $params)
+                    ->where('user.id_user', '!=', $userStruktur->id_user)
+                    ->where('struktur.id_struktur', $userStruktur->id_struktur)
+                    ->where('message.id_user', $userStruktur->id_user)
+                    ->where('pengajuan.lpj_kegiatan', '!=', null)
+                    ->where('pengajuan.lpj_keuangan', '!=', null)
+                    ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.next', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
+                    ->orderBy('pengajuan.id_pengajuan', 'DESC')
+                    ->get();
+            }
+        } else if ($userStruktur->level == 5) {
+            $data = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
+                ->join('message', 'pengajuan.id_pengajuan', 'message.id_pengajuan')
+                ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+                ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                ->where('pengajuan.next', $params)
+                ->where('user.id_user', '!=', $userStruktur->id_user)
+                ->where('struktur.id_struktur', $userStruktur->id_struktur)
+                ->where('struktur_child1.id_struktur_child1', $userStruktur->id_struktur_child1)
+                ->where('message.id_user', $userStruktur->id_user)
+                ->where('pengajuan.lpj_kegiatan', '!=', null)
+                ->where('pengajuan.lpj_keuangan', '!=', null)
+                ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.next', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
+                ->orderBy('pengajuan.id_pengajuan', 'DESC')
+                ->get();
+        }
+
+        return response()->json([
+            "data" => $data
         ]);
     }
 
@@ -768,57 +848,17 @@ class PengajuanController extends Controller
             ->first();
 
         if ($userStruktur->level == 1) {
-            $data = UserModel::join('rkat', 'user.id_user', 'rkat.id_user')
-                ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
-                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
-                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                // ->where('struktur.level', '!=', $userStruktur->level)
-                ->where('user.id_user', '!=', $userStruktur->id_user)
-                ->select('user.id_user', 'user.fullname', 'rkat.created_at', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
-                ->distinct()
-                ->get();
+            $data = DB::select('SELECT user.id_user, user.fullname, struktur.nama_struktur, struktur_child1.nama_struktur_child1, struktur_child2.nama_struktur_child2, (SELECT SUM(rencara_anggaran) FROM rkat WHERE id_user = user.id_user) as rencara_anggaran, (SELECT SUM(biaya_program) FROM pengajuan WHERE id_user = user.id_user AND pencairan != null) as biaya_program FROM user JOIN struktur JOIN struktur_child1 JOIN struktur_child2 WHERE user.id_struktur = struktur.id_struktur AND user.id_struktur_child1 = struktur_child1.id_struktur_child1 AND user.id_struktur_child2 = struktur_child2.id_struktur_child2 AND user.id_user != ' . $userStruktur->id_user . ' ORDER BY struktur.level ASC');
         } else if ($userStruktur->level == 2) {
-            $data = UserModel::join('rkat', 'user.id_user', 'rkat.id_user')
-                ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
-                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
-                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                // ->where('struktur.level', '!=', 1)
-                ->where('user.id_user', '!=', $userStruktur->id_user)
-                ->select('user.id_user', 'user.fullname', 'rkat.created_at', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
-                ->distinct()
-                ->get();
+            $data = DB::select('SELECT user.id_user, user.fullname, struktur.nama_struktur, struktur_child1.nama_struktur_child1, struktur_child2.nama_struktur_child2, (SELECT SUM(rencara_anggaran) FROM rkat WHERE id_user = user.id_user) as rencara_anggaran, (SELECT SUM(biaya_program) FROM pengajuan WHERE id_user = user.id_user AND pencairan != null) as biaya_program FROM user JOIN struktur JOIN struktur_child1 JOIN struktur_child2 WHERE user.id_struktur = struktur.id_struktur AND user.id_struktur_child1 = struktur_child1.id_struktur_child1 AND user.id_struktur_child2 = struktur_child2.id_struktur_child2 AND user.id_user != ' . $userStruktur->id_user . ' ORDER BY struktur.level ASC');
         } else if ($userStruktur->level == 3 || $userStruktur->level == 4) {
             if ($userStruktur->child1_level == "1" || $userStruktur->level == 3) {
-                $data = UserModel::join('rkat', 'user.id_user', 'rkat.id_user')
-                    ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
-                    ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
-                    ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                    ->where('user.id_user', '!=', $userStruktur->id_user)
-                    ->select('user.id_user', 'user.fullname', 'rkat.created_at', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
-                    ->distinct()
-                    ->get();
+                $data = DB::select('SELECT user.id_user, user.fullname, struktur.nama_struktur, struktur_child1.nama_struktur_child1, struktur_child2.nama_struktur_child2, (SELECT SUM(rencara_anggaran) FROM rkat WHERE id_user = user.id_user) as rencara_anggaran, (SELECT SUM(biaya_program) FROM pengajuan WHERE id_user = user.id_user AND pencairan != null) as biaya_program FROM user JOIN struktur JOIN struktur_child1 JOIN struktur_child2 WHERE user.id_struktur = struktur.id_struktur AND user.id_struktur_child1 = struktur_child1.id_struktur_child1 AND user.id_struktur_child2 = struktur_child2.id_struktur_child2 AND user.id_user != ' . $userStruktur->id_user . ' ORDER BY struktur.level ASC');
             } else {
-                $data = UserModel::join('rkat', 'user.id_user', 'rkat.id_user')
-                    ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
-                    ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
-                    ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                    ->where('user.id_user', '!=', $userStruktur->id_user)
-                    ->where('struktur.id_struktur', $userStruktur->id_struktur)
-                    ->select('user.id_user', 'user.fullname', 'rkat.created_at', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
-                    ->distinct()
-                    ->get();
+                $data = DB::select('SELECT user.id_user, user.fullname, struktur.nama_struktur, struktur_child1.nama_struktur_child1, struktur_child2.nama_struktur_child2, (SELECT SUM(rencara_anggaran) FROM rkat WHERE id_user = user.id_user) as rencara_anggaran, (SELECT SUM(biaya_program) FROM pengajuan WHERE id_user = user.id_user AND pencairan != null) as biaya_program FROM user JOIN struktur JOIN struktur_child1 JOIN struktur_child2 WHERE user.id_struktur = struktur.id_struktur AND user.id_struktur_child1 = struktur_child1.id_struktur_child1 AND user.id_struktur_child2 = struktur_child2.id_struktur_child2 AND user.id_user != ' . $userStruktur->id_user . ' AND struktur.id_struktur = ' . $userStruktur->id_struktur . ' ORDER BY struktur.level ASC');
             }
         } else if ($userStruktur->level == 5) {
-            $data = UserModel::join('rkat', 'user.id_user', 'rkat.id_user')
-                ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
-                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
-                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                ->where('user.id_user', '!=', $userStruktur->id_user)
-                ->where('struktur.id_struktur', $userStruktur->id_struktur)
-                ->where('struktur_child1.id_struktur_child1', $userStruktur->id_struktur_child1)
-                ->select('user.id_user', 'user.fullname', 'rkat.created_at', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
-                ->distinct()
-                ->get();
+            $data = DB::select('SELECT user.id_user, user.fullname, struktur.nama_struktur, struktur_child1.nama_struktur_child1, struktur_child2.nama_struktur_child2, (SELECT SUM(rencara_anggaran) FROM rkat WHERE id_user = user.id_user) as rencara_anggaran, (SELECT SUM(biaya_program) FROM pengajuan WHERE id_user = user.id_user AND pencairan != null) as biaya_program FROM user JOIN struktur JOIN struktur_child1 JOIN struktur_child2 WHERE user.id_struktur = struktur.id_struktur AND user.id_struktur_child1 = struktur_child1.id_struktur_child1 AND user.id_struktur_child2 = struktur_child2.id_struktur_child2 AND user.id_user != ' . $userStruktur->id_user . ' AND struktur.id_struktur = ' . $userStruktur->id_struktur . '  AND struktur_child1.id_struktur_child1 = ' . $userStruktur->id_struktur_child1 . ' ORDER BY struktur.level ASC');
         }
 
         return response()->json([
@@ -829,27 +869,23 @@ class PengajuanController extends Controller
     public function getGrafik($params)
     {
         $rkat = RKATModel::where('id_user', $params);
-        $pengajuan = pengajuanModel::where('id_user', $params)
-            ->where('validasi_status', 3)
-            ->orWhere('id_user', $params)
-            ->where('status_pengajuan', 'approved')
-            ->sum('biaya_program');
 
         return response()->json([
             'data' => [
                 'total_rkat' => $rkat->count(),
-                'total_rkat_diterima' => $pengajuan,
+                'total_rkat_diterima' => pengajuanModel::where('id_user', $params)
+                    ->where('pencairan', '!=', null)
+                    ->sum('biaya_program'),
                 'total_anggaran_rkat' => $rkat->sum('total_anggaran'),
                 'pengajuan_diterima' => pengajuanModel::where('id_user', $params)
-                    ->where('status_pengajuan', 'approved')->count(),
+                    ->where('status_pengajuan', 'approved')
+                    ->where('pencairan', '!=', null)
+                    ->count(),
 
                 'pengajuan_progress' => pengajuanModel::where('id_user', $params)
                     ->where('status_pengajuan', 'progress')->count(),
 
-                'rkat' => RKATModel::join('user', 'rkat.id_user', 'user.id_user')
-                    ->select('rkat.*', "user.fullname")
-                    ->where('user.id_user', $params)
-                    ->get(),
+                'rkat' => DB::select('SELECT rkat.id_rkat, rkat.kode_rkat, rkat.rencara_anggaran, (SELECT SUM(biaya_program) FROM pengajuan WHERE kode_rkat = rkat.id_rkat AND pencairan != null) as biaya_program, rkat.created_at FROM rkat WHERE rkat.id_user = ' . $params .' ORDER BY kode_rkat ASC'),
 
                 'pengajuan' => pengajuanModel::join('user', 'pengajuan.id_user', 'user.id_user')
                     ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
@@ -862,8 +898,7 @@ class PengajuanController extends Controller
                     ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                     ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                     ->where('user.id_user', $params)
-                    ->where('user.id_user', $params)
-                    ->select('user.*', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
+                    ->select('user.*', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
                     ->first()
             ]
         ]);
@@ -892,5 +927,44 @@ class PengajuanController extends Controller
 
         $pdf = PDF::loadView('pengajuan', $data)->setPaper('a4', 'landscape');
         return $pdf->download('pengajuan-' . date("Y-m-d") . '.pdf');
+    }
+
+
+
+    public function coba()
+    {
+        $listRkat =  DB::select('SELECT rkat.id_rkat, rkat.kode_rkat, rkat.rencara_anggaran, (SELECT SUM(biaya_program) FROM pengajuan WHERE kode_rkat = rkat.id_rkat AND pencairan != null) as biaya_program, rkat.created_at FROM rkat ORDER BY kode_rkat ASC');
+
+        $id_rkat = [];
+        foreach ($listRkat as $value) {
+            $id_rkat[] = $value->id_rkat;
+        }
+        $listPengajuan = pengajuanModel::whereIn('kode_rkat', $id_rkat)
+            ->select('id_pengajuan', 'kode_rkat', 'latar_belakang', 'biaya_program', 'validasi_status', 'nama_status')
+            ->get();
+
+        $newList = [];
+        foreach ($listRkat as $value) {
+            $newList[] = [
+                "id_rkat" => $value->id_rkat,
+                "kode_rkat" => $value->kode_rkat,
+                "rencara_anggaran" => $value->rencara_anggaran,
+                "biaya_program" => $value->biaya_program,
+                "created_at" => $value->created_at,
+                "pengajuan" => $this->getCoba($listPengajuan, $value->id_rkat)
+            ];
+        }
+        return $newList;
+    }
+
+    public function getCoba($listPengajuan, $params)
+    {
+        $new = [];
+        foreach ($listPengajuan as $key) {
+            if ($key->kode_rkat == $params) {
+                $new[] = $key;
+            }
+        }
+        return $new;
     }
 }

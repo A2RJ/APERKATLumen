@@ -2,8 +2,11 @@
 
 /** @var \Laravel\Lumen\Routing\Router $router */
 
+use App\Models\pengajuanModel;
 use App\Models\RKATModel;
+use App\Models\UserModel;
 use App\Models\validasiModel;
+use Illuminate\Support\Facades\DB;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,7 +27,8 @@ $router->get('/', function () use ($router) {
         'about_API' => "API SUBMISSION"
     ]);
 });
-$router->get('/sendMail/{params}', 'PengajuanController@sendMail');
+
+$router->get('/coba', 'PengajuanController@coba');
 
 $router->group(['middleware' => 'auth', 'prefix' => 'api'], function ($router) {
     $router->get('me', 'AuthController@me');
@@ -41,7 +45,6 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
     $router->group(['prefix' => 'pengajuan'], function () use ($router) {
         $router->get('/', 'PengajuanController@index');
-        $router->get('/pengajuanSelesai', 'PengajuanController@pengajuanSelesai');
         $router->get('/sendMail/{params}', 'PengajuanController@sendMail');
         $router->get('/pdf_pengajuan/{params}', 'PengajuanController@pdfById');
         $router->get('/destroy/{params}', 'PengajuanController@destroy');
@@ -57,6 +60,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/getGrafik/{params}', 'PengajuanController@getGrafik');
         $router->get('/pengajuanSubordinate/{params}', 'PengajuanController@pengajuanSubordinate');
         $router->get('/pengajuanNeedApproved/{params}', 'PengajuanController@pengajuanNeedApproved');
+        $router->get('/pengajuanSelesai/{params}', 'PengajuanController@pengajuanSelesai');
         $router->get('/getSubordinatesGrafik/{params}', 'PengajuanController@getSubordinatesGrafik');
         $router->get('/uploadrkat/{params}', 'PengajuanController@uploadrkat');
         $router->get('/showPengajuan/{params1}/{params2}', 'PengajuanController@showPengajuan');
