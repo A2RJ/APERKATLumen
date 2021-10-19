@@ -28,7 +28,7 @@ $router->get('/', function () use ($router) {
     ]);
 });
 
-$router->get('/coba', 'PengajuanController@coba');
+// $router->get('/coba', 'PengajuanController@coba');
 
 $router->group(['middleware' => 'auth', 'prefix' => 'api'], function ($router) {
     $router->get('me', 'AuthController@me');

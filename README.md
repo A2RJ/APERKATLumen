@@ -3,6 +3,7 @@
 - grafik sub divisi
 - Coba login sebagai atasan lihat pengajuan sub divisi
 - Total realisasi adalah pengajuan diterima atau sudah pencairan
+- SELECT user.fullname, pengajuan.id_pengajuan, rkat.kode_rkat, pengajuan.next, pengajuan.validasi_status, pengajuan.nama_status FROM `pengajuan` JOIN user JOIN rkat WHERE user.id_user = pengajuan.id_user AND rkat.id_rkat = pengajuan.kode_rkat;
 
 
 

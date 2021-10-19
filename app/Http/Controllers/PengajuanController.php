@@ -575,7 +575,7 @@ class PengajuanController extends Controller
     }
 
     /**
-     * Get submission bawahan by id user login
+     * semua pengajuan
      */
     public function pengajuanSubordinate($params)
     {
@@ -592,8 +592,9 @@ class PengajuanController extends Controller
                 ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                ->where('user.id_user', '!=', $userStruktur->id_user)
+                ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
                 ->where('message.id_user', $userStruktur->id_user)
+                ->where('pengajuan.status_pengajuan', 'progress')
                 ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
                 ->orderBy('pengajuan.id_pengajuan', 'DESC')
                 ->get();
@@ -604,8 +605,9 @@ class PengajuanController extends Controller
                 ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                ->where('user.id_user', '!=', $userStruktur->id_user)
+                ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
                 ->where('message.id_user', $userStruktur->id_user)
+                ->where('pengajuan.status_pengajuan', 'progress')
                 ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
                 ->orderBy('pengajuan.id_pengajuan', 'DESC')
                 ->get();
@@ -617,8 +619,9 @@ class PengajuanController extends Controller
                     ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                     ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                     ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                    ->where('user.id_user', '!=', $userStruktur->id_user)
+                    ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
                     ->where('message.id_user', $userStruktur->id_user)
+                    ->where('pengajuan.status_pengajuan', 'progress')
                     ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
                     ->orderBy('pengajuan.id_pengajuan', 'DESC')
                     ->get();
@@ -629,9 +632,10 @@ class PengajuanController extends Controller
                     ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                     ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                     ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                    ->where('user.id_user', '!=', $userStruktur->id_user)
+                    ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
                     ->where('struktur.id_struktur', $userStruktur->id_struktur)
                     ->where('message.id_user', $userStruktur->id_user)
+                    ->where('pengajuan.status_pengajuan', 'progress')
                     ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
                     ->orderBy('pengajuan.id_pengajuan', 'DESC')
                     ->get();
@@ -643,10 +647,11 @@ class PengajuanController extends Controller
                 ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                ->where('user.id_user', '!=', $userStruktur->id_user)
+                ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
                 ->where('struktur.id_struktur', $userStruktur->id_struktur)
                 ->where('struktur_child1.id_struktur_child1', $userStruktur->id_struktur_child1)
                 ->where('message.id_user', $userStruktur->id_user)
+                ->where('pengajuan.status_pengajuan', 'progress')
                 ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
                 ->orderBy('pengajuan.id_pengajuan', 'DESC')
                 ->get();
@@ -657,6 +662,9 @@ class PengajuanController extends Controller
         ]);
     }
 
+    /**
+     * Hanya pengajuan akan di approval
+     */
     public function pengajuanNeedApproved($params)
     {
         $userStruktur = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
@@ -673,10 +681,9 @@ class PengajuanController extends Controller
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                 ->where('pengajuan.next', $params)
-                ->where('user.id_user', '!=', $userStruktur->id_user)
+                ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
                 ->where('message.id_user', $userStruktur->id_user)
-                ->where('pengajuan.lpj_kegiatan', '!=', null)
-                ->where('pengajuan.lpj_keuangan', '!=', null)
+                ->where('pengajuan.status_pengajuan', 'progress')
                 ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.next', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
                 ->orderBy('pengajuan.id_pengajuan', 'DESC')
                 ->get();
@@ -688,8 +695,9 @@ class PengajuanController extends Controller
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                 ->where('pengajuan.next', $params)
-                ->where('user.id_user', '!=', $userStruktur->id_user)
+                ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
                 ->where('message.id_user', $userStruktur->id_user)
+                ->where('pengajuan.status_pengajuan', 'progress')
                 ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.next', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
                 ->orderBy('pengajuan.id_pengajuan', 'DESC')
                 ->get();
@@ -702,8 +710,9 @@ class PengajuanController extends Controller
                     ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                     ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                     ->where('pengajuan.next', $params)
-                    ->where('user.id_user', '!=', $userStruktur->id_user)
+                    ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
                     ->where('message.id_user', $userStruktur->id_user)
+                    ->where('pengajuan.status_pengajuan', 'progress')
                     ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.next', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
                     ->orderBy('pengajuan.id_pengajuan', 'DESC')
                     ->get();
@@ -715,9 +724,10 @@ class PengajuanController extends Controller
                     ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                     ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                     ->where('pengajuan.next', $params)
-                    ->where('user.id_user', '!=', $userStruktur->id_user)
+                    ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
                     ->where('struktur.id_struktur', $userStruktur->id_struktur)
                     ->where('message.id_user', $userStruktur->id_user)
+                    ->where('pengajuan.status_pengajuan', 'progress')
                     ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.next', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
                     ->orderBy('pengajuan.id_pengajuan', 'DESC')
                     ->get();
@@ -730,10 +740,11 @@ class PengajuanController extends Controller
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                 ->where('pengajuan.next', $params)
-                ->where('user.id_user', '!=', $userStruktur->id_user)
+                ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
                 ->where('struktur.id_struktur', $userStruktur->id_struktur)
                 ->where('struktur_child1.id_struktur_child1', $userStruktur->id_struktur_child1)
                 ->where('message.id_user', $userStruktur->id_user)
+                ->where('pengajuan.status_pengajuan', 'progress')
                 ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.next', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
                 ->orderBy('pengajuan.id_pengajuan', 'DESC')
                 ->get();
@@ -744,6 +755,9 @@ class PengajuanController extends Controller
         ]);
     }
 
+    /**
+     * Semua pengajuan selesai
+     */
     public function pengajuanSelesai($params)
     {
         $userStruktur = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
@@ -759,11 +773,9 @@ class PengajuanController extends Controller
                 ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                ->where('pengajuan.next', $params)
-                ->where('user.id_user', '!=', $userStruktur->id_user)
+                ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
                 ->where('message.id_user', $userStruktur->id_user)
-                ->where('pengajuan.lpj_kegiatan', '!=', null)
-                ->where('pengajuan.lpj_keuangan', '!=', null)
+                ->where('pengajuan.status_pengajuan', 'approved')
                 ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.next', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
                 ->orderBy('pengajuan.id_pengajuan', 'DESC')
                 ->get();
@@ -774,11 +786,9 @@ class PengajuanController extends Controller
                 ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                ->where('pengajuan.next', $params)
-                ->where('user.id_user', '!=', $userStruktur->id_user)
+                ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
                 ->where('message.id_user', $userStruktur->id_user)
-                ->where('pengajuan.lpj_kegiatan', '!=', null)
-                ->where('pengajuan.lpj_keuangan', '!=', null)
+                ->where('pengajuan.status_pengajuan', 'approved')
                 ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.next', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
                 ->orderBy('pengajuan.id_pengajuan', 'DESC')
                 ->get();
@@ -790,11 +800,9 @@ class PengajuanController extends Controller
                     ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                     ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                     ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                    ->where('pengajuan.next', $params)
-                    ->where('user.id_user', '!=', $userStruktur->id_user)
+                    ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
                     ->where('message.id_user', $userStruktur->id_user)
-                    ->where('pengajuan.lpj_kegiatan', '!=', null)
-                    ->where('pengajuan.lpj_keuangan', '!=', null)
+                    ->where('pengajuan.status_pengajuan', 'approved')
                     ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.next', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
                     ->orderBy('pengajuan.id_pengajuan', 'DESC')
                     ->get();
@@ -805,12 +813,10 @@ class PengajuanController extends Controller
                     ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                     ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                     ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                    ->where('pengajuan.next', $params)
-                    ->where('user.id_user', '!=', $userStruktur->id_user)
+                    ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
                     ->where('struktur.id_struktur', $userStruktur->id_struktur)
                     ->where('message.id_user', $userStruktur->id_user)
-                    ->where('pengajuan.lpj_kegiatan', '!=', null)
-                    ->where('pengajuan.lpj_keuangan', '!=', null)
+                    ->where('pengajuan.status_pengajuan', 'approved')
                     ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.next', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
                     ->orderBy('pengajuan.id_pengajuan', 'DESC')
                     ->get();
@@ -822,13 +828,11 @@ class PengajuanController extends Controller
                 ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                ->where('pengajuan.next', $params)
-                ->where('user.id_user', '!=', $userStruktur->id_user)
+                ->where('pengajuan.status_pengajuan', 'approved')
+                ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
                 ->where('struktur.id_struktur', $userStruktur->id_struktur)
                 ->where('struktur_child1.id_struktur_child1', $userStruktur->id_struktur_child1)
                 ->where('message.id_user', $userStruktur->id_user)
-                ->where('pengajuan.lpj_kegiatan', '!=', null)
-                ->where('pengajuan.lpj_keuangan', '!=', null)
                 ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.next', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at', 'message.status_message')
                 ->orderBy('pengajuan.id_pengajuan', 'DESC')
                 ->get();
