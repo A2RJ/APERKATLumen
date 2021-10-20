@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\NonRKATModel;
-use App\Models\NonRKATvalidasiModel;
+use App\Models\NonRKATValidasiModel;
 use App\Models\UserModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -78,7 +78,7 @@ class NonRKATController extends Controller
         ]);
 
         $data = NonRKATModel::create($request->all());
-        $this->NonRKATvalidasiModel($data->id_nonrkat, $request->id_user, $request->validasi_status, $request->nama_status, $request->message);
+        $this->NonRKATValidasiModel($data->id_nonrkat, $request->id_user, $request->validasi_status, $request->nama_status, $request->message);
         $this->sendMail($data->id_nonrkat, $request->validasi_status, $request->nama_status);
         return response()->json([
             'data' => $data
@@ -95,7 +95,7 @@ class NonRKATController extends Controller
     {
         $data = NonRKATModel::find($params)->update($request->all());
 
-        $this->NonRKATvalidasiModel($params, $request->id_user, $request->validasi_status, $request->nama_status, $request->message);
+        $this->NonRKATValidasiModel($params, $request->id_user, $request->validasi_status, $request->nama_status, $request->message);
         $this->sendMail($params, $request->validasi_status, $request->nama_status);
 
         return response()->json([
@@ -453,7 +453,7 @@ class NonRKATController extends Controller
             "nama_status" => $request->nama_status,
             "next" => $request->next
         ]);
-        $this->NonRKATvalidasiModel($request->id, $request->id_struktur, $request->validasi_status, $request->nama_status, $request->message);
+        $this->NonRKATValidasiModel($request->id, $request->id_struktur, $request->validasi_status, $request->nama_status, $request->message);
         $this->sendMail($request->id, $request->validasi_status, $request->nama_status);
 
         return response()->json([
@@ -472,16 +472,16 @@ class NonRKATController extends Controller
             "next" => $request->next
         ]);
 
-        $this->NonRKATvalidasiModel($request->id, $request->id_struktur, $request->validasi_status, $request->nama_status, $request->message);
+        $this->NonRKATValidasiModel($request->id, $request->id_struktur, $request->validasi_status, $request->nama_status, $request->message);
         $this->sendMail($request->id, $request->validasi_status, $request->nama_status);
         return response()->json([
             'data' => $data ? "Data was updated" : "Failed to update data"
         ]);
     }
 
-    public function NonRKATvalidasiModel($param1, $param2, $param3, $param4, $param5)
+    public function NonRKATValidasiModel($param1, $param2, $param3, $param4, $param5)
     {
-        NonRKATvalidasiModel::create([
+        NonRKATValidasiModel::create([
             "nonrkat_id" => $param1,
             "id_struktur" => $param2,
             "status_validasi" => $param3,
@@ -536,14 +536,14 @@ class NonRKATController extends Controller
     public function statusNull($id_struktur, $id_nonrkat, $nomor, $warek = false)
     {
         if ($warek !== false) {
-            $data = NonRKATvalidasiModel::join('nonrkat', 'nonrkat_validasi.nonrkat_id', 'nonrkat.id_nonrkat')
+            $data = NonRKATValidasiModel::join('nonrkat', 'nonrkat_validasi.nonrkat_id', 'nonrkat.id_nonrkat')
                 ->where('nonrkat.id_nonrkat', $id_nonrkat)
                 ->where('nonrkat_validasi.id_struktur', $id_struktur)
                 ->where('nonrkat_validasi.status_validasi', $nomor)
                 ->skip($warek)
                 ->first();
         } else {
-            $data = NonRKATvalidasiModel::join('nonrkat', 'nonrkat_validasi.nonrkat_id', 'nonrkat.id_nonrkat')
+            $data = NonRKATValidasiModel::join('nonrkat', 'nonrkat_validasi.nonrkat_id', 'nonrkat.id_nonrkat')
                 ->where('nonrkat.id_nonrkat', $id_nonrkat)
                 ->where('nonrkat_validasi.id_struktur', $id_struktur)
                 ->where('nonrkat_validasi.status_validasi', $nomor)

@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\strukturModel;
-use App\Models\struktur_child1Model;
-use App\Models\struktur_child2Model;
+use App\Models\Struktur_child1Model;
+use App\Models\Struktur_child2Model;
 
 class StrukturController extends Controller
 {
@@ -52,13 +52,13 @@ class StrukturController extends Controller
      */
     public function show($params)
     {
-        $data = struktur_child1Model::where('id_struktur', $params)->find();
+        $data = Struktur_child1Model::where('id_struktur', $params)->find();
 
         return response()->json([
             'data' => $data
                 ? [
                     'struktur_child1' => $data,
-                    'struktur_child2' => struktur_child2Model::where('id_struktur_child1', $data[0]['id_struktur_child1'])->find()
+                    'struktur_child2' => Struktur_child2Model::where('id_struktur_child1', $data[0]['id_struktur_child1'])->find()
                 ]
                 : "Failed, data not found"
         ]);

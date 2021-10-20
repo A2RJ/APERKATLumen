@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class pengajuanModel extends Model
+class PengajuanModel extends Model
 {
     /**
      * Database table name

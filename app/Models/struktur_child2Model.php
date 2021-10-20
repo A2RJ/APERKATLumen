@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class struktur_child2Model extends Model
+class Struktur_child2Model extends Model
 {
     /**
      * Database table name

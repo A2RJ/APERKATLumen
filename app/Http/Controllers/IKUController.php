@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Models\iku_parentModel;
-use App\Models\iku_child1Model;
-use App\Models\iku_child2Model;
+use App\Models\IKU_parentModel;
+use App\Models\IKU_child1Model;
+use App\Models\IKU_child2Model;
 
 class IKUController extends Controller
 {
@@ -37,7 +37,7 @@ class IKUController extends Controller
             "iku_parent"
         ]);
 
-        $data = iku_parentModel::create($request->all());
+        $data = IKU_parentModel::create($request->all());
 
         return response()->json([
             'data' => $data ? "Success data was added" : "Failed add data"
@@ -114,13 +114,13 @@ class IKUController extends Controller
      */
     public function show($params)
     {
-        $data = iku_child1Model::find($params);
+        $data = IKU_child1Model::find($params);
 
         return response()->json([
             'data' => $data
                 ? [
                     'iku_child1' => $data,
-                    'iku_child2' => iku_child2Model::where('id_iku_child1', $data[0]['id_iku_child1'])->find()
+                    'iku_child2' => IKU_child2Model::where('id_iku_child1', $data[0]['id_iku_child1'])->find()
                 ]
                 : "Failed, data not found"
         ]);
@@ -135,7 +135,7 @@ class IKUController extends Controller
      */
     public function update(Request $request, $params)
     {
-        $data = iku_parentModel::find($params)->update($request->all());
+        $data = IKU_parentModel::find($params)->update($request->all());
 
         return response()->json([
             'data' => $data ? "Data was updated" : "Failed to update data"
@@ -150,7 +150,7 @@ class IKUController extends Controller
      */
     public function destroy($params)
     {
-        $data = iku_parentModel::find($params);
+        $data = IKU_parentModel::find($params);
         $data ? $data->delete() : "";
 
         return response()->json([

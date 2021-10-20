@@ -57,6 +57,6 @@ class NonRKATModel extends Model
 
     public function index()
     {
-        return $this->hasMany(NonRKATvalidasiModel::class);
+        return $this->hasMany(NonRKATValidasiModel::class);
     }
 }

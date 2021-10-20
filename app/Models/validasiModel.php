@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class validasiModel extends Model
+class ValidasiModel extends Model
 {
     /**
      * Database table name

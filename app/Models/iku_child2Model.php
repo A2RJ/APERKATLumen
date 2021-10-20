@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class iku_child2Model extends Model
+class IKU_child2Model extends Model
 {
     /**
      * Database table name

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\pengajuanModel;
+use App\Models\PengajuanModel;
 use Illuminate\Http\Request;
 use App\Models\RKATModel;
 use App\Models\UserModel;

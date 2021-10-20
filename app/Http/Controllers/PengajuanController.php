@@ -7,10 +7,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Models\UserModel;
 use App\Models\RKATModel;
-use App\Models\validasiModel;
-use App\Models\pengajuanModel;
+use App\Models\ValidasiModel;
+use App\Models\PengajuanModel;
 use App\Models\MessageModel;
-use App\Models\pengajuanHistoryModel;
+use App\Models\PengajuanHistoryModel;
 use Barryvdh\DomPDF\Facade as PDF;
 use Illuminate\Support\Arr;
 
@@ -24,7 +24,7 @@ class PengajuanController extends Controller
     public function index()
     {
         return Response()->json([
-            'data' => pengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+            'data' => PengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
                 ->paginate(15)
         ]);
     }
@@ -58,8 +58,8 @@ class PengajuanController extends Controller
             "status_pengajuan" => "required"
         ]);
 
-        if (pengajuanModel::where('kode_rkat', $request->kode_rkat)->first()) abort(500, "Tidak dapat store pengajuan");
-        $data = pengajuanModel::create($request->all());
+        if (PengajuanModel::where('kode_rkat', $request->kode_rkat)->first()) abort(500, "Tidak dapat store pengajuan");
+        $data = PengajuanModel::create($request->all());
 
         $id_user = $this->status($data->id_pengajuan);
         $id_user = array_unique($id_user->original['data'], SORT_REGULAR);
@@ -100,7 +100,7 @@ class PengajuanController extends Controller
      */
     public function byUser($params)
     {
-        $data = pengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+        $data = PengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
             ->join('message', 'pengajuan.id_pengajuan', 'message.id_pengajuan')
             ->join('user', 'pengajuan.id_user', 'user.id_user')
             ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
@@ -125,7 +125,7 @@ class PengajuanController extends Controller
      */
     public function show($params)
     {
-        $data = pengajuanModel::find($params);
+        $data = PengajuanModel::find($params);
 
         return response()->json([
             'data' => $data ? $data : "Failed, data not found"
@@ -146,7 +146,7 @@ class PengajuanController extends Controller
 
     public function countMessage($params)
     {
-        $data = pengajuanModel::join('message', 'pengajuan.id_pengajuan', 'message.id_pengajuan')
+        $data = PengajuanModel::join('message', 'pengajuan.id_pengajuan', 'message.id_pengajuan')
             ->where('pengajuan.id_user', '!=', $params)
             ->where('message.id_user', $params)
             ->where('message.status_message', false)
@@ -159,7 +159,7 @@ class PengajuanController extends Controller
 
     public function countMessageSelf($params)
     {
-        $data = pengajuanModel::join('message', 'pengajuan.id_pengajuan', 'message.id_pengajuan')
+        $data = PengajuanModel::join('message', 'pengajuan.id_pengajuan', 'message.id_pengajuan')
             ->where('pengajuan.id_user', $params)
             ->where('message.id_user', $params)
             ->where('message.status_message', false)
@@ -185,7 +185,7 @@ class PengajuanController extends Controller
      */
     public function update(Request $request, $params)
     {
-        $data = pengajuanModel::find($params);
+        $data = PengajuanModel::find($params);
         $data ? $data->update($request->all()) : false;
 
         $this->updateMessage($params, $request->id_user);
@@ -204,7 +204,7 @@ class PengajuanController extends Controller
      */
     public function hapus($params)
     {
-        $pengajuan = pengajuanModel::find($params);
+        $pengajuan = PengajuanModel::find($params);
 
         DB::statement('DELETE pengajuan, pengajuan_history, validasi FROM pengajuan
         INNER JOIN pengajuan_history ON pengajuan.id_pengajuan = pengajuan_history.id
@@ -213,7 +213,7 @@ class PengajuanController extends Controller
         DB::statement('DELETE pengajuan FROM pengajuan WHERE pengajuan.id_pengajuan = ' . $params);
         // DB::statement('DELETE message FROM pengajuan WHERE message.id_pengajuan = ' . $params);
 
-        $anggaran_digunakan = pengajuanModel::where('kode_rkat', $pengajuan->kode_rkat)
+        $anggaran_digunakan = PengajuanModel::where('kode_rkat', $pengajuan->kode_rkat)
             ->where('validasi_status', 3)
             ->orWhere('kode_rkat', $pengajuan->kode_rkat)
             ->where('status_pengajuan', 'approved')
@@ -251,7 +251,7 @@ class PengajuanController extends Controller
      */
     public function deleteRows(Request $request)
     {
-        $data = pengajuanModel::find($request->all());
+        $data = PengajuanModel::find($request->all());
         $data ? $data->each->delete() : false;
 
         return response()->json([
@@ -267,7 +267,7 @@ class PengajuanController extends Controller
      */
     public function history($params)
     {
-        $data = pengajuanHistoryModel::join('validasi', 'pengajuan_history.id_pengajuan', '=', 'validasi.id_pengajuan_history')
+        $data = PengajuanHistoryModel::join('validasi', 'pengajuan_history.id_pengajuan', '=', 'validasi.id_pengajuan_history')
             ->where('pengajuan_history.id', $params)->get();
 
         return response()->json([
@@ -307,7 +307,7 @@ class PengajuanController extends Controller
      */
     public function autoProccess($request, $params)
     {
-        $pengajuan = pengajuanModel::find($params);
+        $pengajuan = PengajuanModel::find($params);
         $pengajuan->status_pengajuan = $request->status_pengajuan;
         $pengajuan->validasi_status = $request->status;
         $pengajuan->nama_status = $request->nama;
@@ -315,7 +315,7 @@ class PengajuanController extends Controller
         $pengajuan->save();
 
         if ($request->status == 3) {
-            $anggaran_digunakan = pengajuanModel::where('kode_rkat', $request->kode_rkat)
+            $anggaran_digunakan = PengajuanModel::where('kode_rkat', $request->kode_rkat)
                 ->where('pencairan', '!=', null)
                 ->sum('biaya_program');
 
@@ -325,7 +325,7 @@ class PengajuanController extends Controller
             $this->updateMessage($params, $request->id_user);
         }
 
-        pengajuanModel::query()
+        PengajuanModel::query()
             ->where('id_pengajuan', $params)
             ->each(function ($oldPost) {
                 $newPost = $oldPost->replicate();
@@ -334,10 +334,10 @@ class PengajuanController extends Controller
                 $newPost->save();
             });
 
-        $pengajuan_history = pengajuanHistoryModel::where('kode_rkat', $request->kode_rkat)
+        $pengajuan_history = PengajuanHistoryModel::where('kode_rkat', $request->kode_rkat)
             ->select('id_pengajuan')->latest()->first();
 
-        validasiModel::create([
+        ValidasiModel::create([
             "id_pengajuan_history" => $pengajuan_history->id_pengajuan,
             "id_struktur" => $request->id_struktur,
             "status_validasi" => $request->status,
@@ -353,7 +353,7 @@ class PengajuanController extends Controller
      */
     public function validasi($params)
     {
-        $data = pengajuanHistoryModel::join('validasi', 'pengajuan_history.id_pengajuan', 'validasi.id_pengajuan_history')
+        $data = PengajuanHistoryModel::join('validasi', 'pengajuan_history.id_pengajuan', 'validasi.id_pengajuan_history')
             ->where('pengajuan_history.id', $params)
             ->select('validasi.status_validasi')
             ->orderBy('validasi.id_validasi', 'DESC')
@@ -365,7 +365,7 @@ class PengajuanController extends Controller
     public function statusNull($id_struktur, $id_pengajuan, $nomor, $warek = false)
     {
         if ($warek !== false) {
-            $data = validasiModel::join('pengajuan_history', 'validasi.id_pengajuan_history', 'pengajuan_history.id_pengajuan')
+            $data = ValidasiModel::join('pengajuan_history', 'validasi.id_pengajuan_history', 'pengajuan_history.id_pengajuan')
                 ->join('pengajuan', 'pengajuan_history.id', 'pengajuan.id_pengajuan')
                 ->where('validasi.id_struktur', $id_struktur)
                 ->where('pengajuan.id_pengajuan', $id_pengajuan)
@@ -373,7 +373,7 @@ class PengajuanController extends Controller
                 ->skip($warek)
                 ->first();
         } else {
-            $data = validasiModel::join('pengajuan_history', 'validasi.id_pengajuan_history', 'pengajuan_history.id_pengajuan')
+            $data = ValidasiModel::join('pengajuan_history', 'validasi.id_pengajuan_history', 'pengajuan_history.id_pengajuan')
                 ->join('pengajuan', 'pengajuan_history.id', 'pengajuan.id_pengajuan')
                 ->where('validasi.id_struktur', $id_struktur)
                 ->where('pengajuan.id_pengajuan', $id_pengajuan)
@@ -430,7 +430,7 @@ class PengajuanController extends Controller
 
     public function status($params)
     {
-        $pengajuan = pengajuanModel::join('user', 'pengajuan.id_user', 'user.id_user')
+        $pengajuan = PengajuanModel::join('user', 'pengajuan.id_user', 'user.id_user')
             ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
             ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
             ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
@@ -877,21 +877,21 @@ class PengajuanController extends Controller
         return response()->json([
             'data' => [
                 'total_rkat' => $rkat->count(),
-                'total_rkat_diterima' => pengajuanModel::where('id_user', $params)
+                'total_rkat_diterima' => PengajuanModel::where('id_user', $params)
                     ->where('pencairan', '!=', null)
                     ->sum('biaya_program'),
                 'total_anggaran_rkat' => $rkat->sum('total_anggaran'),
-                'pengajuan_diterima' => pengajuanModel::where('id_user', $params)
+                'pengajuan_diterima' => PengajuanModel::where('id_user', $params)
                     ->where('status_pengajuan', 'approved')
                     ->where('pencairan', '!=', null)
                     ->count(),
 
-                'pengajuan_progress' => pengajuanModel::where('id_user', $params)
+                'pengajuan_progress' => PengajuanModel::where('id_user', $params)
                     ->where('status_pengajuan', 'progress')->count(),
 
                 'rkat' => DB::select('SELECT rkat.id_rkat, rkat.kode_rkat, rkat.rencara_anggaran, (SELECT SUM(biaya_program) FROM pengajuan WHERE kode_rkat = rkat.id_rkat AND pencairan != null) as biaya_program, rkat.created_at FROM rkat WHERE rkat.id_user = ' . $params .' ORDER BY kode_rkat ASC'),
 
-                'pengajuan' => pengajuanModel::join('user', 'pengajuan.id_user', 'user.id_user')
+                'pengajuan' => PengajuanModel::join('user', 'pengajuan.id_user', 'user.id_user')
                     ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
                     ->where('user.id_user', $params)
                     ->select('user.fullname', 'rkat.kode_rkat', 'pengajuan.id_pengajuan', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'pengajuan.created_at')
@@ -917,7 +917,7 @@ class PengajuanController extends Controller
             ->distinct()
             ->get();
 
-        $pengajuan = pengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+        $pengajuan = PengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
             ->join('user', 'pengajuan.id_user', 'user.id_user')
             ->select('user.fullname', 'rkat.kode_rkat', 'pengajuan.latar_belakang', 'pengajuan.sasaran', 'pengajuan.target_capaian', 'pengajuan.bentuk_pelaksanaan_program', 'pengajuan.tempat_program', 'pengajuan.tanggal', 'pengajuan.bidang_terkait', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status')
             ->orderBy('user.fullname')
@@ -943,7 +943,7 @@ class PengajuanController extends Controller
         foreach ($listRkat as $value) {
             $id_rkat[] = $value->id_rkat;
         }
-        $listPengajuan = pengajuanModel::whereIn('kode_rkat', $id_rkat)
+        $listPengajuan = PengajuanModel::whereIn('kode_rkat', $id_rkat)
             ->select('id_pengajuan', 'kode_rkat', 'latar_belakang', 'biaya_program', 'validasi_status', 'nama_status')
             ->get();
 
