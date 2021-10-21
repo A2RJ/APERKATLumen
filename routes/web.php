@@ -2,12 +2,6 @@
 
 /** @var \Laravel\Lumen\Routing\Router $router */
 
-use App\Models\pengajuanModel;
-use App\Models\RKATModel;
-use App\Models\UserModel;
-use App\Models\validasiModel;
-use Illuminate\Support\Facades\DB;
-
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -27,8 +21,6 @@ $router->get('/', function () use ($router) {
         'about_API' => "API SUBMISSION"
     ]);
 });
-
-// $router->get('/coba', 'PengajuanController@coba');
 
 $router->group(['middleware' => 'auth', 'prefix' => 'api'], function ($router) {
     $router->get('me', 'AuthController@me');

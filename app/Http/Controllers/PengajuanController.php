@@ -12,7 +12,6 @@ use App\Models\PengajuanModel;
 use App\Models\MessageModel;
 use App\Models\PengajuanHistoryModel;
 use Barryvdh\DomPDF\Facade as PDF;
-use Illuminate\Support\Arr;
 
 class PengajuanController extends Controller
 {
@@ -58,7 +57,7 @@ class PengajuanController extends Controller
             "status_pengajuan" => "required"
         ]);
 
-        if (PengajuanModel::where('kode_rkat', $request->kode_rkat)->first()) abort(500, "Tidak dapat store pengajuan");
+        // if (PengajuanModel::where('kode_rkat', $request->kode_rkat)->first()) abort(500, "Tidak dapat store pengajuan");
         $data = PengajuanModel::create($request->all());
 
         $id_user = $this->status($data->id_pengajuan);
@@ -73,11 +72,11 @@ class PengajuanController extends Controller
             ];
         }
         MessageModel::insert($array);
-
+        $request->next = $id_user[1]["id_user"];
         $this->autoProccess($request, $data->id_pengajuan);
 
         return response()->json([
-            'data' => $data
+            'data' => $request->next
         ]);
     }
 
