@@ -204,7 +204,7 @@ class RKATController extends Controller
             'user' => $user,
             'rkat' => $rkat
         ];
-        
+
         $pdf = PDF::loadView('rkat', $data);
         return $pdf->download('RKAT-' . date("Y-m-d") . '.pdf');
     }
