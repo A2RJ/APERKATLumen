@@ -57,15 +57,41 @@ class PengajuanController extends Controller
             "status_pengajuan" => "required"
         ]);
 
+        // Validasi LPJ
+        $validasiLPJ =  $this->validasiLPJ($request->id_user);
+        if ($validasiLPJ) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Mohon lengkapi LPJ pengajuan yang telah dicairkan.'
+            ], 400);
+        }
+
+        // Validasi RKAT
         if (PengajuanModel::where('kode_rkat', $request->kode_rkat)->count() == 1) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Tidak dapat menambah pengajuan dengan kode rkat tersebut'
+                'message' => 'Tidak dapat menambah pengajuan, RKAT telah digunakan'
             ], 400);
         }
-        $this->bandingkanRencanaAnggaran($request->biaya_program);
-        $this->hitungPengajuan($request->id_user);
+
+        // Validasi RKAT dan biaya program
+        $rkat = RKATModel::where('id_rkat', $request->kode_rkat)->first();
+        if ($rkat == null) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Tidak dapat menambah pengajuan, RKAT tidak ditemukan'
+            ], 400);
+        } else {
+            if ($rkat->total_anggaran !== $request->biaya_program) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Tidak dapat menambah pengajuan, biaya program tidak sesuai dengan total anggaran RKAT'
+                ], 400);
+            }
+        }
+
         $data = PengajuanModel::create($request->all());
+
 
         $id_user = $this->status($data->id_pengajuan);
         $id_user = array_unique($id_user->original['data'], SORT_REGULAR);
@@ -74,47 +100,28 @@ class PengajuanController extends Controller
         $this->autoProccess($request, $data->id_pengajuan);
 
         return response()->json([
-            'data' => $request
+            'data' => $data
         ]);
     }
 
     // hitung pengajuan sudah pencairan sebanyak 2x
-    public function hitungPengajuan($id_user)
+    public function validasiLPJ($id_user)
     {
         if (
             PengajuanModel::where('id_user', $id_user)
             ->where('pencairan', '!=', null)
             ->where('lpj_kegiatan', null)
-            ->where('lpj_keuangan', null)->count() == 2 ||
-            PengajuanModel::where('id_user', $id_user)
+            ->where('lpj_keuangan', null)
+            ->orWhere('id_user', $id_user)
             ->where('pencairan', '!=', null)
             ->where('lpj_kegiatan', '!=', null)
-            ->where('lpj_keuangan', null)->count() == 2 ||
-            PengajuanModel::where('id_user', $id_user)
+            ->where('lpj_keuangan', null)
+            ->orWhere('id_user', $id_user)
             ->where('pencairan', '!=', null)
             ->where('lpj_kegiatan', null)
-            ->where('lpj_keuangan', '!=', null)->count() == 2
+            ->where('lpj_keuangan', '!=', null)->count() >= 2
         ) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Mohon lengkapi LPJ untuk pengajuan yang telah dicairkan'
-            ], 400);
-        }
-    }
-
-    /**
-     * bandingkan rencana anggaran dengan anggaran yang sudah digunakan
-     */
-    public function bandingkanRencanaAnggaran($biaya_program)
-    {
-        $data = RKATModel::where('kode_rkat', $biaya_program)->select('total_anggaran')->first();
-        if ($data) {
-            if ($data->total_anggaran > $biaya_program || $data->total_anggaran < $biaya_program) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Biaya program tidak sesuai dengan total anggaran pada RKAT'
-                ], 400);
-            }
+            return true;
         }
     }
 
@@ -221,10 +228,24 @@ class PengajuanController extends Controller
         if (PengajuanModel::where('kode_rkat', $request->kode_rkat)->where('id_pengajuan', '!=', $params)->count() == 1) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Tidak dapat menambah pengajuan dengan kode rkat tersebut'
+                'message' => 'Tidak dapat menambah pengajuan, RKAT telah digunakan'
             ], 400);
         }
-        $this->bandingkanRencanaAnggaran($request->biaya_program);
+
+        $rkat = RKATModel::where('id_rkat', $request->kode_rkat)->first();
+        if ($rkat == null) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Tidak dapat menambah pengajuan, RKAT tidak ditemukan'
+            ], 400);
+        } else {
+            if ($rkat->total_anggaran !== $request->biaya_program) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Tidak dapat menambah pengajuan, biaya program tidak sesuai dengan total anggaran RKAT'
+                ], 400);
+            }
+        }
 
         $data = PengajuanModel::find($params);
         $data ? $data->update($request->all()) : false;
@@ -599,8 +620,25 @@ class PengajuanController extends Controller
             ],
             [
                 "id_user" => $struktur[0]->id_user,
-                "nama_struktur" => $struktur[0]->nama_struktur,
-                "status" => $this->statusNull($struktur[0]->id_user, $pengajuan->id_pengajuan, 2, $sekniv)
+                "nama_struktur" => 'LPJ',
+                "status" => $this->statusNull($struktur[0]->id_user, $pengajuan->id_pengajuan, 2, $sekniv),
+                "lpj" => [
+                    [
+                        "id_user" => $struktur[0]->id_user,
+                        "nama_struktur" => 'Dir Keuangan',
+                        "status" => $this->statusNull($struktur[0]->id_user, $pengajuan->id_pengajuan, 3)
+                    ],
+                    [
+                        "id_user" => $struktur[0]->id_user,
+                        "nama_struktur" => 'Sekniv',
+                        "status" => $this->statusNull($struktur[0]->id_user, $pengajuan->id_pengajuan, 4)
+                    ]
+                ]
+            ],
+            [
+                "id_user" => $struktur[3]->id_user,
+                "nama_struktur" => 'Completed',
+                "status" => $this->statusNull($struktur[3]->id_user, $pengajuan->id_pengajuan, 3)
             ]
         );
 
