@@ -150,7 +150,7 @@ class PengajuanController extends Controller
             ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
             ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
             ->where('pengajuan.id_user', $params)
-            ->select('user.id_user', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at')
+            ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at')
             ->orderBy('pengajuan.id_pengajuan', 'DESC')
             ->paginate();
 
@@ -239,10 +239,10 @@ class PengajuanController extends Controller
                 'message' => 'Tidak dapat menambah pengajuan, RKAT tidak ditemukan'
             ], 400);
         } else {
-            if ($rkat->total_anggaran !== $request->biaya_program) {
+            if ($request->biaya_program && $rkat->total_anggaran !== $request->biaya_program) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Tidak dapat menambah pengajuan, biaya program tidak sesuai dengan total anggaran RKAT'
+                    'message' => 'Tidak dapat menambah pengajuan, biaya program tidak sesuai dengan total anggaran RKAT',
                 ], 400);
             }
         }
@@ -579,6 +579,7 @@ class PengajuanController extends Controller
         // 1 = input/revisi
         // 2 = terima
         // 3 = upload bukti pencairan
+        // 4 = lpj
 
         $struktur = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
             ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
@@ -619,15 +620,17 @@ class PengajuanController extends Controller
                 "status" => $this->statusNull($struktur[3]->id_user, $pengajuan->id_pengajuan, 3)
             ],
             [
-                "id_user" => $struktur[0]->id_user,
+                "id_user" => 1111,
                 "nama_struktur" => 'LPJ',
-                "status" => $this->statusNull($struktur[0]->id_user, $pengajuan->id_pengajuan, 2, $sekniv),
+                "status" => $this->statusNull($struktur[3]->id_user, $pengajuan->id_pengajuan, 4) && $this->statusNull($struktur[0]->id_user, $pengajuan->id_pengajuan, 4) ? true : false,
                 "lpj" => [
+                    // Dir Keuangan
                     [
-                        "id_user" => $struktur[0]->id_user,
-                        "nama_struktur" => 'Dir Keuangan',
-                        "status" => $this->statusNull($struktur[0]->id_user, $pengajuan->id_pengajuan, 3)
+                        "id_user" => $struktur[3]->id_user,
+                        "nama_struktur" => $struktur[3]->nama_struktur_child1,
+                        "status" => $this->statusNull($struktur[3]->id_user, $pengajuan->id_pengajuan, 4)
                     ],
+                    // Sekniv
                     [
                         "id_user" => $struktur[0]->id_user,
                         "nama_struktur" => 'Sekniv',
@@ -635,10 +638,11 @@ class PengajuanController extends Controller
                     ]
                 ]
             ],
+            // Completed
             [
-                "id_user" => $struktur[3]->id_user,
+                "id_user" => 2222,
                 "nama_struktur" => 'Completed',
-                "status" => $this->statusNull($struktur[3]->id_user, $pengajuan->id_pengajuan, 3)
+                "status" => $this->statusNull($struktur[3]->id_user, $pengajuan->id_pengajuan, 4) && $this->statusNull($struktur[0]->id_user, $pengajuan->id_pengajuan, 4) ? true : false
             ]
         );
 
