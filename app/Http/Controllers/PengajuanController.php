@@ -1021,4 +1021,46 @@ class PengajuanController extends Controller
         }
         return $new;
     }
+
+    public function lpjKeuangan()
+    {
+        $return = PengajuanModel::join('pengajuan_history', 'pengajuan.id_pengajuan', 'pengajuan_history.id')
+            ->join('validasi', 'pengajuan_history.id_pengajuan', 'validasi.id_pengajuan_history')
+            ->select('pengajuan.id_pengajuan')
+            ->where('pengajuan.lpj_keuangan', '!=', null) // sudah upload
+            ->where('validasi.status_validasi', 4) // sudah valid
+            ->where('validasi.id_struktur', 24) // keuangan
+            ->distinct()
+            ->get();
+            
+        $a = [];
+        foreach ($return as $r) {
+            $a[] = $r->id_pengajuan;
+        }
+
+        return PengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+            ->join('user', 'pengajuan.id_user', 'user.id_user')
+            ->join('pengajuan_history', 'pengajuan.id_pengajuan', 'pengajuan_history.id')
+            ->join('validasi', 'pengajuan_history.id_pengajuan', 'validasi.id_pengajuan_history')
+            ->select('user.fullname', 'rkat.kode_rkat', 'pengajuan.id_pengajuan', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'pengajuan.created_at')
+            ->where('pengajuan.pencairan', '!=', null) // belum pengajuan
+            ->where('pengajuan.lpj_keuangan', '!=', null) // belum pengajuan
+            ->whereNotIn('pengajuan.id_pengajuan', $a)
+            ->distinct()
+            ->get();
+    }
+
+    public function transfer()
+    {
+        return PengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+            ->join('user', 'pengajuan.id_user', 'user.id_user')
+            ->join('pengajuan_history', 'pengajuan.id_pengajuan', 'pengajuan_history.id')
+            ->join('validasi', 'pengajuan_history.id_pengajuan', 'validasi.id_pengajuan_history')
+            ->select('user.fullname', 'rkat.kode_rkat', 'pengajuan.id_pengajuan', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'pengajuan.created_at')
+            ->where('pengajuan.pencairan', null) // belum pengajuan
+            ->where('validasi.status_validasi', 2) // terima
+            ->where('validasi.id_struktur', 22) // rektor
+            ->distinct()
+            ->get();
+    }
 }

@@ -2,6 +2,9 @@
 
 /** @var \Laravel\Lumen\Routing\Router $router */
 
+use App\Models\PengajuanModel;
+use Illuminate\Support\Facades\DB;
+
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -12,15 +15,15 @@
 | and give it the Closure to call when that URI is requested.
 |
 */
-
-$router->get('/', function () use ($router) {
-    return response()->json([
-        'app_version' => $router->app->version(),
-        'vendor' => "Universitas Teknologi Sumbawa",
-        'author' => "https://github.com/a2rj",
-        'about_API' => "API SUBMISSION"
-    ]);
-});
+$router->get('/', 'PengajuanController@lpjKeuangan');
+// $router->get('/', function () use ($router) {
+//     return response()->json([
+//         'app_version' => $router->app->version(),
+//         'vendor' => "Universitas Teknologi Sumbawa",
+//         'author' => "https://github.com/a2rj",
+//         'about_API' => "API SUBMISSION"
+//     ]);
+// });
 
 $router->group(['middleware' => 'auth', 'prefix' => 'api'], function ($router) {
     $router->get('me', 'AuthController@me');
@@ -37,6 +40,8 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
     $router->group(['prefix' => 'pengajuan'], function () use ($router) {
         $router->get('/', 'PengajuanController@index');
+        $router->get('/transfer', 'PengajuanController@transfer');
+        $router->get('/lpj', 'PengajuanController@lpjKeuangan');
         $router->get('/sendMail/{params}', 'PengajuanController@sendMail');
         $router->get('/pdf_pengajuan/{params}', 'PengajuanController@pdfById');
         $router->get('/destroy/{params}', 'PengajuanController@destroy');
