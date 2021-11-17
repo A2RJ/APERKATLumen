@@ -1044,7 +1044,7 @@ class PengajuanController extends Controller
             ->join('validasi', 'pengajuan_history.id_pengajuan', 'validasi.id_pengajuan_history')
             ->select('user.fullname', 'rkat.kode_rkat', 'pengajuan.id_pengajuan', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'pengajuan.created_at')
             ->where('pengajuan.pencairan', '!=', null) // belum pengajuan
-            ->where('pengajuan.lpj_keuangan', '!=', null) // belum pengajuan
+            ->where('pengajuan.lpj_keuangan', '!=',  null) // belum pengajuan
             ->whereNotIn('pengajuan.id_pengajuan', $a)
             ->distinct()
             ->get();
