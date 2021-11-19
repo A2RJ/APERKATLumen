@@ -17,7 +17,10 @@ class StrukturController extends Controller
     public function index()
     {
         return Response()->json([
-            'data' => strukturModel::find()
+            'data' => strukturModel::join('struktur_child1', 'struktur.id_struktur', 'struktur_child1.id_struktur')
+                ->join('struktur_child2', 'struktur.id_struktur_child1', 'struktur_child2.id_struktur_child1')
+                ->select('struktur.*', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
+                ->get()
         ]);
     }
 
@@ -30,15 +33,15 @@ class StrukturController extends Controller
      */
     public function store(Request $request)
     {
-        $this->validate($request, [
-            "iku_parent"
-        ]);
+        // $this->validate($request, [
+        //     "nama_struktur"
+        // ]);
 
-        $data = strukturModel::create($request->all());
+        // $data = strukturModel::create($request->all());
 
-        return response()->json([
-            'data' => $data ? "Success data was added" : "Failed add data"
-        ]);
+        // return response()->json([
+        //     'data' => $data ? "Success data was added" : "Failed add data"
+        // ]);
     }
 
     /**
@@ -52,15 +55,14 @@ class StrukturController extends Controller
      */
     public function show($params)
     {
-        $data = Struktur_child1Model::where('id_struktur', $params)->find();
+        $data = strukturModel::join('struktur_child1', 'struktur.id_struktur', 'struktur_child1.id_struktur')
+            ->join('struktur_child2', 'struktur.id_struktur_child1', 'struktur_child2.id_struktur_child1')
+            ->select('struktur.id_struktur', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
+            ->where('struktur.id_struktur', $params)
+            ->get();
 
         return response()->json([
-            'data' => $data
-                ? [
-                    'struktur_child1' => $data,
-                    'struktur_child2' => Struktur_child2Model::where('id_struktur_child1', $data[0]['id_struktur_child1'])->find()
-                ]
-                : "Failed, data not found"
+            'status' => $data ? $data : "Failed",
         ]);
     }
 

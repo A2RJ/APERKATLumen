@@ -56,6 +56,7 @@ class UserController extends Controller
             "id_struktur_child1" => "nullable",
             "id_struktur_child2" => "nullable",
             "nomor_wa" => "required|numeric",
+            "kop" => "nullable",
         ]);
 
 
@@ -137,8 +138,6 @@ class UserController extends Controller
      */
     public function update(Request $request, $params)
     {
-        // $this->validation($request);
-
         $data = UserModel::find($params)->update($request->all());
         if ($request->input('password')) {
             $update = UserModel::find($params);
@@ -274,5 +273,15 @@ class UserController extends Controller
                 ->select('id_struktur_child2 as code', 'nama_struktur_child2 as label')
                 ->get()
         ]);
+    }
+
+    // fungsi upload gambar
+    public function upload(Request $request, $params)
+    {
+        if ($request->hasFile('file')) {
+            $fileName = uniqid(40) . "." . $request->file('file')->getClientOriginalExtension();
+            $request->file('file')->move('../kop', $fileName);
+            return $fileName;
+        }
     }
 }

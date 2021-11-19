@@ -28,7 +28,8 @@ class UserModel extends Model implements AuthenticatableContract, AuthorizableCo
         "id_struktur",
         "id_struktur_child1",
         "id_struktur_child2",
-        "nomor_wa"
+        "nomor_wa",
+        "kop"
     ];
 
     /**

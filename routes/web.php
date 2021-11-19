@@ -15,15 +15,15 @@ use Illuminate\Support\Facades\DB;
 | and give it the Closure to call when that URI is requested.
 |
 */
-$router->get('/', 'PengajuanController@lpjKeuangan');
-// $router->get('/', function () use ($router) {
-//     return response()->json([
-//         'app_version' => $router->app->version(),
-//         'vendor' => "Universitas Teknologi Sumbawa",
-//         'author' => "https://github.com/a2rj",
-//         'about_API' => "API SUBMISSION"
-//     ]);
-// });
+
+$router->get('/', function () use ($router) {
+    return response()->json([
+        'app_version' => $router->app->version(),
+        'vendor' => "Universitas Teknologi Sumbawa",
+        'author' => "https://github.com/a2rj",
+        'about_API' => "API SUBMISSION"
+    ]);
+});
 
 $router->group(['middleware' => 'auth', 'prefix' => 'api'], function ($router) {
     $router->get('me', 'AuthController@me');
@@ -126,6 +126,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/getSub_sub_struktur/{params}', 'UserController@getSub_sub_struktur');
         $router->post('/', 'UserController@store');
         $router->post('/{params}', 'UserController@update');
+        $router->post('/upload/{params}', 'UserController@upload');
     });
 
     $router->group(['prefix' => 'iku'], function () use ($router) {

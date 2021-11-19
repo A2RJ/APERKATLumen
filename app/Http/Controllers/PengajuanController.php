@@ -82,7 +82,8 @@ class PengajuanController extends Controller
                 'message' => 'Tidak dapat menambah pengajuan, RKAT tidak ditemukan'
             ], 400);
         } else {
-            if ($rkat->total_anggaran !== $request->biaya_program) {
+            // if ($rkat->total_anggaran !== $request->biaya_program) {
+            if ($request->biaya_program > $rkat->total_anggaran) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Tidak dapat menambah pengajuan, biaya program tidak sesuai dengan total anggaran RKAT'
@@ -94,9 +95,7 @@ class PengajuanController extends Controller
 
 
         $id_user = $this->status($data->id_pengajuan);
-        $id_user = array_unique($id_user->original['data'], SORT_REGULAR);
-
-        $request->next = $id_user[1]["id_user"];
+        $request->next = $id_user->original['data'][1]['id_user'];
         $this->autoProccess($request, $data->id_pengajuan);
 
         return response()->json([
@@ -1032,7 +1031,7 @@ class PengajuanController extends Controller
             ->where('validasi.id_struktur', 24) // keuangan
             ->distinct()
             ->get();
-            
+
         $a = [];
         foreach ($return as $r) {
             $a[] = $r->id_pengajuan;
