@@ -238,7 +238,7 @@ class PengajuanController extends Controller
                 'message' => 'Tidak dapat menambah pengajuan, RKAT tidak ditemukan'
             ], 400);
         } else {
-            if ($request->biaya_program && $rkat->total_anggaran !== $request->biaya_program) {
+            if ($request->biaya_program && $request->biaya_program > $rkat->total_anggaran) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Tidak dapat menambah pengajuan, biaya program tidak sesuai dengan total anggaran RKAT',
@@ -959,25 +959,17 @@ class PengajuanController extends Controller
 
     public function pdfByUSer(Request $request)
     {
-        $user = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
-            ->select('user.fullname')
-            ->orderBy('user.fullname')
-            ->whereIn('pengajuan.id_pengajuan', $request->all())
-            ->distinct()
-            ->get();
-
         $pengajuan = PengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
             ->join('user', 'pengajuan.id_user', 'user.id_user')
-            ->select('user.fullname', 'rkat.kode_rkat', 'pengajuan.latar_belakang', 'pengajuan.sasaran', 'pengajuan.target_capaian', 'pengajuan.bentuk_pelaksanaan_program', 'pengajuan.tempat_program', 'pengajuan.tanggal', 'pengajuan.bidang_terkait', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status')
+            ->select('user.fullname', 'user.kop', 'rkat.nama_program', 'rkat.kode_rkat', 'rkat.tujuan', 'pengajuan.id_pengajuan', 'pengajuan.latar_belakang', 'pengajuan.sasaran', 'pengajuan.target_capaian', 'pengajuan.bentuk_pelaksanaan_program', 'pengajuan.tempat_program', 'pengajuan.tanggal')
             ->orderBy('user.fullname')
             ->whereIn('pengajuan.id_pengajuan', $request->all())
             ->get();
 
         $data = [
-            'user' => $user,
             'pengajuan' => $pengajuan,
         ];
-
+        
         $pdf = PDF::loadView('pengajuan', $data)->setPaper('a4');
         return $pdf->download('pengajuan-' . date("Y-m-d") . '.pdf');
     }

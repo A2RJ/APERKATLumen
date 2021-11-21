@@ -13,86 +13,107 @@
             text-align: center;
         }
 
-        td {
+        .justify {
             text-align: justify;
+        }
+
+        .top tr td {
             text-justify: inter-word;
-            padding: 0px;
-            margin: 0px;
+            padding-bottom: 10px;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-bold {
+            font-weight: bold;
+        }
+
+        #img-kop-surat {
+            width: 100%;
+            height: auto;
+        }
+
+        .unit {
+            margin-bottom: 30px;
         }
     </style>
+
 </head>
 
 <body>
-    <div style="page-break-after: always;">
-        <h3 id=judul>SURAT PERNYATAAN</h3>
-        <!-- <img src="https://image.freepik.com/free-vector/watercolor-christmas-background_79603-2160.jpg" alt=""> -->
+    @foreach ($pengajuan as $p)
+    <div style="page-break-after: always; margin-left: 20px">
+        <!-- <img id="img-kop-surat" src="<?= $p->kop ?>" alt="Belum upload kop surat dihalaman profile"> -->
+        <h3 id=judul>KERANGKA ACUAN KERJA</h3>
+        <div class="unit">
+            <span class="text-bold">Fakultas/Unit Pelaksana:</span> {{ $p->fullname }}
+        </div>
 
-        <p>Saya yang bertanda tangan di bawah ini :</p>
-        <table>
+        <table class="top">
             <tr>
-                <td style="width: 25%;">Nama</td>
+                <td style="width: 25%;">Nama Kegiatan</td>
                 <td>:</td>
-                <td class="justify">Arbrian Abdul Jamal</td>
+                <td style="width: 70%;">{{ $p->nama_program }}</td>
             </tr>
+            <!-- no rkat -->
             <tr>
-                <td style="width: 25%;">Tempat, tanggal lahir</td>
+                <td style="width: 25%;">No. RKAT Kegiatan/Program</td>
                 <td>:</td>
-                <td class="justify">Grobogan, 3 Maret 1993</td>
+                <td style="width: 70%;">{{ $p->kode_rkat }}</td>
             </tr>
+            <!-- latar belakang -->
             <tr>
-                <td style="width: 25%; vertical-align: top;">Alamat</td>
-                <td style="width: 5%; vertical-align: top;">:</td>
-                <td class="justify">Kampung Sambak RT 01 RW 09 Kelurahan Danyang
-                    Kecamatan Purwodadi Kabupaten Grobogan Lorem ipsum dolor sit amet consectetur, adipisicing elit. Vel porro, quam possimus incidunt officia ad quidem natus! Impedit, ipsam esse fugit, nesciunt excepturi aliquid atque, adipisci sint vel earum ipsa? Consequatur labore perspiciatis accusantium libero sequi laboriosam debitis inventore molestiae! Architecto, laboriosam minus. Dolorum veniam dicta deserunt hic deleniti, minus natus exercitationem voluptates voluptatum blanditiis labore, omnis quod repudiandae quam assumenda ipsum nihil voluptas. Maxime impedit provident obcaecati architecto. Sapiente iure perferendis ad qui consequuntur dolorem incidunt quod, repellendus velit aliquam, vitae, totam facilis eaque id similique non tempore minima quo! Rerum eius dolor cupiditate dicta at. Tenetur reiciendis architecto enim. Mollitia, perferendis deserunt minus quas, vel eius assumenda sit neque saepe labore quisquam ex ab, excepturi amet! Voluptatem nesciunt doloremque eaque, expedita fugiat ullam deleniti tenetur, placeat, eum consequatur delectus at vitae nulla voluptatibus accusamus ex? Voluptates vero eligendi unde sed libero debitis perferendis quos inventore, esse quae officia fugiat maxime laborum id, aspernatur, quo deleniti recusandae! Ullam atque voluptas, laboriosam nam itaque nulla a! Amet nobis facere excepturi aspernatur laudantium quam, repellat illum odio maiores dolores officia voluptatem culpa deserunt quasi qui rerum, adipisci, fugiat aliquam tenetur veritatis id maxime. Qui, quisquam. Autem inventore repudiandae aspernatur eius est.</td>
-            </tr>
-            <tr>
-                <td style="width: 25%;">Pekerjaan</td>
+                <td style="width: 25%;">Latar Belakang pelaksanaan Kegiatan</td>
                 <td>:</td>
-                <td class="justify">Guru</td>
+                <td style="width: 70%;">{{ $p->latar_belakang }}</td>
+            </tr>
+            <!-- tujuan -->
+            <tr>
+                <td style="width: 25%;">Tujuan</td>
+                <td>:</td>
+                <td style="width: 70%;">{{ $p->tujuan }}</td>
+            </tr>
+            <!-- sasaran kegiatan -->
+            <tr>
+                <td style="width: 25%;">Sasaran/ Objek dari pelaksanaan Kegiatan</td>
+                <td>:</td>
+                <td style="width: 70%;">{{ $p->sasaran }}</td>
+            </tr>
+            <!-- target capaian -->
+            <tr>
+                <td style="width: 25%;">Target Atas Ketercapaian Pelaksanaan</td>
+                <td>:</td>
+                <td style="width: 70%;">{{ $p->target_capaian }}</td>
+            </tr>
+            <!-- bentuk kegiatan -->
+            <tr>
+                <td style="width: 25%;">Bentuk Pelaksanaan Kegiatan</td>
+                <td>:</td>
+                <td style="width: 70%;">{{ $p->bentuk_pelaksanaan_program }}</td>
+            </tr>
+            <!-- lokasi dan waktu kegiatan -->
+            <tr>
+                <td style="width: 25%;">Lokasi dan Waktu Kegiatan</td>
+                <td>:</td>
+                <td style="width: 70%;">{{ $p->tempat_program }}{{ $p->tanggal }}</td>
             </tr>
         </table>
 
-        <p>menyatakan dengan sebenar-benarnya akan bersungguh-sungguh belajar dan bekerja.</p>
+        <!-- <div style="text-align: center; margin-top: 75px;">
+            <div style="width: 50%; float:left;">
+                <p style="margin-bottom: 25%;">Pengaju</p>
+                <p>{{ $p->fullname }}</p>
+            </div>
 
-        <div style="width: 50%; text-align: left; float: right;">Purwodadi, 25 Januari 2525</div><br>
-        <div style="width: 50%; text-align: left; float: right;">Yang bertanda tangan,</div><br><br><br><br><br>
-        <div style="width: 50%; text-align: left; float: right;">Arbrian Abdul Jamal</div>
+            <div style="width: 50%; float:right;">
+                <p style="margin-bottom: 25%;">Mengetahui,</p>
+                <p>Kepala {{ $p->fullname }}</p>
+            </div>
+        </div> -->
     </div>
-    <div style="page-break-after: always;">
-        <h3 id=judul>SURAT PERNYATAAN</h3>
-        <!-- <img src="https://image.freepik.com/free-vector/watercolor-christmas-background_79603-2160.jpg" alt=""> -->
-
-        <p>Saya yang bertanda tangan di bawah ini :</p>
-        <table>
-            <tr>
-                <td style="width: 25%;">Nama</td>
-                <td>:</td>
-                <td class="justify">Arbrian Abdul Jamal</td>
-            </tr>
-            <tr>
-                <td style="width: 25%;">Tempat, tanggal lahir</td>
-                <td>:</td>
-                <td class="justify">Grobogan, 3 Maret 1993</td>
-            </tr>
-            <tr>
-                <td style="width: 25%; vertical-align: top;">Alamat</td>
-                <td style="width: 5%; vertical-align: top;">:</td>
-                <td class="justify">Kampung Sambak RT 01 RW 09 Kelurahan Danyang
-                    Kecamatan Purwodadi Kabupaten Grobogan Lorem ipsum dolor sit amet consectetur, adipisicing elit. Vel porro, quam possimus incidunt officia ad quidem natus! Impedit, ipsam esse fugit, nesciunt excepturi aliquid atque, adipisci sint vel earum ipsa? Consequatur labore perspiciatis accusantium libero sequi laboriosam debitis inventore molestiae! Architecto, laboriosam minus. Dolorum veniam dicta deserunt hic deleniti, minus natus exercitationem voluptates voluptatum blanditiis labore, omnis quod repudiandae quam assumenda ipsum nihil voluptas. Maxime impedit provident obcaecati architecto. Sapiente iure perferendis ad qui consequuntur dolorem incidunt quod, repellendus velit aliquam, vitae, totam facilis eaque id similique non tempore minima quo! Rerum eius dolor cupiditate dicta at. Tenetur reiciendis architecto enim. Mollitia, perferendis deserunt minus quas, vel eius assumenda sit neque saepe labore quisquam ex ab, excepturi amet! Voluptatem nesciunt doloremque eaque, expedita fugiat ullam deleniti tenetur, placeat, eum consequatur delectus at vitae nulla voluptatibus accusamus ex? Voluptates vero eligendi unde sed libero debitis perferendis quos inventore, esse quae officia fugiat maxime laborum id, aspernatur, quo deleniti recusandae! Ullam atque voluptas, laboriosam nam itaque nulla a! Amet nobis facere excepturi aspernatur laudantium quam, repellat illum odio maiores dolores officia voluptatem culpa deserunt quasi qui rerum, adipisci, fugiat aliquam tenetur veritatis id maxime. Qui, quisquam. Autem inventore repudiandae aspernatur eius est.</td>
-            </tr>
-            <tr>
-                <td style="width: 25%;">Pekerjaan</td>
-                <td>:</td>
-                <td class="justify">Guru</td>
-            </tr>
-        </table>
-
-        <p>menyatakan dengan sebenar-benarnya akan bersungguh-sungguh belajar dan bekerja.</p>
-
-        <div style="width: 50%; text-align: left; float: right;">Purwodadi, 25 Januari 2525</div><br>
-        <div style="width: 50%; text-align: left; float: right;">Yang bertanda tangan,</div><br><br><br><br><br>
-        <div style="width: 50%; text-align: left; float: right;">Arbrian Abdul Jamal</div>
-    </div>
+    @endforeach
 </body>
 
 </html>
