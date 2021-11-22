@@ -971,7 +971,7 @@ class PengajuanController extends Controller
         ];
         
         $pdf = PDF::loadView('pengajuan', $data)->setPaper('a4');
-        return $pdf->download('pengajuan-' . date("Y-m-d") . '.pdf');
+        return $pdf->setOptions(['enable_javascript', true])->setOptions(['javascript-delay', 13500])->save('invoice.pdf');
     }
 
 

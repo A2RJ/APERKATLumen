@@ -41,35 +41,51 @@
     </style>
 
     <script type="text/javascript">
-        window.addEventListener('load', (event) => {
-            addElement()
-        });
+        document.getElementById("judul").innerHTML = "Laporan Pengajuan";
+        // window.addEventListener('DOMContentLoaded', (event) => {
+        //     addElement()
+        // });
+        // window.addEventListener('load', (event) => {
+        //     addElement()
+        // });
 
-        function addElement() {
-            <?php
-            $toJson = json_encode($pengajuan);
-            ?>
+        // function addElement() {
+        //     <?php
+                //     $toJson = json_encode($pengajuan);
+                //     
+                ?>
 
-            var json = <? echo $toJson ?>;
-            for (let i = 0; i < json.length; i++) {
-                fetch(
-                        "https://image.freepik.com/free-vector/merry-christmas-wallpaper-design_79603-2130.jpg"
-                    )
-                    .then((response) => response.blob())
-                    .then((blob) => {
-                        if (blob.type.includes("image")) {
-                            const img = document.createElement("img");
-                            img.src = URL.createObjectURL(blob);
-                            document.getElementById("top-" + json[i].id_pengajuan).appendChild(img);
-                        }
-                    });
-            }
-        }
+        //     var json = <? echo $toJson ?>;
+        //     for (let i = 0; i < json.length; i++) {
+        //         document.getElementById("top").innerHTML = json[i];
+        // fetch(
+        //         "https://image.freepik.com/free-vector/merry-christmas-wallpaper-design_79603-2130.jpg"
+        //     )
+        //     .then((response) => response.blob())
+        //     .then((blob) => {
+        //         if (blob.type.includes("image")) {
+        //             const img = document.createElement("img");
+        //             img.src = URL.createObjectURL(blob);
+        //             document.getElementById("top-" + json[i].id_pengajuan).appendChild(img);
+        //         }
+        //     });
+        // }
+        // }
     </script>
 </head>
 
 <body>
     @foreach ($pengajuan as $p)
+    <script>
+        for (let index = 0; index < 10; index++) {
+            // create element div
+            var div = document.createElement("div");
+            // add class
+            div.className = "unit";
+            // append to body
+            document.body.appendChild(div);
+        }
+    </script>
     <div style="page-break-after: always; margin-left: 20px">
         <div id="top"></div>
 

@@ -2,8 +2,10 @@
 
 /** @var \Laravel\Lumen\Routing\Router $router */
 
+use App\Http\Controllers\PengajuanController;
 use App\Models\PengajuanModel;
 use Illuminate\Support\Facades\DB;
+use phpDocumentor\Reflection\Types\This;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,6 +26,8 @@ $router->get('/', function () use ($router) {
         'about_API' => "API SUBMISSION"
     ]);
 });
+
+$router->get('/g', 'PengajuanController@pdfByUSer');
 
 $router->group(['middleware' => 'auth', 'prefix' => 'api'], function ($router) {
     $router->get('me', 'AuthController@me');
