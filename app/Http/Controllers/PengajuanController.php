@@ -11,6 +11,7 @@ use App\Models\ValidasiModel;
 use App\Models\PengajuanModel;
 use App\Models\MessageModel;
 use App\Models\PengajuanHistoryModel;
+use App\Models\PrintModel;
 use Barryvdh\DomPDF\Facade as PDF;
 
 class PengajuanController extends Controller
@@ -957,13 +958,47 @@ class PengajuanController extends Controller
         ]);
     }
 
-    public function pdfByUSer(Request $request)
+    public function cobaFungsiPrint($params)
     {
+        $data = PrintModel::where('id_user', base64_decode($params))->select('id_pengajuan')->get();
+        $pengajuan = PengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+            ->join('user', 'pengajuan.id_user', 'user.id_user')
+            ->select('user.fullname', 'user.kop', 'user.ttd', 'rkat.nama_program', 'rkat.kode_rkat', 'rkat.tujuan', 'pengajuan.id_pengajuan', 'pengajuan.latar_belakang', 'pengajuan.sasaran', 'pengajuan.target_capaian', 'pengajuan.bentuk_pelaksanaan_program', 'pengajuan.tempat_program', 'pengajuan.tanggal', 'pengajuan.bidang_terkait')
+            ->orderBy('user.fullname')
+            ->whereIn('pengajuan.id_pengajuan', $data)
+            ->get();
+
+        $data = [
+            'pengajuan' => $pengajuan,
+        ];
+
+        return view('pengajuan', $data);
+    }
+
+    public function pdfByUSer(Request $request, $params)
+    {
+        PrintModel::where('id_user', $params)->delete();
+        $new = [];
+        foreach ($request->all() as $value) {
+            $new[] = [
+                'id_user' => $params,
+                'id_pengajuan' => $value
+            ];
+        }
+        PrintModel::insert($new);
+        return response()->json([
+            'data' => $new
+        ]);
+    }
+
+    public function printFromDB($id_user)
+    {
+        $data = PrintModel::where('id_user', $id_user)->select('id_pengajuan')->get();
         $pengajuan = PengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
             ->join('user', 'pengajuan.id_user', 'user.id_user')
             ->select('user.fullname', 'user.kop', 'rkat.nama_program', 'rkat.kode_rkat', 'rkat.tujuan', 'pengajuan.id_pengajuan', 'pengajuan.latar_belakang', 'pengajuan.sasaran', 'pengajuan.target_capaian', 'pengajuan.bentuk_pelaksanaan_program', 'pengajuan.tempat_program', 'pengajuan.tanggal')
             ->orderBy('user.fullname')
-            ->whereIn('pengajuan.id_pengajuan', $request->all())
+            ->whereIn('pengajuan.id_pengajuan', $data)
             ->get();
 
         $data = [
@@ -971,10 +1006,8 @@ class PengajuanController extends Controller
         ];
         
         $pdf = PDF::loadView('pengajuan', $data)->setPaper('a4');
-        return $pdf->setOptions(['enable_javascript', true])->setOptions(['javascript-delay', 13500])->save('invoice.pdf');
+        return $pdf->download('pengajuan-' . date("Y-m-d") . '.pdf');
     }
-
-
 
     public function coba()
     {

@@ -49,14 +49,15 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
-            "fullname" => "required",
-            "email" => "required|email",
+            "fullname" => "required|unique:user",
+            "email" => "required|email|unique:user",
             "password" => "required|min:8",
             "id_struktur" => "required",
             "id_struktur_child1" => "nullable",
             "id_struktur_child2" => "nullable",
-            "nomor_wa" => "required|numeric",
+            "nomor_wa" => "required|numeric|unique:user",
             "kop" => "nullable",
+            "ttd" => "nullable",
         ]);
 
 
@@ -280,7 +281,7 @@ class UserController extends Controller
     {
         if ($request->hasFile('file')) {
             $fileName = uniqid(40) . "." . $request->file('file')->getClientOriginalExtension();
-            $request->file('file')->move('../kop', $fileName);
+            $request->file('file')->move('kop', $fileName);
             return $fileName;
         }
     }

@@ -49,4 +49,10 @@ class PengajuanHistoryModel extends Model
     protected $attributes = [
         // 'status_pengajuan' => 'progress',
     ];
+
+    // hasmany validasi
+    public function validasi()
+    {
+        return $this->hasMany('App\Models\ValidasiModel', 'id_pengajuan_history', 'id_pengajuan');
+    }
 }

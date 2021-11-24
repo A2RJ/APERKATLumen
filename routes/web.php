@@ -27,7 +27,11 @@ $router->get('/', function () use ($router) {
     ]);
 });
 
-$router->get('/g', 'PengajuanController@pdfByUSer');
+// $router->get('/coba', function () use ($router) {
+//     return PengajuanModel::with('pengajuan_history')->get();
+// });
+
+$router->get('/g/{params}', 'PengajuanController@cobaFungsiPrint');
 
 $router->group(['middleware' => 'auth', 'prefix' => 'api'], function ($router) {
     $router->get('me', 'AuthController@me');
@@ -67,7 +71,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/showPengajuan/{params1}/{params2}', 'PengajuanController@showPengajuan');
         $router->post('/', 'PengajuanController@store');
         $router->post('/upload', 'PengajuanController@upload');
-        $router->post('/pdfByUSer', 'PengajuanController@pdfByUSer');
+        $router->post('/pdfByUSer/{params}', 'PengajuanController@pdfByUSer');
         $router->post('/deleteRows', 'PengajuanController@deleteRows');
         $router->post('/approve/{params}', 'PengajuanController@approve');
         $router->post('/decline/{params}', 'PengajuanController@decline');

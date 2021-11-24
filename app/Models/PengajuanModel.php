@@ -53,4 +53,10 @@ class PengajuanModel extends Model
     protected $attributes = [
         'status_pengajuan' => 'progress',
     ];
+
+    // hasMany pengajuan_history
+    public function pengajuan_history()
+    {
+        return $this->hasMany('App\Models\PengajuanHistoryModel',  'id', 'id_pengajuan');
+    }
 }
