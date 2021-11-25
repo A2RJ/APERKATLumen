@@ -49,23 +49,6 @@
     </style>
     <script>
         window.onload = async function() {
-            // <?php
-            // $toJson = json_encode($pengajuan);
-            // ?>
-            // var pengajuan = <?= $toJson ?>;
-            // for (let index = 0; index < pengajuan.length; index++) {
-            //     await fetch('http://localhost:8000/kop/' + pengajuan[index].kop)
-            //         .then((response) => response.blob())
-            //         .then((blob) => {
-            //             if (blob.type.includes("image")) {
-            //                 const img = document.createElement("img");
-            //                 img.setAttribute("class", "top");
-            //                 img.src = URL.createObjectURL(blob);
-            //                 document.getElementById("top-" + pengajuan[index].id_pengajuan).appendChild(img);
-            //             }
-            //         });
-            // }
-
             window.print();
         }
     </script>
@@ -76,6 +59,7 @@
     <div style="page-break-after: always; margin: auto; width: 920px; margin-left: 8%;">
         <!-- <div id="top-<?= $p->id_pengajuan ?>"></div> -->
         <img src="http://localhost:8000/kop/<?= $p->kop ?>" alt="KOP Surat" class="top">
+        <!-- <img src="http://localhost:8000/kop/<?= $p->kop ?>" alt="KOP Surat" class="top"> -->
 
         <h3 id=judul>KERANGKA ACUAN KERJA</h3>
         <div class="unit">
@@ -160,6 +144,7 @@
             </div>
 
             <img src="http://localhost:8000/kop/<?= $p->ttd ?>" alt="TTD Surat" class="ttd">
+            <!-- <img src="http://localhost:8000/kop/<?= $p->ttd ?>" alt="TTD Surat" class="ttd"> -->
         </div>
     </div>
     @endforeach
