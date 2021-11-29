@@ -43,8 +43,9 @@
         }
 
         .ttd {
-            width: 920px;
-            height: 150px;
+            /* width: 920px; */
+            height: 200px;
+            margin-top: -20px;
         }
     </style>
     <script>
@@ -131,16 +132,9 @@
             </tr>
         </table>
 
-        <div style="text-align: left; margin-top: 5%;">
-            <div style="width: 50%; float:left;">
-                <p>Menyetujui</p>
-                <!-- <p style="margin-top: 100px;">(_ _ _ _ _ _ _ _  _ _ _ _ _)</p> -->
-            </div>
-
-            <div style="width: 50%; float:right; margin-top: -21px;">
-                <p>Sumbawa, <?= date('d M Y') ?> <br> Penanggung Jawab</p>
-                <!-- <p></p>
-                <p style="margin-top: 100px;">(_ _ _ _ _ _ _ _  _ _ _ _ _)</p> -->
+        <div style="text-align: left; margin-top: 5%; margin-bottom: 0px;">
+            <div style="margin-left: 440px;">
+                <p>Sumbawa, <?= date('d M Y') ?>
             </div>
 
             <img src="http://localhost:8000/kop/<?= $p->ttd ?>" alt="TTD Surat" class="ttd">

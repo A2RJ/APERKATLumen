@@ -18,3 +18,6 @@
 -   print pengajuan dengan format baru
 -   fitur print lengkap dengan semua dokumen pendukung
 -   [sudah-termasuk-dalam-menu-need-approval] tambah menu pencairan (hanya tampil jika pengajuan akan dicairkan dan format jpg,png,pdf)
+
+
+# Hapus 387
