@@ -68,7 +68,7 @@ class PengajuanController extends Controller
         }
 
         // Validasi RKAT
-        if (PengajuanModel::where('kode_rkat', $request->kode_rkat)->count() == 1) {
+        if (PengajuanModel::where('kode_rkat', $request->kode_rkat)->count() == 2) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Tidak dapat menambah pengajuan, RKAT telah digunakan'
@@ -225,7 +225,8 @@ class PengajuanController extends Controller
      */
     public function update(Request $request, $params)
     {
-        if (PengajuanModel::where('kode_rkat', $request->kode_rkat)->where('id_pengajuan', '!=', $params)->count() == 1) {
+        $kode = PengajuanModel::find($params);
+        if ($kode->kode_rkat != $request->kode_rkat &&  PengajuanModel::where('kode_rkat', $request->kode_rkat)->count() == 2) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Tidak dapat menambah pengajuan, RKAT telah digunakan'
