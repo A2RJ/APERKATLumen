@@ -2,10 +2,6 @@
 
 /** @var \Laravel\Lumen\Routing\Router $router */
 
-use App\Http\Controllers\PengajuanController;
-use App\Models\PengajuanModel;
-use Illuminate\Support\Facades\DB;
-use phpDocumentor\Reflection\Types\This;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,7 +27,7 @@ $router->get('/', function () use ($router) {
 //     return PengajuanModel::with('pengajuan_history')->get();
 // });
 
-$router->get('/g/{params}', 'PengajuanController@cobaFungsiPrint');
+// $router->get('/g/{params}', 'PengajuanController@cobaFungsiPrint');
 
 $router->group(['middleware' => 'auth', 'prefix' => 'api'], function ($router) {
     $router->get('me', 'AuthController@me');
@@ -95,6 +91,12 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->post('/printRows', 'RKATController@printRows');
         $router->post('/deleteRows', 'RKATController@deleteRows');
         $router->post('/{params}', 'RKATController@update');
+    });
+
+    $router->group(['prefix' => 'pencairan'], function () use ($router) {
+        $router->get('/{id}', 'PencairanController@index');
+        $router->post('/{id}', 'PencairanController@store');
+        $router->get('/destroy/{id}', 'PencairanController@destroy');
     });
 
     $router->group(['prefix' => 'nonrkat'], function () use ($router) {
