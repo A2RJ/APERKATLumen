@@ -95,7 +95,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
     $router->group(['prefix' => 'pencairan'], function () use ($router) {
         $router->get('/{id}', 'PencairanController@index');
-        $router->post('/{id}', 'PencairanController@store');
+        $router->post('/', 'PencairanController@store');
         $router->get('/destroy/{id}', 'PencairanController@destroy');
     });
 

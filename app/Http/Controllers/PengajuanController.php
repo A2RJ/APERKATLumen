@@ -94,7 +94,6 @@ class PengajuanController extends Controller
 
         $data = PengajuanModel::create($request->all());
 
-
         $id_user = $this->status($data->id_pengajuan);
         $request->next = $id_user->original['data'][1]['id_user'];
         $this->autoProccess($request, $data->id_pengajuan);
