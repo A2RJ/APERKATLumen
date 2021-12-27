@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\NonRKATModel;
 use App\Models\NonRKATValidasiModel;
 use App\Models\UserModel;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -78,7 +79,7 @@ class NonRKATController extends Controller
         ]);
 
         $data = NonRKATModel::create($request->all());
-        $this->NonRKATValidasiModel($data->id_nonrkat, $request->id_user, $request->validasi_status, $request->nama_status, $request->message);
+        $this->nonRkat($data->id_nonrkat, $request->id_user, $request->validasi_status, $request->nama_status, $request->message);
         $this->sendMail($data->id_nonrkat, $request->validasi_status, $request->nama_status);
         return response()->json([
             'data' => $data
@@ -95,8 +96,8 @@ class NonRKATController extends Controller
     {
         $data = NonRKATModel::find($params)->update($request->all());
 
-        $this->NonRKATValidasiModel($params, $request->id_user, $request->validasi_status, $request->nama_status, $request->message);
-        $this->sendMail($params, $request->validasi_status, $request->nama_status);
+        $this->nonRkat($params, $request->id_user, $request->validasi_status, $request->nama_status, $request->message);
+        // $this->sendMail($params, $request->validasi_status, $request->nama_status);
 
         return response()->json([
             'data' => $data
@@ -453,7 +454,7 @@ class NonRKATController extends Controller
             "nama_status" => $request->nama_status,
             "next" => $request->next
         ]);
-        $this->NonRKATValidasiModel($request->id, $request->id_struktur, $request->validasi_status, $request->nama_status, $request->message);
+        $this->nonRkat($request->id, $request->id_struktur, $request->validasi_status, $request->nama_status, $request->message);
         $this->sendMail($request->id, $request->validasi_status, $request->nama_status);
 
         return response()->json([
@@ -472,14 +473,14 @@ class NonRKATController extends Controller
             "next" => $request->next
         ]);
 
-        $this->NonRKATValidasiModel($request->id, $request->id_struktur, $request->validasi_status, $request->nama_status, $request->message);
+        $this->nonRkat($request->id, $request->id_struktur, $request->validasi_status, $request->nama_status, $request->message);
         $this->sendMail($request->id, $request->validasi_status, $request->nama_status);
         return response()->json([
             'data' => $data ? "Data was updated" : "Failed to update data"
         ]);
     }
 
-    public function NonRKATValidasiModel($param1, $param2, $param3, $param4, $param5)
+    public function nonRkat($param1, $param2, $param3, $param4, $param5)
     {
         NonRKATValidasiModel::create([
             "nonrkat_id" => $param1,
@@ -564,5 +565,84 @@ class NonRKATController extends Controller
             ->select('user.id_user')
             ->first();
         return $data ? $data->id_user : null;
+    }
+
+    // insert to db from json file
+    public function insertFromJson()
+    {
+        $data = collect(json_decode(file_get_contents(storage_path('nonrkat.json')), true));
+
+        $validasi = $data->map(function ($item) {
+            return [
+                "nonrkat_id" => $item['id_nonrkat'],
+                "id_struktur" => $item['id_user'],
+                "status_validasi" => $item['validasi_status'],
+                "message" => $item['fullname'] . ' - Input pengajuan',
+                "created_at" => Carbon::parse($item['created_at'])->format('Y-m-d H:i:s'),
+                "updated_at" => Carbon::parse($item['updated_at'])->format('Y-m-d H:i:s')
+            ];
+        })->toArray();
+
+        $delete = $data->map(function ($item) {
+            return [
+                "id_nonrkat" => $item['id_nonrkat'],
+                "id_user" => $item['id_user'],
+                "next" => $item['next'],
+                "nama_kegiatan" => $item['nama_kegiatan'],
+                "tujuan" => $item['tujuan'],
+                "latar_belakang" => $item['latar_belakang'],
+                "sasaran" => $item['sasaran'],
+                "target_capaian" => $item['target_capaian'],
+                "bentuk_pelaksanaan_program" => $item['bentuk_pelaksanaan_program'],
+                "tempat_program" => $item['tempat_program'],
+                "tanggal" => $item['tanggal'],
+                "bidang_terkait" => $item['bidang_terkait'],
+                "id_iku_parent" => $item['id_iku_parent'],
+                "id_iku_child1" => $item['id_iku_child1'],
+                "id_iku_child2" => $item['id_iku_child2'],
+                "biaya_program" => $item['biaya_program'],
+                "bank" => $item['bank'],
+                "atn" => $item['atn'],
+                "no_rek" => $item['no_rek'],
+                "rab" => $item['rab'],
+                "status_pengajuan" => $item['status_pengajuan'],
+                "pencairan" => $item['pencairan'],
+                "lpj_kegiatan" => $item['lpj_kegiatan'],
+                "lpj_keuangan" => $item['lpj_keuangan'],
+                "validasi_status" => $item['validasi_status'],
+                "nama_status" => $item['nama_status'],
+                "created_at" => Carbon::parse($item['created_at'])->format('Y-m-d H:i:s'),
+                "updated_at" => Carbon::parse($item['updated_at'])->format('Y-m-d H:i:s'),
+            ];
+        })->toArray();
+
+        return [
+            'truncate_nonrkat' => NonRKATModel::truncate() ? true : false,
+            'non_rkat' => NonRKATModel::insert($delete),
+            'truncate_nonrkat_validasi' => NonRKATValidasiModel::truncate() ? true : false,
+            'validasi' => NonRKATValidasiModel::insert($validasi),
+            'count' => count($data)
+        ];
+    }
+
+    // get data atasan
+    public function getAtasan($id_user)
+    {
+        $atasan = '';
+
+        $user = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+        ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+        ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+        ->find($id_user);
+
+        if($user->nama_struktur !== '0'){
+            $atasan = $user->nama_struktur;
+        } else if($user->nama_struktur_child1 !== '0'){
+            $atasan = $user->nama_struktur_child1;
+        } else if($user->nama_struktur_child2 !== '0'){
+            $atasan = $user->nama_struktur_child2;
+        }
+
+        return $atasan;
     }
 }

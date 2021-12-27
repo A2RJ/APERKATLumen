@@ -2,7 +2,6 @@
 
 /** @var \Laravel\Lumen\Routing\Router $router */
 
-
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -23,11 +22,9 @@ $router->get('/', function () use ($router) {
     ]);
 });
 
-// $router->get('/coba', function () use ($router) {
-//     return PengajuanModel::with('pengajuan_history')->get();
-// });
+$router->get('/coba/{id_user}', 'NonRKATController@getAtasan');
 
-// $router->get('/g/{params}', 'PengajuanController@cobaFungsiPrint');
+$router->get('/g/{params}', 'PengajuanController@cobaFungsiPrint');
 
 $router->group(['middleware' => 'auth', 'prefix' => 'api'], function ($router) {
     $router->get('me', 'AuthController@me');
