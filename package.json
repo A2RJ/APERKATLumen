@@ -7,7 +7,7 @@
     "test": "tests"
   },
   "scripts": {
-    "dev": "php -S localhost:8000 -t public",
+    "serve": "php -S localhost:8000 -t public",
     "migration": "php artisan migrate:generate",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
