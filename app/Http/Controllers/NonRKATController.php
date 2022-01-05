@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\NonRKATModel;
-use App\Models\NonRKATValidasiModel;
+use App\Models\NonValidasiModel;
 use App\Models\UserModel;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -11,6 +11,12 @@ use Illuminate\Support\Facades\Mail;
 
 class NonRKATController extends Controller
 {
+
+    public function callAnotherControllerFunction()
+    {
+        $coba = new PengajuanController;
+        return $coba->index();
+    }
     /**
      * Display a listing of the resource.
      *
@@ -79,7 +85,13 @@ class NonRKATController extends Controller
         ]);
 
         $data = NonRKATModel::create($request->all());
-        $this->nonRkat($data->id_nonrkat, $request->id_user, $request->validasi_status, $request->nama_status, $request->message);
+        $this->nonRkat([
+            'id_nonrkat' => $data->id_nonrkat,
+            'id_user' => $request->id_user,
+            'validasi_status' => $request->validasi_status,
+            'nama_status' => $request->nama_status,
+            'message' => $request->message
+        ]);
         $this->sendMail($data->id_nonrkat, $request->validasi_status, $request->nama_status);
         return response()->json([
             'data' => $data
@@ -96,9 +108,15 @@ class NonRKATController extends Controller
     {
         $data = NonRKATModel::find($params)->update($request->all());
 
-        $this->nonRkat($params, $request->id_user, $request->validasi_status, $request->nama_status, $request->message);
+        // $this->nonRkat($params, $request->id_user, $request->validasi_status, $request->nama_status, $request->message);
         // $this->sendMail($params, $request->validasi_status, $request->nama_status);
-
+        $this->nonRkat([
+            'id_nonrkat' => $data->id_nonrkat,
+            'id_user' => $request->id_user,
+            'validasi_status' => $request->validasi_status,
+            'nama_status' => $request->nama_status,
+            'message' => $request->message
+        ]);
         return response()->json([
             'data' => $data
         ]);
@@ -430,6 +448,41 @@ class NonRKATController extends Controller
         ]);
     }
 
+    public function getNext($params)
+    {
+        $user =  UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+            ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+            ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+            ->where('id_user', $params)
+            ->first();
+
+        if ($user) {
+            if ($user->nama_struktur !== '0' && $user->nama_struktur_child1 == '0' && $user->nama_struktur_child2 == '0') {
+                return response()->json([
+                    'message' => 'Atasan',
+                    'next' => 24,
+                    'user' => $user
+                ]);
+            } elseif ($user->nama_struktur !== '0' && $user->nama_struktur_child1 !== '0' && $user->nama_struktur_child2 == '0') {
+                return response()->json([
+                    'message' => 'Fakultas/Unit',
+                    'next' => 24,
+                    'user' => $user
+                ]);
+            } elseif ($user->nama_struktur !== '0' && $user->nama_struktur_child1 !== '0' && $user->nama_struktur_child2 !== '0') {
+                return response()->json([
+                    'message' => 'Sub divisi',
+                    'next' => $user->id_struktur_child1,
+                    'user' => $user
+                ]);
+            }
+        } else {
+            return response()->json([
+                'message' => 'Not found'
+            ], 404);
+        }
+    }
+
     /**
      * Status
      */
@@ -454,7 +507,14 @@ class NonRKATController extends Controller
             "nama_status" => $request->nama_status,
             "next" => $request->next
         ]);
-        $this->nonRkat($request->id, $request->id_struktur, $request->validasi_status, $request->nama_status, $request->message);
+        // $this->nonRkat($request->id, $request->id_struktur, $request->validasi_status, $request->nama_status, $request->message);
+        $this->nonRkat([
+            'id_nonrkat' => $data->id_nonrkat,
+            'id_user' => $request->id_user,
+            'validasi_status' => $request->validasi_status,
+            'nama_status' => $request->nama_status,
+            'message' => $request->message
+        ]);
         $this->sendMail($request->id, $request->validasi_status, $request->nama_status);
 
         return response()->json([
@@ -473,20 +533,27 @@ class NonRKATController extends Controller
             "next" => $request->next
         ]);
 
-        $this->nonRkat($request->id, $request->id_struktur, $request->validasi_status, $request->nama_status, $request->message);
+        // $this->nonRkat($request->id, $request->id_struktur, $request->validasi_status, $request->nama_status, $request->message);
+        $this->nonRkat([
+            'id_nonrkat' => $data->id_nonrkat,
+            'id_user' => $request->id_user,
+            'validasi_status' => $request->validasi_status,
+            'nama_status' => $request->nama_status,
+            'message' => $request->message
+        ]);
         $this->sendMail($request->id, $request->validasi_status, $request->nama_status);
         return response()->json([
             'data' => $data ? "Data was updated" : "Failed to update data"
         ]);
     }
 
-    public function nonRkat($param1, $param2, $param3, $param4, $param5)
+    public function nonRkat($params)
     {
-        NonRKATValidasiModel::create([
-            "nonrkat_id" => $param1,
-            "id_struktur" => $param2,
-            "status_validasi" => $param3,
-            "message" => $param4 . " - " . $param5
+        NonValidasiModel::create([
+            "nonrkat_id" => $params['id_nonrkat'],
+            "id_struktur" => $params['id_user'],
+            "status_validasi" => $params['validasi_status'],
+            "message" => $params['nama_status'] . " - " . $params['message']
         ]);
     }
 
@@ -495,33 +562,33 @@ class NonRKATController extends Controller
      */
     public function sendMail($params, $status, $nama)
     {
-        if ($status == '0') {
-            $status = ' telah ditolak oleh:' . $nama;
-        } else if ($status == '1') {
-            $status = ' telah diinput/direvisi oleh:' . $nama;
-        } else if ($status == '3') {
-            $status = ' Pencairan oleh:' . $nama;
-        } else {
-            $status = ' telah diterima oleh:' . $nama;
-        }
+        // if ($status == '0') {
+        //     $status = ' telah ditolak oleh:' . $nama;
+        // } else if ($status == '1') {
+        //     $status = ' telah diinput/direvisi oleh:' . $nama;
+        // } else if ($status == '3') {
+        //     $status = ' Pencairan oleh:' . $nama;
+        // } else {
+        //     $status = ' telah diterima oleh:' . $nama;
+        // }
 
-        $data = $this->status($params);
-        $data = array_unique($data->original['data'], SORT_REGULAR);
-        $values = [];
-        foreach ($data as $key) {
-            $values[] = $key['id_user'];
-        }
-        $values = UserModel::whereIn('id_user', $values)->where('email', '!=', '')->select('email')->get();
-        $email = [];
-        foreach ($values as $key) {
-            $email[] = $key['email'];
-        }
-        $template = array('name' => '', 'pesan' => 'Pemberitahuan pengajuan ' . $data[0]['nama_struktur'] . $status);
+        // $data = $this->status($params);
+        // $data = array_unique($data->original['data'], SORT_REGULAR);
+        // $values = [];
+        // foreach ($data as $key) {
+        //     $values[] = $key['id_user'];
+        // }
+        // $values = UserModel::whereIn('id_user', $values)->where('email', '!=', '')->select('email')->get();
+        // $email = [];
+        // foreach ($values as $key) {
+        //     $email[] = $key['email'];
+        // }
+        // $template = array('name' => '', 'pesan' => 'Pemberitahuan pengajuan ' . $data[0]['nama_struktur'] . $status);
 
-        Mail::send('mail', $template, function ($message) use ($email) {
-            $message->to($email)->subject('APERKAT - Universitas Teknologi Sumbawa');
-            $message->from(env('MAIL_USERNAME'), 'Notif APERKAT');
-        });
+        // Mail::send('mail', $template, function ($message) use ($email) {
+        //     $message->to($email)->subject('APERKAT - Universitas Teknologi Sumbawa');
+        //     $message->from(env('MAIL_USERNAME'), 'Notif APERKAT');
+        // });
     }
 
     /**
@@ -537,14 +604,14 @@ class NonRKATController extends Controller
     public function statusNull($id_struktur, $id_nonrkat, $nomor, $warek = false)
     {
         if ($warek !== false) {
-            $data = NonRKATValidasiModel::join('nonrkat', 'nonrkat_validasi.nonrkat_id', 'nonrkat.id_nonrkat')
+            $data = NonValidasiModel::join('nonrkat', 'nonrkat_validasi.nonrkat_id', 'nonrkat.id_nonrkat')
                 ->where('nonrkat.id_nonrkat', $id_nonrkat)
                 ->where('nonrkat_validasi.id_struktur', $id_struktur)
                 ->where('nonrkat_validasi.status_validasi', $nomor)
                 ->skip($warek)
                 ->first();
         } else {
-            $data = NonRKATValidasiModel::join('nonrkat', 'nonrkat_validasi.nonrkat_id', 'nonrkat.id_nonrkat')
+            $data = NonValidasiModel::join('nonrkat', 'nonrkat_validasi.nonrkat_id', 'nonrkat.id_nonrkat')
                 ->where('nonrkat.id_nonrkat', $id_nonrkat)
                 ->where('nonrkat_validasi.id_struktur', $id_struktur)
                 ->where('nonrkat_validasi.status_validasi', $nomor)
@@ -619,8 +686,8 @@ class NonRKATController extends Controller
         return [
             'truncate_nonrkat' => NonRKATModel::truncate() ? true : false,
             'non_rkat' => NonRKATModel::insert($delete),
-            'truncate_nonrkat_validasi' => NonRKATValidasiModel::truncate() ? true : false,
-            'validasi' => NonRKATValidasiModel::insert($validasi),
+            'truncate_nonrkat_validasi' => NonValidasiModel::truncate() ? true : false,
+            'validasi' => NonValidasiModel::insert($validasi),
             'count' => count($data)
         ];
     }
@@ -631,15 +698,15 @@ class NonRKATController extends Controller
         $atasan = '';
 
         $user = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
-        ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
-        ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-        ->find($id_user);
+            ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+            ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+            ->find($id_user);
 
-        if($user->nama_struktur !== '0'){
+        if ($user->nama_struktur !== '0') {
             $atasan = $user->nama_struktur;
-        } else if($user->nama_struktur_child1 !== '0'){
+        } else if ($user->nama_struktur_child1 !== '0') {
             $atasan = $user->nama_struktur_child1;
-        } else if($user->nama_struktur_child2 !== '0'){
+        } else if ($user->nama_struktur_child2 !== '0') {
             $atasan = $user->nama_struktur_child2;
         }
 

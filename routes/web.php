@@ -149,20 +149,6 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 });
 
 // For testing only
-$router->get('/test', function () {
-    $data = PengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
-    ->join('user', 'pengajuan.id_user', 'user.id_user')
-    ->join('pengajuan_history', 'pengajuan.id_pengajuan', 'pengajuan_history.id')
-    ->join('validasi', 'pengajuan_history.id_pengajuan', 'validasi.id_pengajuan_history')
-    ->select('user.fullname', 'rkat.kode_rkat', 'pengajuan.id_pengajuan', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'pengajuan.created_at')
-    ->where('pengajuan.pencairan', null) // belum pengajuan
-    ->where('validasi.status_validasi', 2) // terima
-    ->where('validasi.id_struktur', 22) // rektor
-    ->orWhere('pengajuan.pencairan', '') // belum pengajuan
-    ->where('validasi.status_validasi', 2) // terima
-    ->where('validasi.id_struktur', 22) // rektor
-    ->distinct()
-    ->get();
-
-    return $data;
+$router->group(['prefix' => 'testing'], function () use ($router) {
+    $router->get('next/{params}', 'NonRKATController@getNext');
 });

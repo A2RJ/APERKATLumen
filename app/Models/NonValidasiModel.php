@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class NonRKATValidasiModel extends Model
+class NonValidasiModel extends Model
 {
     /**
      * Database table name
