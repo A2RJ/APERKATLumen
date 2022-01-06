@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PencairanModel;
+use App\Models\PengajuanPencairanModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -12,7 +12,7 @@ class PencairanController extends Controller
     {
         return response()->json([
             'status' => 'success',
-            'data' => PencairanModel::where('pencairan_id', $id)->get()
+            'data' => PengajuanPencairanModel::where('pencairan_id', $id)->get()
         ], 200);
     }
 
@@ -24,7 +24,7 @@ class PencairanController extends Controller
             'images' => 'required'
         ]);
 
-        $pencairan = PencairanModel::create($request->all());
+        $pencairan = PengajuanPencairanModel::create($request->all());
 
         return response()->json([
             'status' => 'success',
@@ -34,7 +34,7 @@ class PencairanController extends Controller
 
     public function destroy($id)
     {
-        $pencairan = PencairanModel::findOrFail($id)->delete();
+        $pencairan = PengajuanPencairanModel::findOrFail($id)->delete();
 
         return response()->json([
             'status' => 'success',

@@ -99,6 +99,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->group(['prefix' => 'nonrkat'], function () use ($router) {
         $router->get('/destroy', 'NonRKATController@destroy');
         $router->get('/{params}', 'NonRKATController@index');
+        $router->get('/pencairan/{params}', 'NonPencairanController@index');
         $router->get('/id/{params}', 'NonRKATController@show');
         $router->get('/deleteByUser/{params}', 'NonRKATController@deleteByUser');
         $router->get('/subdivisi/{params}', 'NonRKATController@subDivisi');
@@ -107,6 +108,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->post('/delete', 'NonRKATController@delete');
         $router->post('/approved', 'NonRKATController@approved');
         $router->post('/declined', 'NonRKATController@declined');
+        $router->post('/upload', 'NonPencairanController@store');
         $router->post('/{params}', 'NonRKATController@update');
     });
 
