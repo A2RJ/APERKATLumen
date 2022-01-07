@@ -1057,11 +1057,6 @@ class PengajuanController extends Controller
             ->distinct()
             ->get();
 
-        $a = [];
-        foreach ($return as $r) {
-            $a[] = $r->id_pengajuan;
-        }
-
         return PengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
             ->join('user', 'pengajuan.id_user', 'user.id_user')
             ->join('pengajuan_history', 'pengajuan.id_pengajuan', 'pengajuan_history.id')
@@ -1069,7 +1064,7 @@ class PengajuanController extends Controller
             ->select('user.fullname', 'rkat.kode_rkat', 'pengajuan.id_pengajuan', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'pengajuan.created_at')
             ->where('pengajuan.pencairan', '!=', null) // belum pengajuan
             ->where('pengajuan.lpj_keuangan', '!=',  null) // belum pengajuan
-            ->whereNotIn('pengajuan.id_pengajuan', $a)
+            ->whereNotIn('pengajuan.id_pengajuan', $return->pluck('id_pengajuan'))
             ->distinct()
             ->get();
     }

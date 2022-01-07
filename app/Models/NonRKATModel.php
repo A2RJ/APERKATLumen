@@ -55,8 +55,8 @@ class NonRKATModel extends Model
         'status_pengajuan' => 'progress',
     ];
 
-    public function index()
+    public function validasi()
     {
-        return $this->hasMany(NonRKATValidasiModel::class);
+        return $this->hasMany(NonValidasiModel::class, 'nonrkat_id', 'id_nonrkat');
     }
 }
