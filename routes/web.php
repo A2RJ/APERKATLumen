@@ -98,9 +98,16 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
     $router->group(['prefix' => 'nonrkat'], function () use ($router) {
         $router->get('/destroy', 'NonRKATController@destroy');
+        $router->get('listLPJKeuangan', 'NonRKATController@listLPJKeuangan');
+        $router->get('listLPJKegiatan', 'NonRKATController@listLPJKegiatan');
+        $router->get('listPencairan', 'NonRKATController@listPencairan');
+        $router->get('belumUploadLPJKeuangan', 'NonRKATController@belumUploadLPJKeuangan');
+        $router->get('belumUploadLPJKegiatan', 'NonRKATController@belumUploadLPJKegiatan');
+        $router->get('getCompleted', 'NonRKATController@getCompleted');
         $router->get('/{params}', 'NonRKATController@index');
         $router->get('/pencairan/{params}', 'NonPencairanController@index');
         $router->get('/id/{params}', 'NonRKATController@show');
+        $router->get('getLastValidate/{params}', 'NonRKATController@getLastValidate');
         $router->get('/deleteByUser/{params}', 'NonRKATController@deleteByUser');
         $router->get('/subdivisi/{params}', 'NonRKATController@subDivisi');
         $router->get('/subDivisiNeed/{params}', 'NonRKATController@subDivisiNeed');
@@ -153,9 +160,11 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 // For testing only
 $router->group(['prefix' => 'testing'], function () use ($router) {
     $router->get('next/{params}', 'NonRKATController@getNext');
+    $router->get('listPencairan', 'NonRKATController@listPencairan');
     $router->get('listLPJKeuangan', 'NonRKATController@listLPJKeuangan');
     $router->get('listLPJKegiatan', 'NonRKATController@listLPJKegiatan');
-    $router->get('listPencairan', 'NonRKATController@listPencairan');
     $router->get('belumUploadLPJKeuangan', 'NonRKATController@belumUploadLPJKeuangan');
     $router->get('belumUploadLPJKegiatan', 'NonRKATController@belumUploadLPJKegiatan');
+    $router->get('getCompleted', 'NonRKATController@getCompleted');
+    $router->get('getLastValidate/{params}', 'NonRKATController@getLastValidate');
 });

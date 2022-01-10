@@ -91,7 +91,7 @@ class NonRKATController extends Controller
 
         $this->nonRkatValidasi([
             'nonrkat_id' => $data->id_nonrkat,
-            'id_struktur' => $request->id_struktur,
+            'id_struktur' => $request->id_user,
             'validasi_status' => $request->validasi_status,
             'message' => $request->nama_status . ' ' . $request->message
         ]);
@@ -166,10 +166,10 @@ class NonRKATController extends Controller
         return response()->json([
             'data' => NonRKATModel::join('nonrkat_validasi', 'nonrkat.id_nonrkat', 'nonrkat_validasi.nonrkat_id')
                 ->where('nonrkat.id_nonrkat', $params)
-                ->select('nonrkat_validasi.validasi_status')
-                ->latest()
+                ->select('nonrkat_validasi.status_validasi')
+                ->latest('nonrkat_validasi.created_at')
                 ->take(1)
-                ->get() ? true : false
+                ->first()->status_validasi == 0 ? true : false
         ]);
     }
 
@@ -321,21 +321,29 @@ class NonRKATController extends Controller
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                 ->where('nonrkat.pencairan', null)
+                ->whereHas('validasi', function ($query) {
+                    $query->where('status_validasi', 2)
+                        ->where('id_struktur', 22);
+                })
                 ->orWhere('nonrkat.pencairan', '')
+                ->whereHas('validasi', function ($query) {
+                    $query->where('status_validasi', 2)
+                        ->where('id_struktur', 22);
+                })
                 ->whereDoesntHave('validasi', function ($query) {
                     $query->where('message', 'Direktur Keuangan (Pencairan) Pencairan selesai')
                         ->where('status_validasi', 3);
                 })
                 ->select('user.id_user', 'nonrkat.id_nonrkat', 'nonrkat.validasi_status', 'nonrkat.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'nonrkat.created_at')
                 ->distinct()
-                ->with(['validasi' => function ($query) {
-                    $query->select(
-                        "nonrkat_id",
-                        "id_struktur",
-                        "status_validasi",
-                        "message"
-                    );
-                }])
+                // ->with(['validasi' => function ($query) {
+                //     $query->select(
+                //         "nonrkat_id",
+                //         "id_struktur",
+                //         "status_validasi",
+                //         "message"
+                //     );
+                // }])
                 ->orderBy('nonrkat.id_nonrkat', 'DESC')
                 ->get()
         ]);
@@ -350,9 +358,15 @@ class NonRKATController extends Controller
                 ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                ->where('nonrkat.pencairan', '!=', null)
-                ->orWhere('nonrkat.pencairan', '!=', '')
                 ->where('nonrkat.lpj_keuangan', null)
+                ->whereHas('validasi', function ($query) {
+                    $query->where('message', 'Direktur Keuangan (Pencairan) Pencairan selesai')
+                        ->where('status_validasi', 3);
+                })
+                ->whereDoesntHave('validasi', function ($query) {
+                    $query->where('message', 'LIKE', '%Upload LPJ Kegiatan%')
+                        ->where('status_validasi', 1);
+                })
                 ->orWhere('nonrkat.lpj_keuangan', '')
                 ->whereHas('validasi', function ($query) {
                     $query->where('message', 'Direktur Keuangan (Pencairan) Pencairan selesai')
@@ -364,14 +378,6 @@ class NonRKATController extends Controller
                 })
                 ->select('user.id_user', 'nonrkat.id_nonrkat', 'nonrkat.validasi_status', 'nonrkat.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'nonrkat.created_at')
                 ->distinct()
-                ->with(['validasi' => function ($query) {
-                    $query->select(
-                        "nonrkat_id",
-                        "id_struktur",
-                        "status_validasi",
-                        "message"
-                    );
-                }])
                 ->orderBy('nonrkat.id_nonrkat', 'DESC')
                 ->get()
         ]);
@@ -387,6 +393,10 @@ class NonRKATController extends Controller
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                 ->where('nonrkat.lpj_keuangan', '!=', null)
+                ->whereDoesntHave('validasi', function ($query) {
+                    $query->where('status_validasi', 4)
+                        ->where('id_struktur', 24);
+                })
                 ->orWhere('nonrkat.lpj_keuangan', '!=', '')
                 ->whereDoesntHave('validasi', function ($query) {
                     $query->where('status_validasi', 4)
@@ -394,14 +404,6 @@ class NonRKATController extends Controller
                 })
                 ->select('user.id_user', 'nonrkat.id_nonrkat', 'nonrkat.validasi_status', 'nonrkat.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'nonrkat.created_at')
                 ->distinct()
-                ->with(['validasi' => function ($query) {
-                    $query->select(
-                        "nonrkat_id",
-                        "id_struktur",
-                        "status_validasi",
-                        "message"
-                    );
-                }])
                 ->orderBy('nonrkat.id_nonrkat', 'DESC')
                 ->get()
         ]);
@@ -417,6 +419,16 @@ class NonRKATController extends Controller
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                 ->where('nonrkat.lpj_kegiatan', null)
+                ->whereHas('validasi', function ($query) {
+                    $query->where('message', 'Direktur Keuangan (Pencairan) Pencairan selesai')
+                        ->where('status_validasi', 3)
+                        ->orWhere('status_validasi', 4)
+                        ->where('id_struktur', 24);
+                })
+                ->whereDoesntHave('validasi', function ($query) {
+                    $query->where('status_validasi', 1)
+                        ->where('message', 'LIKE', '%Upload LPJ Kegiatan%');
+                })
                 ->orWhere('nonrkat.lpj_kegiatan', '')
                 ->whereHas('validasi', function ($query) {
                     $query->where('message', 'Direktur Keuangan (Pencairan) Pencairan selesai')
@@ -430,14 +442,6 @@ class NonRKATController extends Controller
                 })
                 ->select('user.id_user', 'nonrkat.id_nonrkat', 'nonrkat.validasi_status', 'nonrkat.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'nonrkat.created_at')
                 ->distinct()
-                ->with(['validasi' => function ($query) {
-                    $query->select(
-                        "nonrkat_id",
-                        "id_struktur",
-                        "status_validasi",
-                        "message"
-                    );
-                }])
                 ->orderBy('nonrkat.id_nonrkat', 'DESC')
                 ->get()
         ]);
@@ -453,6 +457,10 @@ class NonRKATController extends Controller
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                 ->where('nonrkat.lpj_kegiatan', '!=', null)
+                ->whereDoesntHave('validasi', function ($query) {
+                    $query->where('status_validasi', 4)
+                        ->where('id_struktur', 21);
+                })
                 ->orWhere('nonrkat.lpj_kegiatan', '!=', '')
                 ->whereDoesntHave('validasi', function ($query) {
                     $query->where('status_validasi', 4)
@@ -460,14 +468,6 @@ class NonRKATController extends Controller
                 })
                 ->select('user.id_user', 'nonrkat.id_nonrkat', 'nonrkat.validasi_status', 'nonrkat.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'nonrkat.created_at')
                 ->distinct()
-                ->with(['validasi' => function ($query) {
-                    $query->select(
-                        "nonrkat_id",
-                        "id_struktur",
-                        "status_validasi",
-                        "message"
-                    );
-                }])
                 ->orderBy('nonrkat.id_nonrkat', 'DESC')
                 ->get()
         ]);
@@ -493,14 +493,6 @@ class NonRKATController extends Controller
                 })
                 ->select('user.id_user', 'nonrkat.id_nonrkat', 'nonrkat.validasi_status', 'nonrkat.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'nonrkat.created_at')
                 ->distinct()
-                ->with(['validasi' => function ($query) {
-                    $query->select(
-                        "nonrkat_id",
-                        "id_struktur",
-                        "status_validasi",
-                        "message"
-                    );
-                }])
                 ->orderBy('nonrkat.id_nonrkat', 'DESC')
                 ->get()
         ]);
