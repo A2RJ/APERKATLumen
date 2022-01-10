@@ -154,5 +154,8 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 $router->group(['prefix' => 'testing'], function () use ($router) {
     $router->get('next/{params}', 'NonRKATController@getNext');
     $router->get('listLPJKeuangan', 'NonRKATController@listLPJKeuangan');
+    $router->get('listLPJKegiatan', 'NonRKATController@listLPJKegiatan');
     $router->get('listPencairan', 'NonRKATController@listPencairan');
+    $router->get('belumUploadLPJKeuangan', 'NonRKATController@belumUploadLPJKeuangan');
+    $router->get('belumUploadLPJKegiatan', 'NonRKATController@belumUploadLPJKegiatan');
 });

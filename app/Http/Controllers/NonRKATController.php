@@ -161,6 +161,18 @@ class NonRKATController extends Controller
         ]);
     }
 
+    public function getLastValidate($params)
+    {
+        return response()->json([
+            'data' => NonRKATModel::join('nonrkat_validasi', 'nonrkat.id_nonrkat', 'nonrkat_validasi.nonrkat_id')
+                ->where('nonrkat.id_nonrkat', $params)
+                ->select('nonrkat_validasi.validasi_status')
+                ->latest()
+                ->take(1)
+                ->get() ? true : false
+        ]);
+    }
+
     /**
      * Subdivisi
      */
@@ -299,6 +311,7 @@ class NonRKATController extends Controller
         ]);
     }
 
+    // Daftar pencairan non rkat dimana sudah diterima oleh rektor
     public function listPencairan()
     {
         return response()->json([
@@ -309,17 +322,62 @@ class NonRKATController extends Controller
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                 ->where('nonrkat.pencairan', null)
                 ->orWhere('nonrkat.pencairan', '')
-                ->whereHas('validasi', function ($query) {
-                    $query->where('status_validasi', 2)
-                        ->where('id_struktur', 22);
+                ->whereDoesntHave('validasi', function ($query) {
+                    $query->where('message', 'Direktur Keuangan (Pencairan) Pencairan selesai')
+                        ->where('status_validasi', 3);
                 })
-                ->distinct()
                 ->select('user.id_user', 'nonrkat.id_nonrkat', 'nonrkat.validasi_status', 'nonrkat.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'nonrkat.created_at')
+                ->distinct()
+                ->with(['validasi' => function ($query) {
+                    $query->select(
+                        "nonrkat_id",
+                        "id_struktur",
+                        "status_validasi",
+                        "message"
+                    );
+                }])
                 ->orderBy('nonrkat.id_nonrkat', 'DESC')
                 ->get()
         ]);
     }
 
+    // List sudah pencairan tetapi belum upload LPJ Keuangan
+    public function belumUploadLPJKeuangan()
+    {
+        return response()->json([
+            "data" => NonRKATModel::join('nonrkat_validasi', 'nonrkat.id_nonrkat', 'nonrkat_validasi.nonrkat_id')
+                ->join('user', 'nonrkat.id_user', 'user.id_user')
+                ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                ->where('nonrkat.pencairan', '!=', null)
+                ->orWhere('nonrkat.pencairan', '!=', '')
+                ->where('nonrkat.lpj_keuangan', null)
+                ->orWhere('nonrkat.lpj_keuangan', '')
+                ->whereHas('validasi', function ($query) {
+                    $query->where('message', 'Direktur Keuangan (Pencairan) Pencairan selesai')
+                        ->where('status_validasi', 3);
+                })
+                ->whereDoesntHave('validasi', function ($query) {
+                    $query->where('message', 'LIKE', '%Upload LPJ Kegiatan%')
+                        ->where('status_validasi', 1);
+                })
+                ->select('user.id_user', 'nonrkat.id_nonrkat', 'nonrkat.validasi_status', 'nonrkat.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'nonrkat.created_at')
+                ->distinct()
+                ->with(['validasi' => function ($query) {
+                    $query->select(
+                        "nonrkat_id",
+                        "id_struktur",
+                        "status_validasi",
+                        "message"
+                    );
+                }])
+                ->orderBy('nonrkat.id_nonrkat', 'DESC')
+                ->get()
+        ]);
+    }
+
+    // Daftar sudah upload LPJ Keuangan dan belum diterima oleh dir keuangan
     public function listLPJKeuangan()
     {
         return response()->json([
@@ -329,14 +387,13 @@ class NonRKATController extends Controller
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                 ->where('nonrkat.lpj_keuangan', '!=', null)
-                ->where('nonrkat.lpj_keuangan', '!=', '')
+                ->orWhere('nonrkat.lpj_keuangan', '!=', '')
                 ->whereDoesntHave('validasi', function ($query) {
                     $query->where('status_validasi', 4)
                         ->where('id_struktur', 24);
                 })
-                ->distinct()
                 ->select('user.id_user', 'nonrkat.id_nonrkat', 'nonrkat.validasi_status', 'nonrkat.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'nonrkat.created_at')
-                ->orderBy('nonrkat.id_nonrkat', 'DESC')
+                ->distinct()
                 ->with(['validasi' => function ($query) {
                     $query->select(
                         "nonrkat_id",
@@ -345,23 +402,108 @@ class NonRKATController extends Controller
                         "message"
                     );
                 }])
+                ->orderBy('nonrkat.id_nonrkat', 'DESC')
                 ->get()
         ]);
     }
 
-    // List pencairan tetapi belum upload LPJ Keuangan
-    public function notUploadLPJKeuangan()
+    // List pencairan yang belum upload LPJ Kegiatan
+    public function belumUploadLPJKegiatan()
     {
+        return response()->json([
+            "data" => NonRKATModel::join('nonrkat_validasi', 'nonrkat.id_nonrkat', 'nonrkat_validasi.nonrkat_id')
+                ->join('user', 'nonrkat.id_user', 'user.id_user')
+                ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                ->where('nonrkat.lpj_kegiatan', null)
+                ->orWhere('nonrkat.lpj_kegiatan', '')
+                ->whereHas('validasi', function ($query) {
+                    $query->where('message', 'Direktur Keuangan (Pencairan) Pencairan selesai')
+                        ->where('status_validasi', 3)
+                        ->orWhere('status_validasi', 4)
+                        ->where('id_struktur', 24);
+                })
+                ->whereDoesntHave('validasi', function ($query) {
+                    $query->where('status_validasi', 1)
+                        ->where('message', 'LIKE', '%Upload LPJ Kegiatan%');
+                })
+                ->select('user.id_user', 'nonrkat.id_nonrkat', 'nonrkat.validasi_status', 'nonrkat.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'nonrkat.created_at')
+                ->distinct()
+                ->with(['validasi' => function ($query) {
+                    $query->select(
+                        "nonrkat_id",
+                        "id_struktur",
+                        "status_validasi",
+                        "message"
+                    );
+                }])
+                ->orderBy('nonrkat.id_nonrkat', 'DESC')
+                ->get()
+        ]);
     }
 
-    // List pencairan yang belum upload LPJ Kegiatan
-    public function notUploadLPJKegiatan()
+    // Daftar sudah upload LPJ Kegiatan dan belum diterima oleh sekniv
+    public function listLPJKegiatan()
     {
+        return response()->json([
+            "data" => NonRKATModel::join('nonrkat_validasi', 'nonrkat.id_nonrkat', 'nonrkat_validasi.nonrkat_id')
+                ->join('user', 'nonrkat.id_user', 'user.id_user')
+                ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                ->where('nonrkat.lpj_kegiatan', '!=', null)
+                ->orWhere('nonrkat.lpj_kegiatan', '!=', '')
+                ->whereDoesntHave('validasi', function ($query) {
+                    $query->where('status_validasi', 4)
+                        ->where('id_struktur', 21);
+                })
+                ->select('user.id_user', 'nonrkat.id_nonrkat', 'nonrkat.validasi_status', 'nonrkat.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'nonrkat.created_at')
+                ->distinct()
+                ->with(['validasi' => function ($query) {
+                    $query->select(
+                        "nonrkat_id",
+                        "id_struktur",
+                        "status_validasi",
+                        "message"
+                    );
+                }])
+                ->orderBy('nonrkat.id_nonrkat', 'DESC')
+                ->get()
+        ]);
     }
 
     // get complete pengajuan
     public function getCompleted()
     {
+        return response()->json([
+            'data' => NonRKATModel::join('nonrkat_validasi', 'nonrkat.id_nonrkat', 'nonrkat_validasi.nonrkat_id')
+                ->join('user', 'nonrkat.id_user', 'user.id_user')
+                ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+                ->where('nonrkat.lpj_keuangan', '!=', null)
+                ->orWhere('nonrkat.lpj_keuangan', '!=', '')
+                ->where('nonrkat.lpj_kegiatan', '!=', null)
+                ->orWhere('nonrkat.lpj_kegiatan', '!=', '')
+                ->whereHas('validasi', function ($query) {
+                    $query->where('status_validasi', 4)
+                        ->where('id_struktur', 24)
+                        ->orWhere('id_struktur', 21);
+                })
+                ->select('user.id_user', 'nonrkat.id_nonrkat', 'nonrkat.validasi_status', 'nonrkat.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'nonrkat.created_at')
+                ->distinct()
+                ->with(['validasi' => function ($query) {
+                    $query->select(
+                        "nonrkat_id",
+                        "id_struktur",
+                        "status_validasi",
+                        "message"
+                    );
+                }])
+                ->orderBy('nonrkat.id_nonrkat', 'DESC')
+                ->get()
+        ]);
     }
 
     /**
