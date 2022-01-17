@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PengajuanPencairanModel;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
+use App\Models\PengajuanValidasiModel;
 
 class PencairanController extends Controller
 {
@@ -12,19 +12,26 @@ class PencairanController extends Controller
     {
         return response()->json([
             'status' => 'success',
-            'data' => PengajuanPencairanModel::where('pencairan_id', $id)->get()
+            'data' => PengajuanPencairanModel::where('pengajuan_id', $id)->get()
         ], 200);
     }
 
     public function store(Request $request)
     {
         $this->validate($request, [
-            'pencairan_id' => 'required',
+            'pengajuan_id' => 'required',
             'nominal' => 'required',
             'images' => 'required'
         ]);
 
         $pencairan = PengajuanPencairanModel::create($request->all());
+
+        PengajuanValidasiModel::create([
+            'id_pengajuan' => $request->pengajuan_id,
+            'id_struktur' => 24,
+            'status_validasi' => '7777',
+            'message' => 'Direktur Keuangan - Pencairan dana sebesar Rp. ' . $request->nominal
+        ]);
 
         return response()->json([
             'status' => 'success',

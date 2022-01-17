@@ -233,6 +233,13 @@ class PengajuanController extends Controller
      */
     public function approve(Request $request, $params)
     {
+        // if has pencairan update pengajuan
+        if ($request->pencairan) {
+            $data = PengajuanModel::find($params)->update([
+                'pencairan' => $request->pencairan,
+            ]);
+        }
+
         $data = $this->autoProccess([
             'next' => $request->next,
             'id_pengajuan' => $params,
@@ -919,43 +926,83 @@ class PengajuanController extends Controller
 
     public function lpjKeuangan()
     {
-        $return = PengajuanModel::join('pengajuan_validasi', 'pengajuan.id_pengajuan', 'pengajuan_validasi.id_pengajuan')
-            ->select('pengajuan.id_pengajuan')
-            ->where('pengajuan.lpj_keuangan', '!=', null) // sudah upload
-            ->where('pengajuan_validasi.status_validasi', 4) // sudah valid
-            ->where('pengajuan_validasi.id_struktur', 24) // keuangan
-            ->distinct()
-            ->get();
-
-        return PengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
-            ->join('user', 'pengajuan.id_user', 'user.id_user')
-            ->join('pengajuan_validasi', 'pengajuan.id_pengajuan', 'pengajuan_validasi.id_pengajuan')
-            ->select('user.fullname', 'rkat.kode_rkat', 'pengajuan.id_pengajuan', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'pengajuan.created_at')
-            ->where('pengajuan.pencairan', '!=', null) // belum pengajuan
-            ->where('pengajuan.lpj_keuangan', '!=',  null) // belum pengajuan
-            ->whereNotIn('pengajuan.id_pengajuan', $return->pluck('id_pengajuan'))
-            ->distinct()
-            ->get();
+        return response()->json([
+            'data' => PengajuanModel::join('user', 'pengajuan.id_user', 'user.id_user')
+                ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+                ->join('pengajuan_validasi', 'pengajuan.id_pengajuan', 'pengajuan_validasi.id_pengajuan')
+                ->select('user.fullname', 'rkat.kode_rkat', 'pengajuan.id_pengajuan', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'pengajuan.created_at')
+                ->where('pengajuan.pencairan', '!=', null)
+                ->where('pengajuan.lpj_keuangan', '!=', null)
+                ->whereDoesntHave('validasi', function ($query) {
+                    $query->where('status_validasi', 4)
+                        ->where('id_struktur', 24);
+                })
+                ->distinct()
+                ->get()
+        ]);
     }
 
     public function belumLPJKeuangan()
     {
         return response()->json([
-            'data' => []
+            'data' => PengajuanModel::join('user', 'pengajuan.id_user', 'user.id_user')
+                ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+                ->join('pengajuan_validasi', 'pengajuan.id_pengajuan', 'pengajuan_validasi.id_pengajuan')
+                ->select('user.fullname', 'rkat.kode_rkat', 'pengajuan.id_pengajuan', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'pengajuan.created_at')
+                ->where('pengajuan.pencairan', '!=', null)
+                ->where('pengajuan.lpj_keuangan', null)
+                ->whereDoesntHave('validasi', function ($query) {
+                    $query->where('status_validasi', 4)
+                        ->where('id_struktur', 24);
+                })
+                ->distinct()
+                ->get()
         ]);
     }
 
     public function lpjKegiatan()
     {
         return response()->json([
-            'data' => []
+            'data' => PengajuanModel::join('user', 'pengajuan.id_user', 'user.id_user')
+            ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+            ->join('pengajuan_validasi', 'pengajuan.id_pengajuan', 'pengajuan_validasi.id_pengajuan')
+            ->select('user.fullname', 'rkat.kode_rkat', 'pengajuan.id_pengajuan', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'pengajuan.created_at')
+            ->where('pengajuan.pencairan', '!=', null)
+            ->where('pengajuan.lpj_keuangan', '!=', null)
+            ->where('pengajuan.lpj_kegiatan', '!=', null)
+            ->whereHas('validasi', function ($query) {
+                $query->where('status_validasi', 4)
+                    ->where('id_struktur', 24);
+            })
+            ->whereDoesntHave('validasi', function ($query) {
+                $query->where('status_validasi', 4)
+                    ->where('id_struktur', 21);
+            })
+            ->distinct()
+            ->get()
         ]);
     }
 
     public function belumLPJKegiatan()
     {
         return response()->json([
-            'data' => []
+            'data' => PengajuanModel::join('user', 'pengajuan.id_user', 'user.id_user')
+            ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+            ->join('pengajuan_validasi', 'pengajuan.id_pengajuan', 'pengajuan_validasi.id_pengajuan')
+            ->select('user.fullname', 'rkat.kode_rkat', 'pengajuan.id_pengajuan', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'pengajuan.created_at')
+            ->where('pengajuan.pencairan', '!=', null)
+            ->where('pengajuan.lpj_keuangan', '!=', null)
+            ->where('pengajuan.lpj_kegiatan', null)
+            ->whereHas('validasi', function ($query) {
+                $query->where('status_validasi', 4)
+                    ->where('id_struktur', 24);
+            })
+            ->whereDoesntHave('validasi', function ($query) {
+                $query->where('status_validasi', 4)
+                    ->where('id_struktur', 21);
+            })
+            ->distinct()
+            ->get()
         ]);
     }
 

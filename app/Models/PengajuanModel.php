@@ -63,6 +63,6 @@ class PengajuanModel extends Model
     // validasi
     public function validasi()
     {
-        return $this->hasMany(ValidasiModel::class, 'id_pengajuan_history', 'id_pengajuan');
+        return $this->hasMany(PengajuanValidasiModel::class, 'id_pengajuan', 'id_pengajuan');
     }
 }
