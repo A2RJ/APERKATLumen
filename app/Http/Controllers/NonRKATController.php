@@ -827,10 +827,6 @@ class NonRKATController extends Controller
         });
     }
 
-    public function autoproccess($params)
-    {
-    }
-
     public function statusNull($id_struktur, $id_nonrkat, $nomor, $warek = false)
     {
         if ($warek !== false) {
@@ -866,6 +862,7 @@ class NonRKATController extends Controller
     }
 
     // insert to db from json file
+    // fungsi untuk input ulang pengajuan non rkat dan history
     public function insertFromJson()
     {
         $data = collect(json_decode(file_get_contents(storage_path('nonrkat.json')), true));

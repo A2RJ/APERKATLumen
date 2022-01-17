@@ -9,14 +9,14 @@ class PengajuanPencairanModel extends Model
     /**
      * Database table name
      */
-    protected $table      = "pencairan_image";
+    protected $table      = "pengajuan_pencairan";
     protected $primaryKey = "id_pencairan_image";
     protected $guarded = [];
     /**
      * Mass assignable columns
      */
     protected $fillable = [
-        "pencairan_id",
+        "pengajuan_id",
         "nominal",
         "images"
     ];

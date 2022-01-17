@@ -55,8 +55,14 @@ class PengajuanModel extends Model
     ];
 
     // hasMany pengajuan_history
-    public function pengajuan_history()
+    public function history()
     {
-        return $this->hasMany('App\Models\PengajuanHistoryModel',  'id', 'id_pengajuan');
+        return $this->hasMany(PengajuanHistoryModel::class,  'id', 'id_pengajuan');
+    }
+
+    // validasi
+    public function validasi()
+    {
+        return $this->hasMany(ValidasiModel::class, 'id_pengajuan_history', 'id_pengajuan');
     }
 }

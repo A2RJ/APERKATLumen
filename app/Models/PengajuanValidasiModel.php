@@ -4,19 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ValidasiModel extends Model
+class PengajuanValidasiModel extends Model
 {
     /**
      * Database table name
      */
-    protected $table      = "validasi";
+    protected $table      = "pengajuan_validasi";
     protected $primaryKey = "id_validasi";
     protected $guarded = [];
     /**
      * Mass assignable columns
      */
     protected $fillable = [
-        "id_pengajuan_history",
+        "id_pengajuan",
         "id_struktur",
         "status_validasi",
         "message"

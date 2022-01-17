@@ -42,7 +42,10 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->group(['prefix' => 'pengajuan'], function () use ($router) {
         $router->get('/', 'PengajuanController@index');
         $router->get('/transfer', 'PengajuanController@transfer');
-        $router->get('/lpj', 'PengajuanController@lpjKeuangan');
+        $router->get('/lpjKeuangan', 'PengajuanController@lpjKeuangan');
+        $router->get('/belumLPJKeuangan', 'PengajuanController@belumLPJKeuangan');
+        $router->get('/lpjKegiatan', 'PengajuanController@lpjKegiatan');
+        $router->get('/belumLPJKegiatan', 'PengajuanController@belumLPJKegiatan');
         $router->get('/sendMail/{params}', 'PengajuanController@sendMail');
         $router->get('/pdf_pengajuan/{params}', 'PengajuanController@pdfById');
         $router->get('/destroy/{params}', 'PengajuanController@destroy');
@@ -61,7 +64,6 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/pengajuanSelesai/{params}', 'PengajuanController@pengajuanSelesai');
         $router->get('/getSubordinatesGrafik/{params}', 'PengajuanController@getSubordinatesGrafik');
         $router->get('/uploadrkat/{params}', 'PengajuanController@uploadrkat');
-        $router->get('/showPengajuan/{params1}/{params2}', 'PengajuanController@showPengajuan');
         $router->post('/', 'PengajuanController@store');
         $router->post('/upload', 'PengajuanController@upload');
         $router->post('/pdfByUSer/{params}', 'PengajuanController@pdfByUSer');
@@ -167,4 +169,6 @@ $router->group(['prefix' => 'testing'], function () use ($router) {
     $router->get('belumUploadLPJKegiatan', 'NonRKATController@belumUploadLPJKegiatan');
     $router->get('getCompleted', 'NonRKATController@getCompleted');
     $router->get('getLastValidate/{params}', 'NonRKATController@getLastValidate');
+    $router->get('dataPengajuan', 'PengajuanController@dataPengajuan');
+    $router->get('dataValidasi', 'PengajuanController@dataValidasi');
 });
