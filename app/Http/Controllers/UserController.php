@@ -2,14 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\StrukturModel;
 use App\Models\Struktur_child1Model;
 use App\Models\Struktur_child2Model;
-use App\Models\strukturModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\UserModel;
-use App\Models\User;
-// use App\User;
 
 class UserController extends Controller
 {
@@ -224,7 +222,7 @@ class UserController extends Controller
     public function struktur()
     {
         return Response()->json([
-            'data' => strukturModel::orderBy('level')
+            'data' => StrukturModel::orderBy('level')
                 ->select('id_struktur as code', 'nama_struktur as label')->get()
         ]);
     }
@@ -232,7 +230,7 @@ class UserController extends Controller
     public function getStruktur($params)
     {
         return Response()->json([
-            'data' => strukturModel::orderBy('level')
+            'data' => StrukturModel::orderBy('level')
                 ->where('id_struktur', $params)
                 ->select('id_struktur as code', 'nama_struktur as label')->get()
         ]);

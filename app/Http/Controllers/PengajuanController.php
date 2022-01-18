@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Models\UserModel;
 use App\Models\RKATModel;
 use App\Models\PengajuanModel;
-use App\Models\PengajuanValidasiModel;
+use App\Models\PengajuanRKATValidasiModel;
 use App\Models\PrintModel;
 use Barryvdh\DomPDF\Facade as PDF;
 
@@ -196,7 +196,7 @@ class PengajuanController extends Controller
             ], 400);
         }
 
-        $rkat = RKATModel::where('id_rkat', $request->kode_rkat)->first();
+        $rkat = RKATModel::where('id_rkat', $kode->kode_rkat)->first();
         if ($rkat == null) {
             return response()->json([
                 'status' => 'error',
@@ -299,7 +299,7 @@ class PengajuanController extends Controller
             'nama_status' => $params['nama_status']
         ]);
 
-        PengajuanValidasiModel::create([
+        PengajuanRKATValidasiModel::create([
             'id_pengajuan' => $params['id_pengajuan'],
             'id_struktur' => $params['id_struktur'],
             'status_validasi' => $params['status_validasi'],
@@ -346,7 +346,7 @@ class PengajuanController extends Controller
      */
     public function history($params)
     {
-        $data = PengajuanValidasiModel::where('id_pengajuan', $params)->get();
+        $data = PengajuanRKATValidasiModel::where('id_pengajuan', $params)->get();
 
         return response()->json([
             'data' => $data ? $data : "Failed, data not found"
@@ -355,7 +355,7 @@ class PengajuanController extends Controller
 
     public function validasi($params)
     {
-        $data = PengajuanValidasiModel::where('id_pengajuan', $params)->latest()->first();
+        $data = PengajuanRKATValidasiModel::where('id_pengajuan', $params)->latest()->first();
 
         return $data->status_validasi == 0 ? true : false;
     }
@@ -363,14 +363,14 @@ class PengajuanController extends Controller
     public function statusNull($id_struktur, $id_pengajuan, $nomor, $warek = false)
     {
         if ($warek !== false) {
-            $data = PengajuanValidasiModel::join('pengajuan', 'pengajuan_validasi.id_pengajuan', 'pengajuan.id_pengajuan')
+            $data = PengajuanRKATValidasiModel::join('pengajuan', 'pengajuan_validasi.id_pengajuan', 'pengajuan.id_pengajuan')
                 ->where('pengajuan_validasi.id_struktur', $id_struktur)
                 ->where('pengajuan.id_pengajuan', $id_pengajuan)
                 ->where('pengajuan_validasi.status_validasi', $nomor)
                 ->skip($warek)
                 ->first();
         } else {
-            $data = PengajuanValidasiModel::join('pengajuan', 'pengajuan_validasi.id_pengajuan', 'pengajuan.id_pengajuan')
+            $data = PengajuanRKATValidasiModel::join('pengajuan', 'pengajuan_validasi.id_pengajuan', 'pengajuan.id_pengajuan')
                 ->where('pengajuan_validasi.id_struktur', $id_struktur)
                 ->where('pengajuan.id_pengajuan', $id_pengajuan)
                 ->where('pengajuan_validasi.status_validasi', $nomor)
@@ -1127,7 +1127,7 @@ class PengajuanController extends Controller
         }
 
         return response()->json([
-            PengajuanValidasiModel::insert($data)
+            PengajuanRKATValidasiModel::insert($data)
         ]);
     }
 }

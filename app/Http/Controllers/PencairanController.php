@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PengajuanPencairanModel;
 use Illuminate\Http\Request;
-use App\Models\PengajuanValidasiModel;
+use App\Models\PengajuanRKATValidasiModel;
 
 class PencairanController extends Controller
 {
@@ -26,7 +26,7 @@ class PencairanController extends Controller
 
         $pencairan = PengajuanPencairanModel::create($request->all());
 
-        PengajuanValidasiModel::create([
+        PengajuanRKATValidasiModel::create([
             'id_pengajuan' => $request->pengajuan_id,
             'id_struktur' => 24,
             'status_validasi' => '7777',

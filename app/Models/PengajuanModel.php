@@ -55,14 +55,14 @@ class PengajuanModel extends Model
     ];
 
     // hasMany pengajuan_history
-    public function history()
-    {
-        return $this->hasMany(PengajuanHistoryModel::class,  'id', 'id_pengajuan');
-    }
+    // public function history()
+    // {
+    //     return $this->hasMany(PengajuanHistoryModel::class,  'id', 'id_pengajuan');
+    // }
 
     // validasi
     public function validasi()
     {
-        return $this->hasMany(PengajuanValidasiModel::class, 'id_pengajuan', 'id_pengajuan');
+        return $this->hasMany(PengajuanRKATValidasiModel::class, 'id_pengajuan', 'id_pengajuan');
     }
 }
