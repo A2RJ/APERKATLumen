@@ -331,7 +331,7 @@ class NonRKATController extends Controller
                         ->where('id_struktur', 22);
                 })
                 ->whereDoesntHave('validasi', function ($query) {
-                    $query->where('message', 'Direktur Keuangan (Pencairan) Pencairan selesai')
+                    $query->where('id_struktur', 24)
                         ->where('status_validasi', 3);
                 })
                 ->select('user.id_user', 'nonrkat.id_nonrkat', 'nonrkat.validasi_status', 'nonrkat.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'nonrkat.created_at')
@@ -360,7 +360,7 @@ class NonRKATController extends Controller
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                 ->where('nonrkat.lpj_keuangan', null)
                 ->whereHas('validasi', function ($query) {
-                    $query->where('message', 'Direktur Keuangan (Pencairan) Pencairan selesai')
+                     $query->where('id_struktur', 24)
                         ->where('status_validasi', 3);
                 })
                 ->whereDoesntHave('validasi', function ($query) {
@@ -369,7 +369,7 @@ class NonRKATController extends Controller
                 })
                 ->orWhere('nonrkat.lpj_keuangan', '')
                 ->whereHas('validasi', function ($query) {
-                    $query->where('message', 'Direktur Keuangan (Pencairan) Pencairan selesai')
+                     $query->where('id_struktur', 24)
                         ->where('status_validasi', 3);
                 })
                 ->whereDoesntHave('validasi', function ($query) {
@@ -420,7 +420,7 @@ class NonRKATController extends Controller
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                 ->where('nonrkat.lpj_kegiatan', null)
                 ->whereHas('validasi', function ($query) {
-                    $query->where('message', 'Direktur Keuangan (Pencairan) Pencairan selesai')
+                     $query->where('id_struktur', 22)
                         ->where('status_validasi', 3)
                         ->orWhere('status_validasi', 4)
                         ->where('id_struktur', 24);
@@ -431,7 +431,7 @@ class NonRKATController extends Controller
                 })
                 ->orWhere('nonrkat.lpj_kegiatan', '')
                 ->whereHas('validasi', function ($query) {
-                    $query->where('message', 'Direktur Keuangan (Pencairan) Pencairan selesai')
+                     $query->where('id_struktur', 22)
                         ->where('status_validasi', 3)
                         ->orWhere('status_validasi', 4)
                         ->where('id_struktur', 24);

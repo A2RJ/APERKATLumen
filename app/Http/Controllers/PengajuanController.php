@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Backup\PengajuanBackupModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -820,7 +821,7 @@ class PengajuanController extends Controller
         ]);
     }
 
-    public function cobaFungsiPrint($params)
+    public function printPengajuan($params)
     {
         $data = PrintModel::where('id_user', base64_decode($params))->select('id_pengajuan')->get();
         $pengajuan = PengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
@@ -964,22 +965,22 @@ class PengajuanController extends Controller
     {
         return response()->json([
             'data' => PengajuanModel::join('user', 'pengajuan.id_user', 'user.id_user')
-            ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
-            ->join('pengajuan_validasi', 'pengajuan.id_pengajuan', 'pengajuan_validasi.id_pengajuan')
-            ->select('user.fullname', 'rkat.kode_rkat', 'pengajuan.id_pengajuan', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'pengajuan.created_at')
-            ->where('pengajuan.pencairan', '!=', null)
-            ->where('pengajuan.lpj_keuangan', '!=', null)
-            ->where('pengajuan.lpj_kegiatan', '!=', null)
-            ->whereHas('validasi', function ($query) {
-                $query->where('status_validasi', 4)
-                    ->where('id_struktur', 24);
-            })
-            ->whereDoesntHave('validasi', function ($query) {
-                $query->where('status_validasi', 4)
-                    ->where('id_struktur', 21);
-            })
-            ->distinct()
-            ->get()
+                ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+                ->join('pengajuan_validasi', 'pengajuan.id_pengajuan', 'pengajuan_validasi.id_pengajuan')
+                ->select('user.fullname', 'rkat.kode_rkat', 'pengajuan.id_pengajuan', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'pengajuan.created_at')
+                ->where('pengajuan.pencairan', '!=', null)
+                ->where('pengajuan.lpj_keuangan', '!=', null)
+                ->where('pengajuan.lpj_kegiatan', '!=', null)
+                ->whereHas('validasi', function ($query) {
+                    $query->where('status_validasi', 4)
+                        ->where('id_struktur', 24);
+                })
+                ->whereDoesntHave('validasi', function ($query) {
+                    $query->where('status_validasi', 4)
+                        ->where('id_struktur', 21);
+                })
+                ->distinct()
+                ->get()
         ]);
     }
 
@@ -987,22 +988,22 @@ class PengajuanController extends Controller
     {
         return response()->json([
             'data' => PengajuanModel::join('user', 'pengajuan.id_user', 'user.id_user')
-            ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
-            ->join('pengajuan_validasi', 'pengajuan.id_pengajuan', 'pengajuan_validasi.id_pengajuan')
-            ->select('user.fullname', 'rkat.kode_rkat', 'pengajuan.id_pengajuan', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'pengajuan.created_at')
-            ->where('pengajuan.pencairan', '!=', null)
-            ->where('pengajuan.lpj_keuangan', '!=', null)
-            ->where('pengajuan.lpj_kegiatan', null)
-            ->whereHas('validasi', function ($query) {
-                $query->where('status_validasi', 4)
-                    ->where('id_struktur', 24);
-            })
-            ->whereDoesntHave('validasi', function ($query) {
-                $query->where('status_validasi', 4)
-                    ->where('id_struktur', 21);
-            })
-            ->distinct()
-            ->get()
+                ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+                ->join('pengajuan_validasi', 'pengajuan.id_pengajuan', 'pengajuan_validasi.id_pengajuan')
+                ->select('user.fullname', 'rkat.kode_rkat', 'pengajuan.id_pengajuan', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'pengajuan.created_at')
+                ->where('pengajuan.pencairan', '!=', null)
+                ->where('pengajuan.lpj_keuangan', '!=', null)
+                ->where('pengajuan.lpj_kegiatan', null)
+                ->whereHas('validasi', function ($query) {
+                    $query->where('status_validasi', 4)
+                        ->where('id_struktur', 24);
+                })
+                ->whereDoesntHave('validasi', function ($query) {
+                    $query->where('status_validasi', 4)
+                        ->where('id_struktur', 21);
+                })
+                ->distinct()
+                ->get()
         ]);
     }
 
@@ -1024,7 +1025,7 @@ class PengajuanController extends Controller
                 ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
+                // ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
                 ->where('pengajuan.next', 3333)
                 ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.next', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at')
                 ->orderBy('pengajuan.id_pengajuan', 'DESC')
@@ -1035,7 +1036,7 @@ class PengajuanController extends Controller
                 ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
+                // ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
                 ->where('pengajuan.next', 3333)
                 ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.next', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at')
                 ->orderBy('pengajuan.id_pengajuan', 'DESC')
@@ -1047,7 +1048,7 @@ class PengajuanController extends Controller
                     ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                     ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                     ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                    ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
+                    // ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
                     ->where('pengajuan.next', 3333)
                     ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.next', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at')
                     ->orderBy('pengajuan.id_pengajuan', 'DESC')
@@ -1058,7 +1059,7 @@ class PengajuanController extends Controller
                     ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                     ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                     ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                    ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
+                    // ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
                     ->where('struktur.id_struktur', $userStruktur->id_struktur)
                     ->where('pengajuan.next', 3333)
                     ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.next', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at')
@@ -1072,7 +1073,7 @@ class PengajuanController extends Controller
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                 ->where('pengajuan.next', 3333)
-                ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
+                // ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
                 ->where('struktur.id_struktur', $userStruktur->id_struktur)
                 ->where('struktur_child1.id_struktur_child1', $userStruktur->id_struktur_child1)
                 ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.next', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at')
@@ -1085,25 +1086,14 @@ class PengajuanController extends Controller
         ]);
     }
 
-    // Data pengajuan dari tb pengajuan, history pengajuan dan validasi
-    public function dataPengajuan()
-    {
-        return response()->json([
-            PengajuanModel::select('id_pengajuan')
-                ->with(['history' => function ($query) {
-                    $query->select('id', 'id_pengajuan')
-                        ->with(['validasi' => function ($query) {
-                            $query->select('id_validasi', 'id_pengajuan_history', 'id_struktur', 'status_validasi', 'message');
-                        }]);
-                }])
-                ->get()
-        ]);
-    }
+    /**
+     * Export from pengajuan with history and validasi
+     * to pengajuan with validasi
+     * */
 
-    // Get data pengajuan, history pengajuan dan validasi kemudian insert ke tb pengajuan_validasi
     public function dataValidasi()
     {
-        $return = PengajuanModel::select('id_pengajuan')
+        $return = PengajuanBackupModel::select('id_pengajuan')
             ->with(['history' => function ($query) {
                 $query->select('id', 'id_pengajuan')
                     ->with(['validasi' => function ($query) {

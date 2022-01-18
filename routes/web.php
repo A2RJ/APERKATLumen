@@ -2,10 +2,6 @@
 
 /** @var \Laravel\Lumen\Routing\Router $router */
 
-use App\Models\PengajuanModel;
-use App\Models\UserModel;
-use Barryvdh\Debugbar\Facades\Debugbar;
-
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -26,7 +22,7 @@ $router->get('/', function () use ($router) {
     ]);
 });
 
-$router->get('/g/{params}', 'PengajuanController@cobaFungsiPrint');
+$router->get('/g/{params}', 'PengajuanController@printPengajuan');
 
 $router->group(['middleware' => 'auth', 'prefix' => 'api'], function ($router) {
     $router->get('me', 'AuthController@me');
@@ -175,13 +171,6 @@ $router->group(['prefix' => 'testing'], function () use ($router) {
     $router->get('dataValidasi', 'PengajuanController@dataValidasi');
     
     $router->get('debug', function () {
-        Debugbar::enable();
-        Debugbar::info(
-            PengajuanModel::all()
-        );
-        Debugbar::error('Error!');
-        Debugbar::warning('Watch out…');
-        Debugbar::addMessage('Another message', 'mylabel');
-        return view('debug');
+
     });
 });
