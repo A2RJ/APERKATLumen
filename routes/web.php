@@ -159,18 +159,15 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
 // For testing only
 $router->group(['prefix' => 'testing'], function () use ($router) {
-    $router->get('next/{params}', 'NonRKATController@getNext');
-    $router->get('listPencairan', 'NonRKATController@listPencairan');
-    $router->get('listLPJKeuangan', 'NonRKATController@listLPJKeuangan');
-    $router->get('listLPJKegiatan', 'NonRKATController@listLPJKegiatan');
-    $router->get('belumUploadLPJKeuangan', 'NonRKATController@belumUploadLPJKeuangan');
-    $router->get('belumUploadLPJKegiatan', 'NonRKATController@belumUploadLPJKegiatan');
-    $router->get('getCompleted', 'NonRKATController@getCompleted');
-    $router->get('getLastValidate/{params}', 'NonRKATController@getLastValidate');
-    $router->get('dataPengajuan', 'PengajuanController@dataPengajuan');
-    $router->get('dataValidasi', 'PengajuanController@dataValidasi');
-    
-    $router->get('debug', function () {
-
-    });
+    // $router->get('next/{params}', 'NonRKATController@getNext');
+    // $router->get('listPencairan', 'NonRKATController@listPencairan');
+    // $router->get('listLPJKeuangan', 'NonRKATController@listLPJKeuangan');
+    // $router->get('listLPJKegiatan', 'NonRKATController@listLPJKegiatan');
+    // $router->get('belumUploadLPJKeuangan', 'NonRKATController@belumUploadLPJKeuangan');
+    // $router->get('belumUploadLPJKegiatan', 'NonRKATController@belumUploadLPJKegiatan');
+    // $router->get('getCompleted', 'NonRKATController@getCompleted');
+    // $router->get('getLastValidate/{params}', 'NonRKATController@getLastValidate');
+    // $router->get('dataPengajuan', 'PengajuanController@dataPengajuan');
+    // $router->get('dataValidasi', 'PengajuanController@dataValidasi');
+    // $router->get('exportNonRKAT', 'NonRKATController@exportNonRKAT');
 });

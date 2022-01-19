@@ -59,4 +59,9 @@ class NonRKATModel extends Model
     {
         return $this->hasMany(NonValidasiModel::class, 'nonrkat_id', 'id_nonrkat');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(UserModel::class, 'id_user', 'id_user');
+    }
 }

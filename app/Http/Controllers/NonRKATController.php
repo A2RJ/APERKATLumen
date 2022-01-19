@@ -8,6 +8,7 @@ use App\Models\NonValidasiModel;
 use App\Models\UserModel;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Queue\Events\Looping;
 use Illuminate\Support\Facades\Mail;
 
 use function PHPSTORM_META\map;
@@ -360,7 +361,7 @@ class NonRKATController extends Controller
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                 ->where('nonrkat.lpj_keuangan', null)
                 ->whereHas('validasi', function ($query) {
-                     $query->where('id_struktur', 24)
+                    $query->where('id_struktur', 24)
                         ->where('status_validasi', 3);
                 })
                 ->whereDoesntHave('validasi', function ($query) {
@@ -369,7 +370,7 @@ class NonRKATController extends Controller
                 })
                 ->orWhere('nonrkat.lpj_keuangan', '')
                 ->whereHas('validasi', function ($query) {
-                     $query->where('id_struktur', 24)
+                    $query->where('id_struktur', 24)
                         ->where('status_validasi', 3);
                 })
                 ->whereDoesntHave('validasi', function ($query) {
@@ -420,7 +421,7 @@ class NonRKATController extends Controller
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                 ->where('nonrkat.lpj_kegiatan', null)
                 ->whereHas('validasi', function ($query) {
-                     $query->where('id_struktur', 22)
+                    $query->where('id_struktur', 22)
                         ->where('status_validasi', 3)
                         ->orWhere('status_validasi', 4)
                         ->where('id_struktur', 24);
@@ -431,7 +432,7 @@ class NonRKATController extends Controller
                 })
                 ->orWhere('nonrkat.lpj_kegiatan', '')
                 ->whereHas('validasi', function ($query) {
-                     $query->where('id_struktur', 22)
+                    $query->where('id_struktur', 22)
                         ->where('status_validasi', 3)
                         ->orWhere('status_validasi', 4)
                         ->where('id_struktur', 24);
@@ -673,26 +674,34 @@ class NonRKATController extends Controller
             ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
             ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
             ->where('id_user', $params)
+            ->select('user.*', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2')
             ->first();
+
 
         if ($user) {
             if ($user->nama_struktur !== '0' && $user->nama_struktur_child1 == '0' && $user->nama_struktur_child2 == '0') {
                 return [
                     'message' => 'Atasan',
+                    'user' => $user->fullname,
+                    'id_user' => $user->id_user,
                     'next' => 24,
-                    'user' => $user->fullname
+                    'nama_struktur' => "Direktur Keuangan",
                 ];
             } elseif ($user->nama_struktur !== '0' && $user->nama_struktur_child1 !== '0' && $user->nama_struktur_child2 == '0') {
                 return [
                     'message' => 'Fakultas/Unit',
-                    'next' => 24,
-                    'user' => $user->fullname
+                    'user' => $user->fullname,
+                    'id_user' => $user->id_user,
+                    'next' => $user->nama_struktur == 'Fakultas' ? 24 : $this->getID($user->nama_struktur, '0', '0'),
+                    'nama_struktur' => $user->nama_struktur,
                 ];
             } elseif ($user->nama_struktur !== '0' && $user->nama_struktur_child1 !== '0' && $user->nama_struktur_child2 !== '0') {
                 return [
                     'message' => 'Sub divisi',
-                    'next' => $user->id_struktur_child1,
-                    'user' => $user->fullname
+                    'user' => $user->fullname,
+                    'id_user' => $user->id_user,
+                    'next' => $this->getID($user->nama_struktur, $user->nama_struktur_child1, '0'),
+                    'nama_struktur' => $user->nama_struktur_child1,
                 ];
             }
         } else {
@@ -863,81 +872,58 @@ class NonRKATController extends Controller
 
     // insert to db from json file
     // fungsi untuk input ulang pengajuan non rkat dan history
-    public function insertFromJson()
+    public function exportNonRKAT()
     {
-        $data = collect(json_decode(file_get_contents(storage_path('nonrkat.json')), true));
+        $data = NonRKATModel::with('user')->get();
+        NonValidasiModel::truncate();
 
-        $validasi = $data->map(function ($item) {
-            return [
-                "nonrkat_id" => $item['id_nonrkat'],
-                "id_struktur" => $item['id_user'],
-                "status_validasi" => $item['validasi_status'],
-                "message" => $item['fullname'] . ' - Input pengajuan',
-                "created_at" => Carbon::parse($item['created_at'])->format('Y-m-d H:i:s'),
-                "updated_at" => Carbon::parse($item['updated_at'])->format('Y-m-d H:i:s')
+        // Looping data
+        $newData = [];
+        foreach ($data as $key) {
+            $update = [
+                "id_nonrkat" => $key->id_nonrkat,
+                "id_user" => $key->id_user,
+                "next" => $this->getNext($key->id_user)['next'],
+                "nama_kegiatan" => $key->nama_kegiatan,
+                "tujuan" => $key->tujuan,
+                "latar_belakang" => $key->latar_belakang,
+                "sasaran" => $key->sasaran,
+                "target_capaian" => $key->target_capaian,
+                "bentuk_pelaksanaan_program" => $key->bentuk_pelaksanaan_program,
+                "tempat_program" => $key->tempat_program,
+                "tanggal" => $key->tanggal,
+                "bidang_terkait" => $key->bidang_terkait,
+                "id_iku_parent" => $key->id_iku_parent,
+                "id_iku_child1" => $key->id_iku_child1,
+                "id_iku_child2" => $key->id_iku_child2,
+                "biaya_program" => $key->biaya_program,
+                "bank" => $key->bank,
+                "atn" => $key->atn,
+                "no_rek" => $key->no_rek,
+                "rab" => $key->rab,
+                "status_pengajuan" => $key->status_pengajuan,
+                "pencairan" => $key->pencairan,
+                "lpj_kegiatan" => $key->lpj_kegiatan,
+                "lpj_keuangan" => $key->lpj_keuangan,
+                "validasi_status" => $key->validasi_status,
+                "nama_status" => $key->nama_status,
+                "created_at" => $key->created_at,
+                "updated_at" => $key->updated_at,
             ];
-        })->toArray();
 
-        $delete = $data->map(function ($item) {
-            return [
-                "id_nonrkat" => $item['id_nonrkat'],
-                "id_user" => $item['id_user'],
-                "next" => $item['next'],
-                "nama_kegiatan" => $item['nama_kegiatan'],
-                "tujuan" => $item['tujuan'],
-                "latar_belakang" => $item['latar_belakang'],
-                "sasaran" => $item['sasaran'],
-                "target_capaian" => $item['target_capaian'],
-                "bentuk_pelaksanaan_program" => $item['bentuk_pelaksanaan_program'],
-                "tempat_program" => $item['tempat_program'],
-                "tanggal" => $item['tanggal'],
-                "bidang_terkait" => $item['bidang_terkait'],
-                "id_iku_parent" => $item['id_iku_parent'],
-                "id_iku_child1" => $item['id_iku_child1'],
-                "id_iku_child2" => $item['id_iku_child2'],
-                "biaya_program" => $item['biaya_program'],
-                "bank" => $item['bank'],
-                "atn" => $item['atn'],
-                "no_rek" => $item['no_rek'],
-                "rab" => $item['rab'],
-                "status_pengajuan" => $item['status_pengajuan'],
-                "pencairan" => $item['pencairan'],
-                "lpj_kegiatan" => $item['lpj_kegiatan'],
-                "lpj_keuangan" => $item['lpj_keuangan'],
-                "validasi_status" => $item['validasi_status'],
-                "nama_status" => $item['nama_status'],
-                "created_at" => Carbon::parse($item['created_at'])->format('Y-m-d H:i:s'),
-                "updated_at" => Carbon::parse($item['updated_at'])->format('Y-m-d H:i:s'),
-            ];
-        })->toArray();
+            $newData[] = $update;
+            NonRKATModel::find($key->id_nonrkat)->update($update);
 
-        return [
-            'truncate_nonrkat' => NonRKATModel::truncate() ? true : false,
-            'non_rkat' => NonRKATModel::insert($delete),
-            'truncate_nonrkat_validasi' => NonValidasiModel::truncate() ? true : false,
-            'validasi' => NonValidasiModel::insert($validasi),
-            'count' => count($data)
-        ];
-    }
-
-    // get data atasan
-    public function getAtasan($id_user)
-    {
-        $atasan = '';
-
-        $user = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
-            ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
-            ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-            ->find($id_user);
-
-        if ($user->nama_struktur !== '0') {
-            $atasan = $user->nama_struktur;
-        } else if ($user->nama_struktur_child1 !== '0') {
-            $atasan = $user->nama_struktur_child1;
-        } else if ($user->nama_struktur_child2 !== '0') {
-            $atasan = $user->nama_struktur_child2;
+            NonValidasiModel::create([
+                "nonrkat_id" => $key->id_nonrkat,
+                "id_struktur" => $key->id_user,
+                "status_validasi" => 1,
+                "message" => $key['user']->fullname . ' - Input pengajuan',
+                "created_at" => $key->created_at,
+                "updated_at" => $key->updated_at,
+            ]);
         }
 
-        return $atasan;
+        return $newData;
     }
 }

@@ -1097,7 +1097,7 @@ class PengajuanController extends Controller
             ->with(['history' => function ($query) {
                 $query->select('id', 'id_pengajuan')
                     ->with(['validasi' => function ($query) {
-                        $query->select('id_validasi', 'id_pengajuan_history', 'id_struktur', 'status_validasi', 'message');
+                        $query->select('id_validasi', 'id_pengajuan_history', 'id_struktur', 'status_validasi', 'message', 'created_at', 'updated_at');
                     }]);
             }])
             ->get();
@@ -1111,6 +1111,8 @@ class PengajuanController extends Controller
                         'id_struktur' => $value3->id_struktur,
                         'status_validasi' => $value3->status_validasi,
                         'message' => $value3->message,
+                        'created_at' => $value3->created_at,
+                        'updated_at' => $value3->updated_at,
                     ];
                 }
             }
