@@ -64,8 +64,9 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/uploadrkat/{params}', 'PengajuanController@uploadrkat');
         $router->post('/', 'PengajuanController@store');
         $router->post('/upload', 'PengajuanController@upload');
-        $router->post('/pdfByUSer/{params}', 'PengajuanController@pdfByUSer');
+        $router->post('/importRAB', 'PengajuanController@importRAB');
         $router->post('/deleteRows', 'PengajuanController@deleteRows');
+        $router->post('/pdfByUSer/{params}', 'PengajuanController@pdfByUSer');
         $router->post('/approve/{params}', 'PengajuanController@approve');
         $router->post('/decline/{params}', 'PengajuanController@decline');
         $router->post('/{params}', 'PengajuanController@update');
@@ -155,6 +156,13 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->put('/{params}', 'IKUController@update');
         $router->delete('/{params}', 'IKUController@destroy');
     });
+
+    $router->group(['prefix' => 'period'], function () use ($router){
+        $router->get('/', 'PeriodController@index');
+        $router->post('/', 'PeriodController@store');
+        $router->get('/{params}', 'PeriodController@getPengajuanByPeriod');
+        $router->post('/addList', 'PeriodController@addList');
+    });
 });
 
 // For testing only
@@ -170,4 +178,5 @@ $router->group(['prefix' => 'testing'], function () use ($router) {
     // $router->get('dataPengajuan', 'PengajuanController@dataPengajuan');
     // $router->get('dataValidasi', 'PengajuanController@dataValidasi');
     // $router->get('exportNonRKAT', 'NonRKATController@exportNonRKAT');
+    $router->get('/print/{params}', 'PengajuanController@printPengajuan');
 });

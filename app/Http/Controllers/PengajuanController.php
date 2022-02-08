@@ -12,6 +12,7 @@ use App\Models\PengajuanModel;
 use App\Models\PengajuanRKATValidasiModel;
 use App\Models\PrintModel;
 use Barryvdh\DomPDF\Facade as PDF;
+use Rap2hpoutre\FastExcel\FastExcel;
 
 class PengajuanController extends Controller
 {
@@ -139,6 +140,29 @@ class PengajuanController extends Controller
             return $fileName;
         } else {
             return false;
+        }
+    }
+
+    public function importRAB(Request $request)
+    {
+        if ($request->hasFile('file')) {
+            $collection = (new FastExcel)->import($request->file('file'));
+            $array = [];
+            foreach ($collection as $value) {
+                $array[] = [
+                    "no" => uniqid(),
+                    "jenis_barang" => $value["Jenis Barang"],
+                    "harga_satuan" => $value["Harga Satuan"],
+                    "qty" => $value["Qty"],
+                    // string into number
+                    'total' => '0',
+                    "keterangan" => $value["Keterangan"],
+                ];
+            }
+
+            return response()->json(['data' => $array]);
+        } else {
+            return response()->json(['data ' => []]);
         }
     }
 
@@ -828,6 +852,7 @@ class PengajuanController extends Controller
             ->join('user', 'pengajuan.id_user', 'user.id_user')
             ->select('user.fullname', 'user.kop', 'user.ttd', 'rkat.nama_program', 'rkat.kode_rkat', 'rkat.tujuan', 'pengajuan.id_pengajuan', 'pengajuan.latar_belakang', 'pengajuan.sasaran', 'pengajuan.target_capaian', 'pengajuan.bentuk_pelaksanaan_program', 'pengajuan.tempat_program', 'pengajuan.tanggal', 'pengajuan.bidang_terkait')
             ->orderBy('user.fullname')
+            ->with('validasi')
             ->whereIn('pengajuan.id_pengajuan', $data)
             ->get();
 
@@ -1093,33 +1118,33 @@ class PengajuanController extends Controller
 
     public function dataValidasi()
     {
-        $return = PengajuanBackupModel::select('id_pengajuan')
-            ->with(['history' => function ($query) {
-                $query->select('id', 'id_pengajuan')
-                    ->with(['validasi' => function ($query) {
-                        $query->select('id_validasi', 'id_pengajuan_history', 'id_struktur', 'status_validasi', 'message', 'created_at', 'updated_at');
-                    }]);
-            }])
-            ->get();
+        // $return = PengajuanBackupModel::select('id_pengajuan')
+        //     ->with(['history' => function ($query) {
+        //         $query->select('id', 'id_pengajuan')
+        //             ->with(['validasi' => function ($query) {
+        //                 $query->select('id_validasi', 'id_pengajuan_history', 'id_struktur', 'status_validasi', 'message', 'created_at', 'updated_at');
+        //             }]);
+        //     }])
+        //     ->get();
 
-        $data = [];
-        foreach ($return as $key => $value) {
-            foreach ($value->history as $key2 => $value2) {
-                foreach ($value2->validasi as $key3 => $value3) {
-                    $data[] = [
-                        'id_pengajuan' => $value->id_pengajuan,
-                        'id_struktur' => $value3->id_struktur,
-                        'status_validasi' => $value3->status_validasi,
-                        'message' => $value3->message,
-                        'created_at' => $value3->created_at,
-                        'updated_at' => $value3->updated_at,
-                    ];
-                }
-            }
-        }
+        // $data = [];
+        // foreach ($return as $key => $value) {
+        //     foreach ($value->history as $key2 => $value2) {
+        //         foreach ($value2->validasi as $key3 => $value3) {
+        //             $data[] = [
+        //                 'id_pengajuan' => $value->id_pengajuan,
+        //                 'id_struktur' => $value3->id_struktur,
+        //                 'status_validasi' => $value3->status_validasi,
+        //                 'message' => $value3->message,
+        //                 'created_at' => $value3->created_at,
+        //                 'updated_at' => $value3->updated_at,
+        //             ];
+        //         }
+        //     }
+        // }
 
-        return response()->json([
-            PengajuanRKATValidasiModel::insert($data)
-        ]);
+        // return response()->json([
+        //     PengajuanRKATValidasiModel::insert($data)
+        // ]);
     }
 }

@@ -140,6 +140,14 @@
             <img src="http://localhost:8000/kop/<?= $p->ttd ?>" alt="TTD Surat" class="ttd">
             <!-- <img src="http://localhost:8000/kop/<?= $p->ttd ?>" alt="TTD Surat" class="ttd"> -->
         </div>
+        <h3>History</h3>
+        <ul>
+            @foreach ($p->validasi as $v)
+            <li>
+                {{ $v->message }} ({{ $v->created_at->format('d M Y') }})
+            </li>
+            @endforeach
+        </ul>
     </div>
     @endforeach
 </body>
