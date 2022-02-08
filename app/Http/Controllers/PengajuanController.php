@@ -107,7 +107,8 @@ class PengajuanController extends Controller
         ]);
 
         return response()->json([
-            'data' => $data
+            'data' => $data,
+            'id_pengajuan' => $data->id_pengajuan,
         ]);
     }
 

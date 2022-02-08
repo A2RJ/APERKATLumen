@@ -157,6 +157,11 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->delete('/{params}', 'IKUController@destroy');
     });
 
+    $router->group(['prefix' => 'rab'], function () use ($router){
+        $router->get('/{params}', 'RABController@index');
+        $router->post('/', 'RABController@store');
+        $router->delete('/{params}', 'RABController@destroy');
+    });
     $router->group(['prefix' => 'period'], function () use ($router){
         $router->get('/', 'PeriodController@index');
         $router->post('/', 'PeriodController@store');

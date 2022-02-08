@@ -8,24 +8,24 @@ use Illuminate\Http\Request;
 class RABController extends Controller
 {
 
-    public function index()
+    public function index($params)
     {
-        //
+        return response()->json(RABModel::where('pengajuan_id', $params)->get());
     }
-
 
     public function store(Request $request)
     {
-        //
+        RABModel::where('pengajuan_id', $request->pengajuan_id)->delete();
+
+        $rab = RABModel::insert($request->all());
+
+        return response()->json($rab, 201);
     }
 
-    public function update(Request $request, RABModel $rABModel)
+    public function destroy(RABModel $params)
     {
-        //
-    }
+        // $params->delete();
 
-    public function destroy(RABModel $rABModel)
-    {
-        //
+        return response()->json($params, 204);
     }
 }
