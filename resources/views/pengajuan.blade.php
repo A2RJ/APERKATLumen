@@ -140,6 +140,38 @@
             <img src="http://localhost:8000/kop/<?= $p->ttd ?>" alt="TTD Surat" class="ttd">
             <!-- <img src="http://localhost:8000/kop/<?= $p->ttd ?>" alt="TTD Surat" class="ttd"> -->
         </div>
+        <h3>RAB</h3>
+        <!-- looping with table -->
+        <div style="
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        ">
+            <table border="1">
+                <tr>
+                    <th>Jenis Barang</th>
+                    <th>Harga satuan</th>
+                    <th>QTY</th>
+                    <th>Total</th>
+                    <th>Keterangan</th>
+                </tr>
+                @foreach ($p->rab as $r)
+                <tr>
+                    <td>{{ $r->jenis_barang }}</td>
+                    <td>{{ $r->harga_satuan }}</td>
+                    <td>{{ $r->qty }}</td>
+                    <td>{{ $r->total }}</td>
+                    <td>{{ $r->keterangan }}</td>
+                </tr>
+                @endforeach
+                <tr>
+                    <td colspan="3">Catatan</td>
+                    <td colspan="2"></td>
+                </tr>
+            </table>
+        </div>
+        <hr>
         <h3>History</h3>
         <ul>
             @foreach ($p->validasi as $v)

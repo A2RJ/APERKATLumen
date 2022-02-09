@@ -60,9 +60,23 @@ class PengajuanModel extends Model
     //     return $this->hasMany(PengajuanHistoryModel::class,  'id', 'id_pengajuan');
     // }
 
+    public function rab()
+    {
+        return $this->hasMany(RabModel::class, 'pengajuan_id', 'id_pengajuan');
+    }
+
+    public function rkat()
+    {
+        return $this->hasOne(RKATModel::class, 'id_rkat', 'kode_rkat');
+    }
     // validasi
     public function validasi()
     {
         return $this->hasMany(PengajuanRKATValidasiModel::class, 'id_pengajuan', 'id_pengajuan');
+    }
+
+    public function pencairan()
+    {
+        return $this->hasMany(PengajuanPencairanModel::class, 'pengajuan_id', 'id_pengajuan');
     }
 }

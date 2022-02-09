@@ -15,7 +15,7 @@ class RABController extends Controller
 
     public function store(Request $request)
     {
-        RABModel::where('pengajuan_id', $request->pengajuan_id)->delete();
+        RABModel::where('pengajuan_id', $request->pengajuan_id)->truncate();
 
         $rab = RABModel::insert($request->all());
 

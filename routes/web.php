@@ -166,6 +166,8 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/', 'PeriodController@index');
         $router->post('/', 'PeriodController@store');
         $router->get('/{params}', 'PeriodController@getPengajuanByPeriod');
+        $router->get('/{id}/{params}', 'PeriodController@biayaDisetujui');
+        $router->get('/getByAtasan/{id}/{params}', 'PeriodController@getByAtasan');
         $router->post('/addList', 'PeriodController@addList');
     });
 });
@@ -183,5 +185,6 @@ $router->group(['prefix' => 'testing'], function () use ($router) {
     // $router->get('dataPengajuan', 'PengajuanController@dataPengajuan');
     // $router->get('dataValidasi', 'PengajuanController@dataValidasi');
     // $router->get('exportNonRKAT', 'NonRKATController@exportNonRKAT');
+    $router->get('newformatrkat', 'Testing@newformatrkat');
     $router->get('/print/{params}', 'PengajuanController@printPengajuan');
 });
