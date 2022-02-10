@@ -39,7 +39,9 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
     $router->group(['prefix' => 'pengajuan'], function () use ($router) {
         $router->get('/', 'PengajuanController@index');
+        $router->get('/getItemForListPencairan', 'PengajuanController@getItemForListPencairan');
         $router->get('/transfer', 'PengajuanController@transfer');
+        $router->get('/sudahTransfer', 'PengajuanController@sudahTransfer');
         $router->get('/lpjKeuangan', 'PengajuanController@lpjKeuangan');
         $router->get('/belumLPJKeuangan', 'PengajuanController@belumLPJKeuangan');
         $router->get('/lpjKegiatan', 'PengajuanController@lpjKegiatan');
