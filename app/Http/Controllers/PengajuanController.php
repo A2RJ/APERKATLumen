@@ -734,7 +734,7 @@ class PengajuanController extends Controller
             ->where('id_user', $params)
             ->first();
 
-        if ($userStruktur->level == 1) {
+        if ($userStruktur->level == 1 || $userStruktur->level == 2) {
             $data = UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
                 ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
                 ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
@@ -742,19 +742,6 @@ class PengajuanController extends Controller
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                 ->where('pengajuan.next', $params)
                 ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
-                ->where('pengajuan.status_pengajuan', 'progress')
-                ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.next', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at')
-                ->orderBy('pengajuan.id_pengajuan', 'DESC')
-                ->get();
-        } else if ($userStruktur->level == 2) {
-            $data =   UserModel::join('pengajuan', 'user.id_user', 'pengajuan.id_user')
-                ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
-                ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
-                ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
-                ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-                ->where('pengajuan.next', $params)
-                ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
-                ->where('pengajuan.status_pengajuan', 'progress')
                 ->select('user.id_user', 'rkat.kode_rkat', 'pengajuan.next', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at')
                 ->orderBy('pengajuan.id_pengajuan', 'DESC')
                 ->get();

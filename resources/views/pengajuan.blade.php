@@ -5,8 +5,15 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <title>Laporan Pengajuan</title>
+<?php
+$title = '';
+    if (count($pengajuan) == 1) {       
+        $title = $pengajuan[0]->kode_rkat . ' - ' . $pengajuan[0]->nama_program;
+    }else{
+        $title = 'RKAT';
+    }
+?>
+    <title>{{ $title }}-{{ date("d-m-Y") }}</title>
 
     <style>
         #judul {
@@ -57,10 +64,10 @@
 
 <body>
     @foreach ($pengajuan as $p)
-    <div style="page-break-after: always; margin: auto; width: 920px; margin-left: 8%;">
+    <div style="page-break-after: always; width: 920px;">
         <!-- <div id="top-<?= $p->id_pengajuan ?>"></div> -->
-        <img src="http://localhost:8000/kop/<?= $p->kop ?>" alt="KOP Surat" class="top">
-        <!-- <img src="http://localhost:8000/kop/<?= $p->kop ?>" alt="KOP Surat" class="top"> -->
+        <img src="http://localhost:8000/kop/KOPDefault.png" alt="KOP Surat" class="top">
+        <!-- <img src="http://localhost:8000/kop/KOPDefault.png" alt="KOP Surat" class="top"> -->
 
         <h3 id=judul>KERANGKA ACUAN KERJA</h3>
         <div class="unit">
@@ -132,14 +139,14 @@
             </tr>
         </table>
 
-        <div style="text-align: left; margin-top: 5%; margin-bottom: 0px;">
+        <!-- <div style="text-align: left; margin-top: 5%; margin-bottom: 0px;">
             <div style="margin-left: 440px;">
                 <p>Sumbawa, <?= date('d M Y') ?>
             </div>
 
             <img src="http://localhost:8000/kop/<?= $p->ttd ?>" alt="TTD Surat" class="ttd">
-            <!-- <img src="http://localhost:8000/kop/<?= $p->ttd ?>" alt="TTD Surat" class="ttd"> -->
-        </div>
+            <img src="http://localhost:8000/kop/<?= $p->ttd ?>" alt="TTD Surat" class="ttd">
+        </div> -->
         <h3>RAB</h3>
         <!-- looping with table -->
         <div style="
@@ -148,7 +155,7 @@
             justify-content: center;
             align-items: center;
         ">
-            <table border="1">
+            <table border="1" style="width: 90%;">
                 <tr>
                     <th>Jenis Barang</th>
                     <th>Harga satuan</th>
@@ -166,8 +173,8 @@
                 </tr>
                 @endforeach
                 <tr>
-                    <td colspan="3">Catatan</td>
-                    <td colspan="2"></td>
+                    <td>Catatan</td>
+                    <td colspan="4"></td>
                 </tr>
             </table>
         </div>

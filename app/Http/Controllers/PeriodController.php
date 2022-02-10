@@ -15,8 +15,7 @@ class PeriodController extends Controller
     public function index()
     {
         return response()->json([
-            'data' => PeriodModel::select('id_period as value', 'period as text')
-                ->get()
+            'data' => PeriodModel::select('id_period as value', 'period as text', 'created_at')->get()
         ]);
     }
 

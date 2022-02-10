@@ -12,7 +12,7 @@ class PeriodModel extends Model{
     protected $fillable = [
         'period', 
     ];
-    public $timestamps = false;
+    public $timestamps = true;
 
     public function pengajuan()
     {
