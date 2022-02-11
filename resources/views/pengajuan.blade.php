@@ -5,14 +5,14 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-<?php
-$title = '';
-    if (count($pengajuan) == 1) {       
+    <?php
+    $title = '';
+    if (count($pengajuan) == 1) {
         $title = $pengajuan[0]->kode_rkat . ' - ' . $pengajuan[0]->nama_program;
-    }else{
+    } else {
         $title = 'RKAT';
     }
-?>
+    ?>
     <title>{{ $title }}-{{ date("d-m-Y") }}</title>
 
     <style>
@@ -56,13 +56,14 @@ $title = '';
         }
     </style>
     <script>
-        window.onload = async function() {
-            window.print();
+        window.print();
+        window.onafterprint = function() {
+            window.close();
         }
     </script>
 </head>
 
-<body>
+<body id="body">
     @foreach ($pengajuan as $p)
     <div style="page-break-after: always; width: 920px;">
         <!-- <div id="top-<?= $p->id_pengajuan ?>"></div> -->
@@ -128,7 +129,7 @@ $title = '';
                 <td>8</td>
                 <td style="width: 25%;">Lokasi dan Waktu Kegiatan</td>
                 <td>:</td>
-                <td class="justify">{{ $p->tempat_program }}{{ $p->tanggal }}</td>
+                <td class="justify">{{ $p->tempat_program }} Pada {{ date('d-M-Y', strtotime($p->tanggal)) }}</td>
             </tr>
             <!--bidang terkait -->
             <tr>
@@ -166,12 +167,17 @@ $title = '';
                 @foreach ($p->rab as $r)
                 <tr>
                     <td>{{ $r->jenis_barang }}</td>
-                    <td>{{ $r->harga_satuan }}</td>
+                    <td>{{ number_format($r->harga_satuan, 0, ',', '.') }}</td>
                     <td>{{ $r->qty }}</td>
-                    <td>{{ $r->total }}</td>
+                    <td>{{ number_format($r->total, 0, ',', '.') }}</td>
                     <td>{{ $r->keterangan }}</td>
                 </tr>
                 @endforeach
+                <tr>
+                    <td colspan="3">Total</td>
+                    <!-- count total rab and number format-->
+                    <td colspan="2">{{ number_format($p->rab->sum('total'), 0, ',', '.') }}</td>
+                </tr>
                 <tr>
                     <td>Catatan</td>
                     <td colspan="4"></td>
