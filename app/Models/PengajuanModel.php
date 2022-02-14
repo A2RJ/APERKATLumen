@@ -62,7 +62,7 @@ class PengajuanModel extends Model
 
     public function rab()
     {
-        return $this->hasMany(RabModel::class, 'pengajuan_id', 'id_pengajuan');
+        return $this->hasMany(RABModel::class, 'pengajuan_id', 'id_pengajuan');
     }
 
     public function rkat()
