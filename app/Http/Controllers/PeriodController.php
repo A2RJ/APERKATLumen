@@ -39,6 +39,7 @@ class PeriodController extends Controller
                 'pengajuan.atn',
                 'pengajuan.lpj_keuangan',
                 'pengajuan.lpj_kegiatan',
+                'pengajuan.created_at',
             )
                 ->where('id_period', $params)
                 ->with(['pencairan', 'rkat' => function ($query) {
@@ -63,6 +64,7 @@ class PeriodController extends Controller
                 'pengajuan.atn',
                 'pengajuan.lpj_keuangan',
                 'pengajuan.lpj_kegiatan',
+                'pengajuan.created_at',
             )
                 ->where('id_period', $params)
                 ->where('next', $id)

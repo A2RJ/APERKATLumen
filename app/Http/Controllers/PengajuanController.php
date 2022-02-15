@@ -713,6 +713,7 @@ class PengajuanController extends Controller
             'atn',
             'lpj_keuangan',
             'lpj_kegiatan',
+            'created_at',
         )
             ->where('next', 24)
             // ->where('id_user', '!=', $userStruktur->id_user)
