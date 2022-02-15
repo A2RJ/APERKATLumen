@@ -958,6 +958,7 @@ class PengajuanController extends Controller
                 'pengajuan.atn',
                 'pengajuan.lpj_keuangan',
                 'pengajuan.lpj_kegiatan',
+                'pengajuan.created_at'
             )
             ->where('pengajuan.pencairan', null) // belum pengajuan
             ->where('pengajuan_validasi.status_validasi', 2) // terima
@@ -999,6 +1000,7 @@ class PengajuanController extends Controller
                 'pengajuan.atn',
                 'pengajuan.lpj_keuangan',
                 'pengajuan.lpj_kegiatan',
+                'pengajuan.created_at'
             )
             ->where('pengajuan_validasi.status_validasi', 3)
             ->where('pengajuan_validasi.id_struktur', 24)
@@ -1036,6 +1038,7 @@ class PengajuanController extends Controller
                 'pengajuan.atn',
                 'pengajuan.lpj_keuangan',
                 'pengajuan.lpj_kegiatan',
+                'pengajuan.created_at'
             )
                 ->where('pengajuan.pencairan', '!=', null)
                 ->where('pengajuan.lpj_keuangan', '!=', null)
@@ -1077,6 +1080,7 @@ class PengajuanController extends Controller
                 'pengajuan.atn',
                 'pengajuan.lpj_keuangan',
                 'pengajuan.lpj_kegiatan',
+                'pengajuan.created_at'
             )
                 ->where('pengajuan.pencairan', '!=', null)
                 ->where('pengajuan.lpj_keuangan', null)
@@ -1106,6 +1110,7 @@ class PengajuanController extends Controller
                 'pengajuan.atn',
                 'pengajuan.lpj_keuangan',
                 'pengajuan.lpj_kegiatan',
+                'pengajuan.created_at'
             )
                 ->where('pengajuan.pencairan', '!=', null)
                 ->where('pengajuan.lpj_keuangan', '!=', null)
@@ -1157,6 +1162,7 @@ class PengajuanController extends Controller
                 'pengajuan.atn',
                 'pengajuan.lpj_keuangan',
                 'pengajuan.lpj_kegiatan',
+                'pengajuan.created_at'
             )
                 ->where('pengajuan.pencairan', '!=', null)
                 ->where('pengajuan.lpj_keuangan', '!=', null)
