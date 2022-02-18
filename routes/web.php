@@ -187,6 +187,9 @@ $router->group(['prefix' => 'testing'], function () use ($router) {
     // $router->get('dataPengajuan', 'PengajuanController@dataPengajuan');
     // $router->get('dataValidasi', 'PengajuanController@dataValidasi');
     // $router->get('exportNonRKAT', 'NonRKATController@exportNonRKAT');
+    $router->get('AddStrukturChild1', 'StrukturController@AddStrukturChild1');
+    $router->get('AddStruktur/{nama_struktur}', 'StrukturController@AddStruktur');
     $router->get('newformatrkat', 'Testing@newformatrkat');
+    $router->get('byUser/{params}', 'PengajuanController@byUser');
     $router->get('/print/{params}', 'PengajuanController@printPengajuan');
 });

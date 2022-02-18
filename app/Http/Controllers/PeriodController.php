@@ -30,7 +30,6 @@ class PeriodController extends Controller
         return response()->json([
             'data' => PengajuanModel::select(
                 'pengajuan.id_pengajuan',
-                'pengajuan.kode_rkat',
                 'pengajuan.tanggal',
                 'pengajuan.biaya_program',
                 'pengajuan.biaya_disetujui',
@@ -40,11 +39,14 @@ class PeriodController extends Controller
                 'pengajuan.lpj_keuangan',
                 'pengajuan.lpj_kegiatan',
                 'pengajuan.created_at',
+                'rkat.id_rkat',
+                'rkat.kode_rkat',
+                'rkat.period',
+                'rkat.nama_program'
             )
+                ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
                 ->where('id_period', $params)
-                ->with(['pencairan', 'rkat' => function ($query) {
-                    $query->select('id_rkat', 'kode_rkat', 'nama_program');
-                }])
+                ->with(['pencairan'])
                 ->orderBy('pengajuan.id_pengajuan', 'DESC')
                 ->get()
         ]);
@@ -55,7 +57,6 @@ class PeriodController extends Controller
         return response()->json([
             'data' => PengajuanModel::select(
                 'pengajuan.id_pengajuan',
-                'pengajuan.kode_rkat',
                 'pengajuan.tanggal',
                 'pengajuan.biaya_program',
                 'pengajuan.biaya_disetujui',
@@ -65,12 +66,15 @@ class PeriodController extends Controller
                 'pengajuan.lpj_keuangan',
                 'pengajuan.lpj_kegiatan',
                 'pengajuan.created_at',
+                'rkat.id_rkat',
+                'rkat.kode_rkat',
+                'rkat.period',
+                'rkat.nama_program'
             )
+                ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
                 ->where('id_period', $params)
                 ->where('next', $id)
-                ->with(['pencairan', 'rkat' => function ($query) {
-                    $query->select('id_rkat', 'kode_rkat', 'nama_program');
-                }])
+                ->with(['pencairan'])
                 ->orderBy('pengajuan.id_pengajuan', 'DESC')
                 ->get()
         ]);

@@ -18,6 +18,7 @@ class RKATModel extends Model
     protected $fillable = [
         "id_user",
         "kode_rkat",
+        "period",
         "sasaran_strategi",
         "indikator_sasaran_strategi",
         "nama_program",

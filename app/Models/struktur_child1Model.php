@@ -17,13 +17,16 @@ class Struktur_child1Model extends Model
      */
     protected $fillable = [
         "id_struktur",
+        "child1_level",
         "nama_struktur_child1"
     ];
 
     /**
      * Date time columns.
      */
-    protected $dates = [];
+    // protected $dates = [];
+    // disable updated_at and created_at
+    public $timestamps = false;
     /**
      * The model's default values for attributes.
      *

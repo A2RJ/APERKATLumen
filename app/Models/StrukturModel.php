@@ -23,7 +23,9 @@ class StrukturModel extends Model
     /**
      * Date time columns.
      */
-    protected $dates = [];
+    // protected $dates = [];
+    // disable updated_at and created_at
+    public $timestamps = false;
     /**
      * The model's default values for attributes.
      *

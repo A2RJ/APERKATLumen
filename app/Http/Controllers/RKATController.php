@@ -24,6 +24,8 @@ class RKATController extends Controller
                 // ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                 // ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->select('rkat.*', "user.fullname")
+                // where like this year
+                ->where('rkat.period', 'like', date('Y') . '%')
                 ->get()
         ]);
     }
@@ -280,13 +282,29 @@ class RKATController extends Controller
                 if ($dataRKAT == null) {
                     $array[] = [
                         "no" => $no,
-                        "kode_rkat" => $value["No"],
+                        "kode_rkat" => date('Y') . $value["No"],
                         "program_kerja" => $value["Program Kerja"],
                         "deskripsi" => $value["Deskripsi Program Kerja"],
-                        "mulai_program" => is_string($value["Mulai"]) ? str_ireplace("/", "-", $value["Mulai"]) : $value["Mulai"]->format('d-m-Y'),
-                        "selesai_program" => is_string($value["Selesai"]) ? str_ireplace("/", "-", $value["Selesai"]) : $value["Selesai"]->format('d-m-Y'),
+                        "mulai_program" => is_string($value["Mulai"]) ? $value["Mulai"] : $value["Mulai"]->format('Y-m-d'),
+                        "selesai_program" => is_string($value["Selesai"]) ? $value["Selesai"] : $value["Selesai"]->format('Y-m-d'),
                         "tempat" => $value["Tempat"],
-                        "total_anggaran" => $value["Total Anggaran"]
+                        // total anggaran convert to number only
+                        "total_anggaran" => preg_replace('/[^0-9]/', '', $value["Total Anggaran"]),
+                        // "no" => $no,
+                        // "kode_rkat" => $value["No"],
+                        // "periode" => $value["Periode"],
+                        // "sasaran_strategi" => $value["Sasaran Strategi"],
+                        // "indikator_sasaran_strategi" => $value["Indikator Sasaran Strategi"],
+                        // "nama_program" => $value["Nama Program"],
+                        // "program_kerja" => $value["Program Kerja"],
+                        // "deskripsi" => $value["Deskripsi Program Kerja"],
+                        // "tujuan" => $value["Tujuan"],
+                        // "mulai_program" => $value["Mulai"],
+                        // "selesai_program" => $value["Selesai"],
+                        // "tempat" => $value["Tempat"],
+                        // "sumber_anggaran" => $value["Sumber Anggaran"],
+                        // "rencana_anggaran" => $value["Rencana Anggaran"],
+                        // "total_anggaran" => $value["Total Anggaran"]
                     ];
                     $no++;
                 }
@@ -316,8 +334,8 @@ class RKATController extends Controller
                 "program_kerja" => $value["program_kerja"],
                 "deskripsi" => $value["deskripsi"],
                 "tujuan" => "-",
-                "mulai_program" => date('Y-m-d', strtotime($value["mulai_program"])),
-                "selesai_program" => date('Y-m-d', strtotime($value["selesai_program"])),
+                "mulai_program" => $value["mulai_program"],
+                "selesai_program" => $value["selesai_program"],
                 "tempat" => $value["tempat"],
                 "sumber_anggaran" => "-",
                 "rencara_anggaran" => $value["total_anggaran"],
@@ -325,6 +343,24 @@ class RKATController extends Controller
                 "total_anggaran" => $value["total_anggaran"],
                 "created_at" => date('Y-m-d'),
                 "updated_at" => date('Y-m-d')
+                // "id_user" => $params,
+                // "kode_rkat" => $value["kode_rkat"],
+                // "period" => $value["periode"],
+                // "sasaran_strategi" => $value["sasaran_strategi"],
+                // "indikator_sasaran_strategi" => $value["indikator_sasaran_strategi"],
+                // "nama_program" => $value["nama_program"],
+                // "program_kerja" => $value["program_kerja"],
+                // "deskripsi" => $value["deskripsi"],
+                // "tujuan" => $value["tujuan"],
+                // "mulai_program" => $value["mulai_program"],
+                // "selesai_program" => $value["selesai_program"],
+                // "tempat" => $value["tempat"],
+                // "sumber_anggaran" => $value["sumber_anggaran"],
+                // "rencara_anggaran" => $value["total_anggaran"],
+                // "anggaran_digunakan" => "0",
+                // "total_anggaran" => $value["total_anggaran"],
+                // "created_at" => date('Y-m-d'),
+                // "updated_at" => date('Y-m-d')
             ];
         }
 
