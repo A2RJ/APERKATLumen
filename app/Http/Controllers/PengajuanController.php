@@ -214,28 +214,28 @@ class PengajuanController extends Controller
      */
     public function update(Request $request, $params)
     {
-        $kode = PengajuanModel::find($params);
-        if ($kode->kode_rkat != $request->kode_rkat &&  PengajuanModel::where('kode_rkat', $request->kode_rkat)->count() == 2) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Tidak dapat menambah pengajuan, RKAT telah digunakan'
-            ], 400);
-        }
+        // $kode = PengajuanModel::find($params);
+        // if ($kode->kode_rkat != $request->kode_rkat &&  PengajuanModel::where('kode_rkat', $request->kode_rkat)->count() == 2) {
+        //     return response()->json([
+        //         'status' => 'error',
+        //         'message' => 'Tidak dapat menambah pengajuan, RKAT telah digunakan'
+        //     ], 400);
+        // }
 
-        $rkat = RKATModel::where('id_rkat', $kode->kode_rkat)->first();
-        if ($rkat == null) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Tidak dapat menambah pengajuan, RKAT tidak ditemukan'
-            ], 400);
-        } else {
-            if ($request->biaya_program && $request->biaya_program > $rkat->total_anggaran) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Tidak dapat menambah pengajuan, biaya program tidak sesuai dengan total anggaran RKAT',
-                ], 400);
-            }
-        }
+        // $rkat = RKATModel::where('id_rkat', $kode->kode_rkat)->first();
+        // if ($rkat == null) {
+        //     return response()->json([
+        //         'status' => 'error',
+        //         'message' => 'Tidak dapat menambah pengajuan, RKAT tidak ditemukan'
+        //     ], 400);
+        // } else {
+        //     if ($request->biaya_program && $request->biaya_program > $rkat->total_anggaran) {
+        //         return response()->json([
+        //             'status' => 'error',
+        //             'message' => 'Tidak dapat menambah pengajuan, biaya program tidak sesuai dengan total anggaran RKAT',
+        //         ], 400);
+        //     }
+        // }
 
         $data = PengajuanModel::find($params);
         $data ? $data->update($request->all()) : false;
@@ -824,30 +824,37 @@ class PengajuanController extends Controller
 
     public function getGrafik($params)
     {
-        $rkat = RKATModel::where('id_user', $params);
-
         return response()->json([
             'data' => [
-                'total_rkat' => $rkat->count(),
-                'total_rkat_diterima' => PengajuanModel::where('id_user', $params)
-                    ->where('pencairan', '!=', null)
-                    ->sum('biaya_program'),
-                'total_anggaran_rkat' => $rkat->sum('total_anggaran'),
-                'pengajuan_diterima' => PengajuanModel::where('id_user', $params)
-                    ->where('next', 3333)->count(),
-
-                'pengajuan_progress' => PengajuanModel::where('id_user', $params)
-                    ->where('next', '!=', 3333)->count(),
-
-                'rkat' => DB::select('SELECT rkat.id_rkat, rkat.kode_rkat, rkat.period, rkat.rencara_anggaran, (SELECT SUM(biaya_program) FROM pengajuan WHERE kode_rkat = rkat.id_rkat AND next = 3333) as biaya_program, rkat.created_at FROM rkat WHERE rkat.id_user = ' . $params . ' ORDER BY kode_rkat ASC'),
-
+                'total_rkat' => RKATModel::where('period', 'LIKE', '%' . date('Y') . '%')
+                    ->where('id_user', $params)
+                    ->count(),
+                'total_rkat_diterima' => PengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+                    ->where('pengajuan.id_user', $params)
+                    ->where('rkat.period', 'LIKE', '%' . date('Y') . '%')
+                    ->where('pengajuan.pencairan', '!=', null)
+                    ->sum('pengajuan.biaya_program'),
+                'total_anggaran_rkat' => RKATModel::where('id_user', $params)
+                    ->where('period', 'LIKE', '%' . date('Y') . '%')
+                    ->sum('total_anggaran'),
+                'pengajuan_diterima' => PengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+                    ->where('pengajuan.id_user', $params)
+                    ->where('rkat.period', 'LIKE', '%' . date('Y') . '%')
+                    ->where('pengajuan.next', 3333)
+                    ->count(),
+                'pengajuan_progress' => PengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+                    ->where('pengajuan.id_user', $params)
+                    ->where('rkat.period', 'LIKE', '%' . date('Y') . '%')
+                    ->where('pengajuan.next', '!=', 3333)
+                    ->count(),
+                'rkat' => DB::select('SELECT rkat.id_rkat, rkat.kode_rkat, rkat.period, rkat.rencara_anggaran, (SELECT SUM(biaya_program) FROM pengajuan WHERE kode_rkat = rkat.id_rkat AND next = 3333) as biaya_program, rkat.created_at FROM rkat WHERE rkat.id_user = ' . $params . ' AND rkat.period LIKE "%' . date('Y') . '%" ORDER BY rkat.created_at DESC'),
                 'pengajuan' => PengajuanModel::join('user', 'pengajuan.id_user', 'user.id_user')
                     ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
                     ->where('user.id_user', $params)
+                    ->where('rkat.period', 'LIKE', '%' . date('Y') . '%')
                     ->select('user.fullname', 'rkat.kode_rkat', 'rkat.period', 'pengajuan.id_pengajuan', 'pengajuan.biaya_program', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'pengajuan.created_at')
                     ->orderBy('pengajuan.kode_rkat', 'ASC')
                     ->get(),
-
                 'user' => UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
                     ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                     ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')

@@ -192,4 +192,5 @@ $router->group(['prefix' => 'testing'], function () use ($router) {
     $router->get('newformatrkat', 'Testing@newformatrkat');
     $router->get('byUser/{params}', 'PengajuanController@byUser');
     $router->get('/print/{params}', 'PengajuanController@printPengajuan');
+    $router->get('getGrafik/{params}', 'PengajuanController@getGrafik');
 });

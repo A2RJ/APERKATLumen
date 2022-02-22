@@ -25,7 +25,7 @@ class RKATController extends Controller
                 // ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->select('rkat.*', "user.fullname")
                 // where like this year
-                ->where('rkat.period', 'like', date('Y') . '%')
+                ->where('rkat.period', 'LIKE', '%' . date('Y') . '%')
                 ->get()
         ]);
     }
@@ -149,7 +149,9 @@ class RKATController extends Controller
     {
         return Response()->json([
             'data' => RKATModel::where('id_user', $params)
+                ->where('rkat.period', 'LIKE', '%' . date('Y') . '%')
                 ->orWhere('kode_rkat', $params)
+                ->where('rkat.period', 'LIKE', '%' . date('Y') . '%')
                 ->select('rkat.id_rkat as code', 'rkat.kode_rkat as label')
                 ->get()
         ]);
