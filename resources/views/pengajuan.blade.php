@@ -22,8 +22,6 @@
 
         table tr .justify {
             width: 70%;
-            text-align: justify;
-            padding-right: 50px;
             padding-bottom: 10px;
         }
 
@@ -54,8 +52,19 @@
             height: 200px;
             margin-top: -20px;
         }
+
+        #rab {
+            width: 90%;
+            border-collapse: collapse;
+        }
+        .wrap-word {
+
+            width: fit-content;
+            word-wrap: break-word;
+        }
     </style>
     <script>
+        // 
         window.print();
         window.onafterprint = function() {
             window.close();
@@ -156,13 +165,13 @@
             justify-content: center;
             align-items: center;
         ">
-            <table border="1" style="width: 90%;">
+            <table id="rab" border="1"
                 <tr>
-                    <th>Jenis Barang</th>
-                    <th>Harga satuan</th>
-                    <th>QTY</th>
-                    <th>Total</th>
-                    <th>Keterangan</th>
+                    <th width="30%">Jenis Barang</th>
+                    <th width="12%">Harga satuan</th>
+                    <th width="5%">QTY</th>
+                    <th width="13%">Total</th>
+                    <th width="40%">Keterangan</th>
                 </tr>
                 @foreach ($p->rab as $r)
                 <tr>

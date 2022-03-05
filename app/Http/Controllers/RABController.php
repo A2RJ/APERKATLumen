@@ -15,7 +15,11 @@ class RABController extends Controller
 
     public function store(Request $request)
     {
-        // RABModel::where('pengajuan_id', $request->pengajuan_id)->truncate();
+        $data = RABModel::where('pengajuan_id', $request[0]['pengajuan_id'])->get();
+        // check if data is not empty and delete all data
+        if (!$data->isEmpty()) {
+            RABModel::where('pengajuan_id', $request[0]['pengajuan_id'])->delete();
+        }
 
         $rab = RABModel::insert($request->all());
 

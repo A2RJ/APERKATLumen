@@ -2,6 +2,8 @@
 
 /** @var \Laravel\Lumen\Routing\Router $router */
 
+use App\Models\PengajuanModel;
+
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -193,4 +195,14 @@ $router->group(['prefix' => 'testing'], function () use ($router) {
     $router->get('byUser/{params}', 'PengajuanController@byUser');
     $router->get('/print/{params}', 'PengajuanController@printPengajuan');
     $router->get('getGrafik/{params}', 'PengajuanController@getGrafik');
+});
+$router->get('coba', function () {
+    // $data = PengajuanModel::all();
+    // foreach ($data as $key => $value) {
+    //     echo $value->id_pengajuan . " " . $value->belongsToRkat->kode_rkat . '<br>';
+    // }
+    $data = PengajuanModel::with('belongsToRkat')->get();
+    foreach ($data as $key => $value) {
+        echo $value->id_pengajuan . " " . $value->belongsToRkat->kode_rkat . '<br>';
+    }
 });

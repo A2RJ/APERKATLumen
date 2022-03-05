@@ -79,4 +79,9 @@ class PengajuanModel extends Model
     {
         return $this->hasMany(PengajuanPencairanModel::class, 'pengajuan_id', 'id_pengajuan');
     }
+
+    public function belongsToRkat()
+    {
+        return $this->belongsTo(RKATModel::class, 'kode_rkat', 'id_rkat');
+    }
 }
