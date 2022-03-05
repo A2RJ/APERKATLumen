@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Struktur_child1Model;
-use App\Models\Struktur_child2Model;
+use App\Models\Struktur_Child1Model;
+use App\Models\Struktur_Child2Model;
 use App\Models\StrukturModel;
 use Illuminate\Http\Request;
 
@@ -113,12 +113,12 @@ class StrukturController extends Controller
                 'nama_struktur' => $nama_struktur,
                 'level' => 4,
             ]);
-            $data2 = Struktur_child1Model::create([
+            $data2 = Struktur_Child1Model::create([
                 'nama_struktur_child1' => '0',
                 'child1_level' => 0,
                 'id_struktur' => $data->id_struktur
             ]);
-            Struktur_child2Model::create([
+            Struktur_Child2Model::create([
                 'nama_struktur_child2' => '0',
                 'id_struktur_child1' => $data2->id_struktur_child1
             ]);
@@ -141,17 +141,17 @@ class StrukturController extends Controller
         // check if exist struktur 
         if ($struktur) {
             // get id_struktur_child1
-            $struktur_child1 = Struktur_child1Model::where('nama_struktur_child1', $nama_struktur_child1)->first();
+            $struktur_child1 = Struktur_Child1Model::where('nama_struktur_child1', $nama_struktur_child1)->first();
             // check if exist struktur_child1
             if (!$struktur_child1) {
                 // create new struktur_child1
-                $struktur_child1 = Struktur_child1Model::create([
+                $struktur_child1 = Struktur_Child1Model::create([
                     'nama_struktur_child1' => $nama_struktur_child1,
                     'child1_level' => 1,
                     'id_struktur' => $struktur->id_struktur
                 ]);
                 // create new struktur_child2
-                Struktur_child2Model::create([
+                Struktur_Child2Model::create([
                     'nama_struktur_child2' => '0',
                     'id_struktur_child1' => $struktur_child1->id_struktur_child1
                 ]);

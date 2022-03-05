@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\StrukturModel;
-use App\Models\Struktur_child1Model;
-use App\Models\Struktur_child2Model;
+use App\Models\Struktur_Child1Model;
+use App\Models\Struktur_Child2Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\UserModel;
@@ -64,19 +64,19 @@ class UserController extends Controller
         $dataUser->save();
 
         if ($request->id_struktur_child1 == 0 && $request->id_struktur_child2 == 0) {
-            $id = Struktur_child1Model::where('id_struktur', $request->id_struktur)->where('nama_struktur_child1', '0')->select('id_struktur_child1')->first();
+            $id = Struktur_Child1Model::where('id_struktur', $request->id_struktur)->where('nama_struktur_child1', '0')->select('id_struktur_child1')->first();
             $data = UserModel::find($dataUser->id_user);
             $data->id_struktur_child1 = $id->id_struktur_child1;
             $data->save();
             if ($request->id_struktur_child2 == 0) {
-                $id = Struktur_child2Model::where('id_struktur_child1', $id->id_struktur_child1)->where('nama_struktur_child2', '0')->select('id_struktur_child2')->first();
+                $id = Struktur_Child2Model::where('id_struktur_child1', $id->id_struktur_child1)->where('nama_struktur_child2', '0')->select('id_struktur_child2')->first();
                 $data = UserModel::find($dataUser->id_user);
                 $data->id_struktur_child2 = $id->id_struktur_child2;
                 $data->save();
             }
         }
         if ($request->id_struktur_child1 !== 0 && $request->id_struktur_child2 == 0) {
-            $id = Struktur_child2Model::where('id_struktur_child1', $request->id_struktur_child1)->where('nama_struktur_child2', '0')->select('id_struktur_child2')->first();
+            $id = Struktur_Child2Model::where('id_struktur_child1', $request->id_struktur_child1)->where('nama_struktur_child2', '0')->select('id_struktur_child2')->first();
             $data = UserModel::find($dataUser->id_user);
             $data->id_struktur_child2 = $id->id_struktur_child2;
             $data->save();
@@ -239,7 +239,7 @@ class UserController extends Controller
     public function sub_struktur($params)
     {
         return Response()->json([
-            'data' => Struktur_child1Model::where('id_struktur', $params)
+            'data' => Struktur_Child1Model::where('id_struktur', $params)
                 ->where('nama_struktur_child1', '!=', '0')
                 ->select('id_struktur_child1 as code', 'nama_struktur_child1 as label')
                 ->get()
@@ -249,7 +249,7 @@ class UserController extends Controller
     public function getSub_struktur($params)
     {
         return Response()->json([
-            'data' => Struktur_child1Model::where('id_struktur_child1', $params)
+            'data' => Struktur_Child1Model::where('id_struktur_child1', $params)
                 ->select('id_struktur_child1 as code', 'nama_struktur_child1 as label')
                 ->get()
         ]);
@@ -258,7 +258,7 @@ class UserController extends Controller
     public function sub_sub_struktur($params)
     {
         return Response()->json([
-            'data' => Struktur_child2Model::where('id_struktur_child1', $params)
+            'data' => Struktur_Child2Model::where('id_struktur_child1', $params)
                 ->where('nama_struktur_child2', '!=', '0')
                 ->select('id_struktur_child2 as code', 'nama_struktur_child2 as label')
                 ->get()
@@ -268,7 +268,7 @@ class UserController extends Controller
     public function getSub_sub_struktur($params)
     {
         return Response()->json([
-            'data' => Struktur_child2Model::where('id_struktur_child2', $params)
+            'data' => Struktur_Child2Model::where('id_struktur_child2', $params)
                 ->select('id_struktur_child2 as code', 'nama_struktur_child2 as label')
                 ->get()
         ]);
