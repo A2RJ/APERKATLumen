@@ -183,10 +183,10 @@ class PengajuanController extends Controller
             ->where('pengajuan.id_user', $params)
             ->select('user.id_user', 'rkat.kode_rkat',  'rkat.period', 'rkat.period', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at')
             ->orderBy('pengajuan.id_pengajuan', 'DESC')
-            ->paginate();
+            ->get();
 
         return response()->json([
-            'data' => $data ? $data : "Failed, data not found"
+            'data' => $data ? $data : []
         ]);
     }
 
