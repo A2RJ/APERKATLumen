@@ -19,6 +19,7 @@ class PengajuanModel extends Model
         "kode_rkat",
         "id_user",
         "next",
+        "id_period",
         "latar_belakang",
         "sasaran",
         "target_capaian",
@@ -83,5 +84,10 @@ class PengajuanModel extends Model
     public function belongsToRkat()
     {
         return $this->belongsTo(RKATModel::class, 'kode_rkat', 'id_rkat');
+    }
+
+    public function periodePencairan()
+    {
+        return $this->hasOne(PeriodModel::class, 'id_period', 'id_period');
     }
 }

@@ -177,7 +177,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 });
 
 // For testing only
-$router->group(['prefix' => 'testing'], function () use ($router) {
+// $router->group(['prefix' => 'testing'], function () use ($router) {
     // $router->get('next/{params}', 'NonRKATController@getNext');
     // $router->get('listPencairan', 'NonRKATController@listPencairan');
     // $router->get('listLPJKeuangan', 'NonRKATController@listLPJKeuangan');
@@ -189,20 +189,35 @@ $router->group(['prefix' => 'testing'], function () use ($router) {
     // $router->get('dataPengajuan', 'PengajuanController@dataPengajuan');
     // $router->get('dataValidasi', 'PengajuanController@dataValidasi');
     // $router->get('exportNonRKAT', 'NonRKATController@exportNonRKAT');
-    $router->get('AddStrukturChild1', 'StrukturController@AddStrukturChild1');
-    $router->get('AddStruktur/{nama_struktur}', 'StrukturController@AddStruktur');
-    $router->get('newformatrkat', 'Testing@newformatrkat');
-    $router->get('byUser/{params}', 'PengajuanController@byUser');
-    $router->get('/print/{params}', 'PengajuanController@printPengajuan');
-    $router->get('getGrafik/{params}', 'PengajuanController@getGrafik');
-});
-$router->get('coba', function () {
-    // $data = PengajuanModel::all();
-    // foreach ($data as $key => $value) {
-    //     echo $value->id_pengajuan . " " . $value->belongsToRkat->kode_rkat . '<br>';
-    // }
-    $data = PengajuanModel::with('belongsToRkat')->get();
-    foreach ($data as $key => $value) {
-        echo $value->id_pengajuan . " " . $value->belongsToRkat->kode_rkat . '<br>';
-    }
-});
+//     $router->get('AddStrukturChild1', 'StrukturController@AddStrukturChild1');
+//     $router->get('AddStruktur/{nama_struktur}', 'StrukturController@AddStruktur');
+//     $router->get('newformatrkat', 'Testing@newformatrkat');
+//     $router->get('byUser/{params}', 'PengajuanController@byUser');
+//     $router->get('/print/{params}', 'PengajuanController@printPengajuan');
+//     $router->get('getGrafik/{params}', 'PengajuanController@getGrafik');
+// });
+// $router->get('periode', function () {
+//     return  PengajuanModel::select(
+//         'user.id_user',
+//         'rkat.kode_rkat',
+//         'rkat.period',
+//         'pengajuan.id_pengajuan',
+//         'pengajuan.id_period',
+//         'pengajuan.validasi_status',
+//         'pengajuan.nama_status',
+//         'user.fullname',
+//         'struktur.nama_struktur',
+//         'struktur_child1.nama_struktur_child1',
+//         'struktur_child2.nama_struktur_child2',
+//         'pengajuan.created_at'
+//     )
+//         ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+//         ->join('user', 'pengajuan.id_user', 'user.id_user')
+//         ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+//         ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+//         ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+//         ->where('pengajuan.id_user', 3337)
+//         ->with(['periodePencairan'])
+//         ->orderBy('pengajuan.id_pengajuan', 'DESC')
+//         ->get();
+// });
