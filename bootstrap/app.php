@@ -61,6 +61,7 @@ $app->singleton(
 
 $app->configure('app');
 $app->configure('dompdf');
+$app->configure('cors');
 $app->singleton(
     'mailer',
     function ($app) {
@@ -99,7 +100,8 @@ $app->routeMiddleware([
 ]);
 
 $app->middleware([
-    App\Http\Middleware\CorsMiddleware::class
+    // App\Http\Middleware\CorsMiddleware::class
+    Fruitcake\Cors\HandleCors::class,
 ]);
 /*
 |--------------------------------------------------------------------------
@@ -123,6 +125,7 @@ $app->register(\Flipbox\LumenGenerator\LumenGeneratorServiceProvider::class);
 $app->register(\KitLoong\MigrationsGenerator\MigrationsGeneratorServiceProvider::class);
 $app->register(\Barryvdh\DomPDF\ServiceProvider::class);
 class_alias('Barryvdh\DomPDF\Facade', 'PDF');
+$app->register(Fruitcake\Cors\CorsServiceProvider::class);
 
 /*
 |--------------------------------------------------------------------------

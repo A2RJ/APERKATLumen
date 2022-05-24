@@ -2,6 +2,7 @@
 
 /** @var \Laravel\Lumen\Routing\Router $router */
 
+use App\Http\Controllers\Testing;
 use App\Models\PengajuanModel;
 
 /*
@@ -177,7 +178,8 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 });
 
 // For testing only
-// $router->group(['prefix' => 'testing'], function () use ($router) {
+$router->group(['prefix' => 'testing'], function () use ($router) {
+    // $router->get('/', 'Testing@word');
     // $router->get('next/{params}', 'NonRKATController@getNext');
     // $router->get('listPencairan', 'NonRKATController@listPencairan');
     // $router->get('listLPJKeuangan', 'NonRKATController@listLPJKeuangan');
@@ -220,4 +222,4 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 //         ->with(['periodePencairan'])
 //         ->orderBy('pengajuan.id_pengajuan', 'DESC')
 //         ->get();
-// });
+});

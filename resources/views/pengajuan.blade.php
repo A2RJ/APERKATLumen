@@ -57,6 +57,7 @@
             width: 90%;
             border-collapse: collapse;
         }
+
         .wrap-word {
 
             width: fit-content;
@@ -64,20 +65,27 @@
         }
     </style>
     <script>
-        // 
         window.print();
         window.onafterprint = function() {
             window.close();
         }
+        // if (window.matchMedia) {
+        //     var mediaQueryList = window.matchMedia('print');
+        //     mediaQueryList.addListener(function(mql) {
+        //         if (!mql.matches) {
+        //             window.close();
+        //         } else {
+        //             window.close();
+        //         }
+        //     });
+        // }
     </script>
 </head>
 
 <body id="body">
     @foreach ($pengajuan as $p)
     <div style="page-break-after: always; width: 920px;">
-        <!-- <div id="top-<?= $p->id_pengajuan ?>"></div> -->
-        <img src="http://localhost:8000/kop/KOPDefault.png" alt="KOP Surat" class="top">
-        <!-- <img src="http://localhost:8000/kop/KOPDefault.png" alt="KOP Surat" class="top"> -->
+        <img src="https://aperkat.uts.ac.id/public/kop/KOPDefault.png" alt="KOP Surat" class="top">
 
         <h3 id=judul>KERANGKA ACUAN KERJA</h3>
         <div class="unit">
@@ -165,13 +173,12 @@
             justify-content: center;
             align-items: center;
         ">
-            <table id="rab" border="1"
-                <tr>
-                    <th width="30%">Jenis Barang</th>
-                    <th width="12%">Harga satuan</th>
-                    <th width="5%">QTY</th>
-                    <th width="13%">Total</th>
-                    <th width="40%">Keterangan</th>
+            <table id="rab" border="1" <tr>
+                <th width="30%">Jenis Barang</th>
+                <th width="12%">Harga satuan</th>
+                <th width="5%">QTY</th>
+                <th width="13%">Total</th>
+                <th width="40%">Keterangan</th>
                 </tr>
                 @foreach ($p->rab as $r)
                 <tr>

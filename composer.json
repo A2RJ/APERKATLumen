@@ -6,13 +6,15 @@
     "type": "project",
     "require": {
         "php": "^7.3|^8.0",
-        "barryvdh/laravel-dompdf": "^0.9.0",
+        "barryvdh/laravel-dompdf": "^1.0",
         "chuckrincon/lumen-config-discover": "^1.0",
         "flipbox/lumen-generator": "^8.2",
+        "fruitcake/laravel-cors": "^3.0",
         "illuminate/mail": "^8.39",
         "kitloong/laravel-migrations-generator": "^4.4",
         "laravel/lumen-framework": "^8.0",
         "maatwebsite/excel": "^3.1",
+        "phpoffice/phpword": "^0.18.3",
         "rap2hpoutre/fast-excel": "^3.0",
         "sanjeev-kr/laravel-mysqlbackup": "^1.0",
         "swiftmailer/swiftmailer": "^6.3",
@@ -38,7 +40,8 @@
     "config": {
         "preferred-install": "dist",
         "sort-packages": true,
-        "optimize-autoloader": true
+        "optimize-autoloader": true,
+        "platform-check": false
     },
     "minimum-stability": "dev",
     "prefer-stable": true,

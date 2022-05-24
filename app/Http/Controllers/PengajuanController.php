@@ -23,7 +23,7 @@ class PengajuanController extends Controller
      */
     public function index()
     {
-        return Response()->json([
+        return response()->json([
             'data' => PengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
                 ->paginate(15)
         ]);
@@ -59,38 +59,38 @@ class PengajuanController extends Controller
         ]);
 
         // Validasi LPJ
-        // $validasiLPJ =  $this->validasiLPJ($request->id_user);
-        // if ($validasiLPJ) {
-        //     return response()->json([
-        //         'status' => 'error',
-        //         'message' => 'Mohon lengkapi LPJ pengajuan yang telah dicairkan.'
-        //     ], 400);
-        // }
+        $validasiLPJ =  $this->validasiLPJ($request->id_user);
+        if ($validasiLPJ) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Mohon lengkapi LPJ pengajuan yang telah dicairkan.'
+            ], 400);
+        }
 
-        // // Validasi RKAT
-        // if (PengajuanModel::where('kode_rkat', $request->kode_rkat)->count() == 2) {
-        //     return response()->json([
-        //         'status' => 'error',
-        //         'message' => 'Tidak dapat menambah pengajuan, RKAT telah digunakan'
-        //     ], 400);
-        // }
+        // Validasi RKAT
+        if (PengajuanModel::where('kode_rkat', $request->kode_rkat)->count() == 2) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Tidak dapat menambah pengajuan, RKAT telah digunakan'
+            ], 400);
+        }
 
-        // // Validasi RKAT dan biaya program
-        // $rkat = RKATModel::where('id_rkat', $request->kode_rkat)->first();
-        // if ($rkat == null) {
-        //     return response()->json([
-        //         'status' => 'error',
-        //         'message' => 'Tidak dapat menambah pengajuan, RKAT tidak ditemukan'
-        //     ], 400);
-        // } else {
-        //     // if ($rkat->total_anggaran !== $request->biaya_program) {
-        //     if ($request->biaya_program > $rkat->total_anggaran) {
-        //         return response()->json([
-        //             'status' => 'error',
-        //             'message' => 'Tidak dapat menambah pengajuan, biaya program tidak sesuai dengan total anggaran RKAT'
-        //         ], 400);
-        //     }
-        // }
+        // Validasi RKAT dan biaya program
+        $rkat = RKATModel::where('id_rkat', $request->kode_rkat)->first();
+        if ($rkat == null) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Tidak dapat menambah pengajuan, RKAT tidak ditemukan'
+            ], 400);
+        } else {
+            // if ($rkat->total_anggaran !== $request->biaya_program) {
+            if ($request->biaya_program > $rkat->total_anggaran) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Tidak dapat menambah pengajuan, biaya program tidak sesuai dengan total anggaran RKAT'
+                ], 400);
+            }
+        }
 
         $next = new NonRKATController;
         $data = PengajuanModel::create($request->all());
@@ -137,7 +137,7 @@ class PengajuanController extends Controller
     {
         if ($request->hasFile('file')) {
             $fileName = uniqid(40) . "." . $request->file('file')->getClientOriginalExtension();
-            $request->file('file')->move('../', $fileName);
+            $request->file('file')->move('/file', $fileName);
             return $fileName;
         } else {
             return false;
