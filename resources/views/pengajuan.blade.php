@@ -85,7 +85,7 @@
 <body id="body">
     @foreach ($pengajuan as $p)
     <div style="page-break-after: always; width: 920px;">
-        <img src="https://aperkat.uts.ac.id/public/kop/KOPDefault.png" alt="KOP Surat" class="top">
+        <img src="https://aperkat.uts.ac.id/api/public/kop/KOPDefault.png" alt="KOP Surat" class="top">
 
         <h3 id=judul>KERANGKA ACUAN KERJA</h3>
         <div class="unit">
