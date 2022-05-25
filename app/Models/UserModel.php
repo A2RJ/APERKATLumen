@@ -67,4 +67,9 @@ class UserModel extends Model implements AuthenticatableContract, AuthorizableCo
     {
         return [];
     }
+
+    public function rkat()
+    {
+        return $this->hasMany(RKATModel::class, 'id_user', 'id_user');
+    }
 }

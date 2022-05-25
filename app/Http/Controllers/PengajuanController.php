@@ -1256,6 +1256,38 @@ class PengajuanController extends Controller
         ]);
     }
 
+    public function sudahLPJKeuangan()
+    {
+        $data = PengajuanModel::select(
+            'pengajuan.id_pengajuan',
+            'pengajuan.tanggal',
+            'pengajuan.biaya_program',
+            'pengajuan.biaya_disetujui',
+            'pengajuan.bank',
+            'pengajuan.no_rek',
+            'pengajuan.atn',
+            'pengajuan.lpj_keuangan',
+            'pengajuan.lpj_kegiatan',
+            'pengajuan.created_at',
+            'rkat.id_rkat',
+            'rkat.kode_rkat',
+            'rkat.period',
+            'rkat.nama_program'
+        )
+            ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+            ->where('pengajuan.pencairan', '!=', null)
+            ->where('pengajuan.lpj_keuangan', '!=', null)
+            ->with(['pencairan', 'validasi' => function ($query) {
+                $query->where('status_validasi', 4)
+                    ->where('id_struktur', 24);
+            }])
+            ->distinct()
+            ->get();
+        return response()->json([
+            'data' => $data->count() ? $data : []
+        ]);
+    }
+
     public function lpjKegiatan()
     {
         return response()->json([
@@ -1406,6 +1438,22 @@ class PengajuanController extends Controller
 
         return response()->json([
             "data" => $data
+        ]);
+    }
+
+
+    public function summary($params)
+    {
+        $user = UserModel::select('id_user', 'fullname', 'email')
+            ->with(['rkat' => function ($query) {
+                $query->where('period', 'like', '%' . date('Y') . '%')
+                    ->with('pengajuan');
+            }])
+            ->where('id_user', $params)
+            ->get();
+
+        return response()->json([
+            "data" => $user
         ]);
     }
 

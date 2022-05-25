@@ -46,4 +46,9 @@ class RKATModel extends Model
     protected $attributes = [
         // 'kode_rkat' => false,
     ];
+
+    public function pengajuan()
+    {
+        return $this->hasMany(PengajuanModel::class, 'kode_rkat', 'id_rkat');
+    }
 }

@@ -126,6 +126,7 @@ $app->register(\KitLoong\MigrationsGenerator\MigrationsGeneratorServiceProvider:
 $app->register(\Barryvdh\DomPDF\ServiceProvider::class);
 class_alias('Barryvdh\DomPDF\Facade', 'PDF');
 $app->register(Fruitcake\Cors\CorsServiceProvider::class);
+// $app->register(Rap2hpoutre\FastExcel\Facades\FastExcel::class);
 
 /*
 |--------------------------------------------------------------------------

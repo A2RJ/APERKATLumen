@@ -47,8 +47,10 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/sudahTransfer', 'PengajuanController@sudahTransfer');
         $router->get('/lpjKeuangan', 'PengajuanController@lpjKeuangan');
         $router->get('/belumLPJKeuangan', 'PengajuanController@belumLPJKeuangan');
+        $router->get('/sudahLPJKeuangan', 'PengajuanController@sudahLPJKeuangan');
         $router->get('/lpjKegiatan', 'PengajuanController@lpjKegiatan');
         $router->get('/belumLPJKegiatan', 'PengajuanController@belumLPJKegiatan');
+        $router->get('/summary/{params}', 'PengajuanController@summary');
         $router->get('/sendMail/{params}', 'PengajuanController@sendMail');
         $router->get('/pdf_pengajuan/{params}', 'PengajuanController@pdfById');
         $router->get('/destroy/{params}', 'PengajuanController@destroy');
@@ -179,6 +181,9 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
 // For testing only
 $router->group(['prefix' => 'testing'], function () use ($router) {
+    $router->get('/sudahLPJKeuangan', 'PengajuanController@sudahLPJKeuangan');
+    $router->get('/summary/{params}', 'PengajuanController@summary');
+
     // $router->get('/', 'Testing@word');
     // $router->get('next/{params}', 'NonRKATController@getNext');
     // $router->get('listPencairan', 'NonRKATController@listPencairan');
