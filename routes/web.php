@@ -51,6 +51,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/lpjKegiatan', 'PengajuanController@lpjKegiatan');
         $router->get('/belumLPJKegiatan', 'PengajuanController@belumLPJKegiatan');
         $router->get('/summary/{params}', 'PengajuanController@summary');
+        $router->get('/summaryByUnit/{params}', 'PengajuanController@summaryByUnit');
         $router->get('/sendMail/{params}', 'PengajuanController@sendMail');
         $router->get('/pdf_pengajuan/{params}', 'PengajuanController@pdfById');
         $router->get('/destroy/{params}', 'PengajuanController@destroy');
@@ -183,6 +184,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 $router->group(['prefix' => 'testing'], function () use ($router) {
     $router->get('/sudahLPJKeuangan', 'PengajuanController@sudahLPJKeuangan');
     $router->get('/summary/{params}', 'PengajuanController@summary');
+    $router->get('/summaryByUnit/{params}', 'PengajuanController@summaryByUnit');
 
     // $router->get('/', 'Testing@word');
     // $router->get('next/{params}', 'NonRKATController@getNext');

@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Backup\PengajuanBackupModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Models\UserModel;
 use App\Models\RKATModel;
 use App\Models\PengajuanModel;
+use App\Models\PengajuanPencairanModel;
 use App\Models\PengajuanRKATValidasiModel;
 use App\Models\PrintModel;
 use Barryvdh\DomPDF\Facade as PDF;
@@ -137,7 +137,7 @@ class PengajuanController extends Controller
     {
         if ($request->hasFile('file')) {
             $fileName = uniqid(40) . "." . $request->file('file')->getClientOriginalExtension();
-            $request->file('file')->move('/file', $fileName);
+            $request->file('file')->move('public/file', $fileName);
             return $fileName;
         } else {
             return false;
@@ -155,7 +155,6 @@ class PengajuanController extends Controller
                     "jenis_barang" => $value["Jenis Barang"],
                     "harga_satuan" => $value["Harga Satuan"],
                     "qty" => $value["Qty"],
-                    // string into number
                     'total' => '0',
                     "keterangan" => $value["Keterangan"],
                 ];
@@ -349,15 +348,6 @@ class PengajuanController extends Controller
         ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     * Delete pengajuan beserta semua data yang berelasi ke pengajuan_validasi
-     * Dan periksa apakah pengajuan sudah pencairan sebanyak 1x/2x
-     * Jika sudah maka tidak dapat dihapus
-     * 
-     * @param  int  $params
-     * @return \Illuminate\Http\Response
-     */
     public function hapus($params)
     {
     }
@@ -1444,53 +1434,126 @@ class PengajuanController extends Controller
 
     public function summary($params)
     {
-        $user = UserModel::select('id_user', 'fullname', 'email')
-            ->with(['rkat' => function ($query) {
-                $query->where('period', 'like', '%' . date('Y') . '%')
-                    ->with('pengajuan');
-            }])
-            ->where('id_user', $params)
+        $user = UserModel::select('id_user')->where('id_user', $params)->first();
+
+        if (!$user) {
+            return response()->json([
+                "status" => "error",
+                "message" => "Data tidak ditemukan"
+            ]);
+        }
+
+        $rkat = RKATModel::leftJoin('pengajuan', 'rkat.id_rkat', 'pengajuan.kode_rkat')
+            ->where('rkat.period', 'like', '%' . date('Y') . '%')
+            ->where('rkat.id_user', $params)
+            ->select(
+                'rkat.id_user',
+                'rkat.kode_rkat',
+                'rkat.mulai_program',
+                'rkat.selesai_program',
+                'rkat.nama_program',
+                'pengajuan.id_pengajuan',
+                'pengajuan.biaya_program',
+                'pengajuan.biaya_disetujui',
+                'pengajuan.pencairan',
+                'pengajuan.lpj_keuangan',
+                'pengajuan.lpj_kegiatan',
+            )
             ->get();
 
+        return $rkat->map(function ($item) {
+            return [
+                'fullname' => UserModel::select('fullname')->where('id_user', $item->id_user)->first()->fullname,
+                'kode_rkat' => $item->kode_rkat,
+                'mulai_program' => $item->mulai_program,
+                'selesai_program' => $item->selesai_program,
+                'nama_program' => $item->nama_program,
+                'biaya_program' => $item->biaya_program,
+                'biaya_disetujui' => $item->biaya_disetujui,
+                'pencairan' => $item->pencairan,
+                'list_pencairan' => PengajuanPencairanModel::where('pengajuan_id', $item->id_pengajuan)->get(),
+                'lpj_keuangan' => $item->lpj_keuangan,
+                'lpj_kegiatan' => $item->lpj_kegiatan,
+            ];
+        });
+    }
+
+    public function summaryByUnit($params)
+    {
+        $user = UserModel::select('id_user')->where('id_user', $params)->first();
+
+        if (!$user) {
+            return response()->json([
+                "status" => "error",
+                "message" => "Data tidak ditemukan"
+            ]);
+        }
+
+        $userStruktur = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
+            ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
+            ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
+            ->where('id_user', $params)
+            ->first();
+
+        if ($userStruktur->level == 1) {
+            $data = $this->getSummaryListByUnit($userStruktur->id_struktur);
+        } else if ($userStruktur->level == 2) {
+            $data = $this->getSummaryListByUnit($userStruktur->id_struktur);
+        } else if ($userStruktur->level == 3) {
+            $data = $this->getSummaryListByUnit($userStruktur->id_struktur);
+        } else if ($userStruktur->level == 4) {
+            $data = $this->getSummaryListByUnit($userStruktur->id_struktur);
+        } else {
+            $data = $this->summary($params);
+        }
+
         return response()->json([
-            "data" => $user
+            "data" => $data
         ]);
     }
 
-    /**
-     * Export from pengajuan with history and validasi
-     * to pengajuan with validasi
-     * */
-
-    public function dataValidasi()
+    public function getSummaryListByUnit($params)
     {
-        // $return = PengajuanBackupModel::select('id_pengajuan')
-        //     ->with(['history' => function ($query) {
-        //         $query->select('id', 'id_pengajuan')
-        //             ->with(['validasi' => function ($query) {
-        //                 $query->select('id_validasi', 'id_pengajuan_history', 'id_struktur', 'status_validasi', 'message', 'created_at', 'updated_at');
-        //             }]);
-        //     }])
-        //     ->get();
+        $user = UserModel::where('id_struktur', $params)
+            ->select('id_user')
+            ->get();
 
-        // $data = [];
-        // foreach ($return as $key => $value) {
-        //     foreach ($value->history as $key2 => $value2) {
-        //         foreach ($value2->validasi as $key3 => $value3) {
-        //             $data[] = [
-        //                 'id_pengajuan' => $value->id_pengajuan,
-        //                 'id_struktur' => $value3->id_struktur,
-        //                 'status_validasi' => $value3->status_validasi,
-        //                 'message' => $value3->message,
-        //                 'created_at' => $value3->created_at,
-        //                 'updated_at' => $value3->updated_at,
-        //             ];
-        //         }
-        //     }
-        // }
+        foreach ($user as $item) {
+            $rkat = RKATModel::leftJoin('pengajuan', 'rkat.id_rkat', 'pengajuan.kode_rkat')
+                ->where('rkat.period', 'like', '%' . date('Y') . '%')
+                ->where('rkat.id_user', $item->id_user)
+                ->select(
+                    'rkat.id_user',
+                    'rkat.kode_rkat',
+                    'rkat.mulai_program',
+                    'rkat.selesai_program',
+                    'rkat.nama_program',
+                    'pengajuan.id_pengajuan',
+                    'pengajuan.biaya_program',
+                    'pengajuan.biaya_disetujui',
+                    'pengajuan.pencairan',
+                    'pengajuan.lpj_keuangan',
+                    'pengajuan.lpj_kegiatan',
+                )
+                ->get();
 
-        // return response()->json([
-        //     PengajuanRKATValidasiModel::insert($data)
-        // ]);
+            foreach ($rkat as $item) {
+                $data[] = [
+                    'fullname' => UserModel::select('fullname')->where('id_user', $item->id_user)->first()->fullname,
+                    'kode_rkat' => $item->kode_rkat,
+                    'mulai_program' => $item->mulai_program,
+                    'selesai_program' => $item->selesai_program,
+                    'nama_program' => $item->nama_program,
+                    'biaya_program' => $item->biaya_program,
+                    'biaya_disetujui' => $item->biaya_disetujui,
+                    'pencairan' => $item->pencairan,
+                    'list_pencairan' => PengajuanPencairanModel::where('pengajuan_id', $item->id_pengajuan)->get(),
+                    'lpj_keuangan' => $item->lpj_keuangan,
+                    'lpj_kegiatan' => $item->lpj_kegiatan,
+                ];
+            }
+        }
+
+        return $data;
     }
 }
