@@ -1431,80 +1431,31 @@ class PengajuanController extends Controller
         ]);
     }
 
-
-    public function summary($params)
-    {
-        $user = UserModel::select('id_user')->where('id_user', $params)->first();
-
-        if (!$user) {
-            return response()->json([
-                "status" => "error",
-                "message" => "Data tidak ditemukan"
-            ]);
-        }
-
-        $rkat = RKATModel::leftJoin('pengajuan', 'rkat.id_rkat', 'pengajuan.kode_rkat')
-            ->where('rkat.period', 'like', '%' . date('Y') . '%')
-            ->where('rkat.id_user', $params)
-            ->select(
-                'rkat.id_user',
-                'rkat.kode_rkat',
-                'rkat.mulai_program',
-                'rkat.selesai_program',
-                'rkat.nama_program',
-                'pengajuan.id_pengajuan',
-                'pengajuan.biaya_program',
-                'pengajuan.biaya_disetujui',
-                'pengajuan.pencairan',
-                'pengajuan.lpj_keuangan',
-                'pengajuan.lpj_kegiatan',
-            )
-            ->get();
-
-        return $rkat->map(function ($item) {
-            return [
-                'fullname' => UserModel::select('fullname')->where('id_user', $item->id_user)->first()->fullname,
-                'kode_rkat' => $item->kode_rkat,
-                'mulai_program' => $item->mulai_program,
-                'selesai_program' => $item->selesai_program,
-                'nama_program' => $item->nama_program,
-                'biaya_program' => $item->biaya_program,
-                'biaya_disetujui' => $item->biaya_disetujui,
-                'pencairan' => $item->pencairan,
-                'list_pencairan' => PengajuanPencairanModel::where('pengajuan_id', $item->id_pengajuan)->get(),
-                'lpj_keuangan' => $item->lpj_keuangan,
-                'lpj_kegiatan' => $item->lpj_kegiatan,
-            ];
-        });
-    }
-
     public function summaryByUnit($params)
     {
-        $user = UserModel::select('id_user')->where('id_user', $params)->first();
-
-        if (!$user) {
-            return response()->json([
-                "status" => "error",
-                "message" => "Data tidak ditemukan"
-            ]);
-        }
-
         $userStruktur = UserModel::join('struktur', 'user.id_struktur', 'struktur.id_struktur')
             ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
             ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
-            ->where('id_user', $params)
+            ->where(DB::raw('BINARY `id_user`'), $params)
             ->first();
 
+        if (!$userStruktur) {
+            return response()->json([
+                "status" => "error",
+                "message" => "Data tidak ditemukan"
+            ]);
+        }
+
         if ($userStruktur->level == 1) {
-            $data = $this->getSummaryListByUnit($userStruktur->id_struktur);
+            $data = $this->getRkatByUnit($userStruktur->id_struktur);
         } else if ($userStruktur->level == 2) {
-            $data = $this->getSummaryListByUnit($userStruktur->id_struktur);
+            $data = $this->getRkatByUnit($userStruktur->id_struktur);
         } else if ($userStruktur->level == 3) {
-            $data = $this->getSummaryListByUnit($userStruktur->id_struktur);
+            $data = $this->getRkatByUnit($userStruktur->id_struktur);
         } else if ($userStruktur->level == 4) {
-            $data = $this->getSummaryListByUnit($userStruktur->id_struktur);
+            $data = $this->getRkatByUnit($userStruktur->id_struktur);
         } else {
-            $data = $this->summary($params);
+            $data = $this->getRkatByUnit($userStruktur->id_struktur, $userStruktur->id_struktur_child1);
         }
 
         return response()->json([
@@ -1512,11 +1463,20 @@ class PengajuanController extends Controller
         ]);
     }
 
-    public function getSummaryListByUnit($params)
+    public function getRkatByUnit($params, $fakultas = false)
     {
         $user = UserModel::where('id_struktur', $params)
             ->select('id_user')
             ->get();
+
+        if ($fakultas) {
+            $user = UserModel::where('id_struktur', $params)
+                ->where('id_struktur_child1', $fakultas)
+                ->select('id_user')
+                ->get();
+        }
+
+        $data = [];
 
         foreach ($user as $item) {
             $rkat = RKATModel::leftJoin('pengajuan', 'rkat.id_rkat', 'pengajuan.kode_rkat')
@@ -1555,5 +1515,51 @@ class PengajuanController extends Controller
         }
 
         return $data;
+    }
+
+    public function summary($params)
+    {
+        $user = UserModel::select('id_user')->where('id_user', $params)->first();
+
+        if (!$user) {
+            return response()->json([
+                "status" => "error",
+                "message" => "Data tidak ditemukan"
+            ], 404);
+        }
+
+        $rkat = RKATModel::leftJoin('pengajuan', 'rkat.id_rkat', 'pengajuan.kode_rkat')
+            ->where('rkat.period', 'like', '%' . date('Y') . '%')
+            ->where('rkat.id_user', $params)
+            ->select(
+                'rkat.id_user',
+                'rkat.kode_rkat',
+                'rkat.mulai_program',
+                'rkat.selesai_program',
+                'rkat.nama_program',
+                'pengajuan.id_pengajuan',
+                'pengajuan.biaya_program',
+                'pengajuan.biaya_disetujui',
+                'pengajuan.pencairan',
+                'pengajuan.lpj_keuangan',
+                'pengajuan.lpj_kegiatan',
+            )
+            ->get();
+
+        return $rkat->map(function ($item) {
+            return [
+                'fullname' => UserModel::select('fullname')->where('id_user', $item->id_user)->first()->fullname,
+                'kode_rkat' => $item->kode_rkat,
+                'mulai_program' => $item->mulai_program,
+                'selesai_program' => $item->selesai_program,
+                'nama_program' => $item->nama_program,
+                'biaya_program' => $item->biaya_program,
+                'biaya_disetujui' => $item->biaya_disetujui,
+                'pencairan' => $item->pencairan,
+                'list_pencairan' => PengajuanPencairanModel::where('pengajuan_id', $item->id_pengajuan)->get(),
+                'lpj_keuangan' => $item->lpj_keuangan,
+                'lpj_kegiatan' => $item->lpj_kegiatan,
+            ];
+        });
     }
 }

@@ -138,6 +138,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
     $router->group(['prefix' => 'user'], function () use ($router) {
         $router->get('/', 'UserController@index');
+        $router->get('/unit', 'UserController@unitTopList');
         $router->get('/destroy', 'UserController@destroy');
         $router->get('/rkatUser', 'UserController@rkatUser');
         $router->get('/struktur', 'UserController@struktur');
@@ -182,6 +183,8 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
 // For testing only
 $router->group(['prefix' => 'testing'], function () use ($router) {
+    $router->get('/unit', 'UserController@unitTopList');
+
     $router->get('/sudahLPJKeuangan', 'PengajuanController@sudahLPJKeuangan');
     $router->get('/summary/{params}', 'PengajuanController@summary');
     $router->get('/summaryByUnit/{params}', 'PengajuanController@summaryByUnit');

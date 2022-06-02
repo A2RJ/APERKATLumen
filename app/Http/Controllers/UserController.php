@@ -279,8 +279,30 @@ class UserController extends Controller
     {
         if ($request->hasFile('file')) {
             $fileName = uniqid(40) . "." . $request->file('file')->getClientOriginalExtension();
-            $request->file('file')->move('kop', $fileName);
+            $request->file('file')->move('public/kop', $fileName);
             return $fileName;
         }
+    }
+
+    public function unitTopList()
+    {
+        return response()->json([
+            'data' => UserModel::join('struktur', 'struktur.id_struktur', 'user.id_struktur')
+                ->join('struktur_child1', 'struktur_child1.id_struktur_child1', 'user.id_struktur_child1')
+                ->join('struktur_child2', 'struktur_child2.id_struktur_child2', 'user.id_struktur_child2')
+                ->where('struktur.level', 1)
+                ->where('struktur_child1.nama_struktur_child1', '0')
+                ->orWhere('struktur.level', 2)
+                ->where('struktur_child1.nama_struktur_child1', '0')
+                ->orWhere('struktur.level', 3)
+                ->where('struktur_child1.nama_struktur_child1', '0')
+                ->orWhere('struktur.level', 4)
+                ->where('struktur_child1.nama_struktur_child1', '0')
+                ->orWhere('struktur.level', 5)
+                ->where('struktur_child1.nama_struktur_child1', '!=', '0')
+                ->where('struktur_child2.nama_struktur_child2', '0')
+                ->select('user.id_user as id', 'user.fullname as name')
+                ->get()
+        ]);
     }
 }
