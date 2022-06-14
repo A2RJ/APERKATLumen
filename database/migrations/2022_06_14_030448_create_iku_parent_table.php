@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreatePrintsTable extends Migration
+class CreateIkuParentTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,9 @@ class CreatePrintsTable extends Migration
      */
     public function up()
     {
-        Schema::create('prints', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::create('iku_parent', function (Blueprint $table) {
+            $table->integer('id_iku_parent', true);
+            $table->text('iku_parent');
         });
     }
 
@@ -26,6 +26,6 @@ class CreatePrintsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('prints');
+        Schema::dropIfExists('iku_parent');
     }
 }

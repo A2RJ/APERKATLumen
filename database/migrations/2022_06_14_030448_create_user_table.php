@@ -17,14 +17,13 @@ class CreateUserTable extends Migration
             $table->integer('id_user', true);
             $table->string('fullname');
             $table->string('password');
-            $table->string('token');
             $table->integer('id_struktur')->nullable()->index('id_struktur');
             $table->integer('id_struktur_child1')->nullable()->index('id_struktur_child1');
             $table->integer('id_struktur_child2')->nullable()->index('id_struktur_child2');
             $table->string('email', 50);
             $table->string('nomor_wa', 15);
-            $table->string('bank', 20);
-            $table->string('no_rek', 30);
+            $table->string('kop')->nullable();
+            $table->string('ttd')->nullable();
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
         });

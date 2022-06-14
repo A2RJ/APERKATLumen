@@ -280,7 +280,7 @@ class RKATController extends Controller
             $array = [];
             $no = 1;
             foreach ($collection as $value) {
-                $dataRKAT = RKATModel::where('kode_rkat', $value["No"])->select('kode_rkat')->first();
+                $dataRKAT = RKATModel::where('kode_rkat', $value["Kode RKAT"])->select('kode_rkat')->first();
                 if ($dataRKAT == null) {
                     $array[] = [
                         // "no" => $no,
@@ -292,16 +292,16 @@ class RKATController extends Controller
                         // "tempat" => $value["Tempat"],
                         // "total_anggaran" => preg_replace('/[^0-9]/', '', $value["Total Anggaran"]),
                         "no" => $no,
-                        "kode_rkat" => date('Y') . $value["No"],
+                        "kode_rkat" => date('Y') . $value["Kode RKAT"],
                         "periode" => date('Y'),
                         "sasaran_strategi" => $value["Sasaran Strategi"],
                         "indikator_sasaran_strategi" => $value["Indikator Sasaran Strategi"],
                         "nama_program" => $value["Nama Program"],
                         "program_kerja" => $value["Program Kerja"],
                         "deskripsi" => $value["Deskripsi Program Kerja"],
-                        "tujuan" => $value["Tujuan"],
-                        "mulai_program" => is_string($value["Mulai"]) ? $value["Mulai"] : $value["Mulai"]->format('Y-m-d'),
-                        "selesai_program" => is_string($value["Selesai"]) ? $value["Selesai"] : $value["Selesai"]->format('Y-m-d'),
+                        "tujuan" => $value["Tujuan Kegiatan"],
+                        "mulai_program" => is_string($value["Waktu Mulai"]) ? $value["Waktu Mulai"] : $value["Waktu Mulai"]->format('Y-m-d'),
+                        "selesai_program" => is_string($value["Waktu Berakhir"]) ? $value["Waktu Berakhir"] : $value["Waktu Berakhir"]->format('Y-m-d'),
                         "tempat" => $value["Tempat"],
                         "sumber_anggaran" => $value["Sumber Anggaran"],
                         "rencana_anggaran" => preg_replace('/[^0-9]/', '', $value["Rencana Anggaran"]),

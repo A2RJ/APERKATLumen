@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateStrukturChild1Table extends Migration
+class CreatePrintTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,10 @@ class CreateStrukturChild1Table extends Migration
      */
     public function up()
     {
-        Schema::create('struktur_child1', function (Blueprint $table) {
-            $table->integer('id_struktur_child1', true);
-            $table->integer('id_struktur')->index('id_struktur');
-            $table->string('nama_struktur_child1', 30);
+        Schema::create('print', function (Blueprint $table) {
+            $table->integer('id', true);
+            $table->integer('id_user');
+            $table->integer('id_pengajuan');
         });
     }
 
@@ -27,6 +27,6 @@ class CreateStrukturChild1Table extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('struktur_child1');
+        Schema::dropIfExists('print');
     }
 }

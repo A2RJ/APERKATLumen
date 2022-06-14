@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateIkuParentTable extends Migration
+class CreatePeriodTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,11 @@ class CreateIkuParentTable extends Migration
      */
     public function up()
     {
-        Schema::create('iku_parent', function (Blueprint $table) {
-            $table->integer('id_iku_parent', true);
-            $table->integer('iku_parent');
+        Schema::create('period', function (Blueprint $table) {
+            $table->integer('id_period', true);
+            $table->string('period');
+            $table->dateTime('created_at')->useCurrent();
+            $table->dateTime('updated_at')->useCurrent();
         });
     }
 
@@ -26,6 +28,6 @@ class CreateIkuParentTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('iku_parent');
+        Schema::dropIfExists('period');
     }
 }

@@ -15,21 +15,24 @@ class CreateRkatTable extends Migration
     {
         Schema::create('rkat', function (Blueprint $table) {
             $table->integer('id_rkat', true);
+            $table->string('kode_rkat', 20);
             $table->integer('id_user')->index('id_user');
-            $table->string('sasaran_strategi', 200);
-            $table->string('indikator_sasaran_strategi', 200);
-            $table->string('nama_program', 100);
-            $table->string('program_kerja', 100);
+            $table->string('period')->default('CURRENT_TIMESTAMP');
+            $table->text('sasaran_strategi');
+            $table->text('indikator_sasaran_strategi');
+            $table->text('nama_program');
+            $table->text('program_kerja');
             $table->text('deskripsi');
-            $table->string('tujuan', 100);
-            $table->dateTime('mulai_program');
-            $table->dateTime('selesai_program');
-            $table->string('tempat', 100);
-            $table->string('sumber_anggaran', 100);
+            $table->text('tujuan');
+            $table->string('mulai_program');
+            $table->string('selesai_program');
+            $table->text('tempat');
+            $table->text('sumber_anggaran');
             $table->string('rencara_anggaran', 50);
             $table->string('total_anggaran', 50);
-            $table->dateTime('created_at');
-            $table->dateTime('updated_at');
+            $table->string('anggaran_digunakan', 50);
+            $table->date('created_at');
+            $table->date('updated_at');
         });
     }
 

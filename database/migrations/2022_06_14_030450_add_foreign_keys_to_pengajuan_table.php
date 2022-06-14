@@ -14,7 +14,8 @@ class AddForeignKeysToPengajuanTable extends Migration
     public function up()
     {
         Schema::table('pengajuan', function (Blueprint $table) {
-            $table->foreign('id_rkat', 'pengajuan_ibfk_1')->references('id_rkat')->on('rkat')->onUpdate('NO ACTION')->onDelete('NO ACTION');
+            $table->foreign('next', 'next')->references('id_user')->on('user')->onUpdate('NO ACTION')->onDelete('NO ACTION');
+            $table->foreign('id_user', 'id_user')->references('id_user')->on('user')->onUpdate('NO ACTION')->onDelete('NO ACTION');
         });
     }
 
@@ -26,7 +27,8 @@ class AddForeignKeysToPengajuanTable extends Migration
     public function down()
     {
         Schema::table('pengajuan', function (Blueprint $table) {
-            $table->dropForeign('pengajuan_ibfk_1');
+            $table->dropForeign('next');
+            $table->dropForeign('id_user');
         });
     }
 }
