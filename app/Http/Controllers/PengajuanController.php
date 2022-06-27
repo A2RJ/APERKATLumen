@@ -116,18 +116,16 @@ class PengajuanController extends Controller
     public function validasiLPJ($id_user)
     {
         if (
-            PengajuanModel::where('id_user', $id_user)
-            ->where('pencairan', '!=', null)
+            PengajuanModel::join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
+            ->where('pengajuan.id_user', $id_user)
+            ->where('pengajuan.pencairan', 'default.jpg')
             ->where('lpj_kegiatan', null)
             ->where('lpj_keuangan', null)
-            ->orWhere('id_user', $id_user)
-            ->where('pencairan', '!=', null)
+            ->orWhere('pengajuan.id_user', $id_user)
+            ->where('pengajuan.pencairan', 'default.jpg')
             ->where('lpj_kegiatan', '!=', null)
             ->where('lpj_keuangan', null)
-            ->orWhere('id_user', $id_user)
-            ->where('pencairan', '!=', null)
-            ->where('lpj_kegiatan', null)
-            ->where('lpj_keuangan', '!=', null)->count() >= 2
+            ->count() >= 2
         ) {
             return true;
         }
