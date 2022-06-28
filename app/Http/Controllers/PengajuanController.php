@@ -956,17 +956,17 @@ class PengajuanController extends Controller
             ->first();
 
         if ($userStruktur->level == 1) {
-            $data = DB::select('SELECT user.id_user, user.fullname, struktur.nama_struktur, struktur_child1.nama_struktur_child1, struktur_child2.nama_struktur_child2, (SELECT SUM(rencara_anggaran) FROM rkat WHERE id_user = user.id_user) as rencara_anggaran, (SELECT SUM(biaya_program) FROM pengajuan WHERE id_user = user.id_user AND  next = 3333) as biaya_program FROM user JOIN struktur JOIN struktur_child1 JOIN struktur_child2 WHERE user.id_struktur = struktur.id_struktur AND user.id_struktur_child1 = struktur_child1.id_struktur_child1 AND user.id_struktur_child2 = struktur_child2.id_struktur_child2 AND user.id_user != ' . $userStruktur->id_user . ' ORDER BY struktur.level ASC');
+            $data = DB::select('SELECT user.id_user, user.fullname, struktur.nama_struktur, struktur_child1.nama_struktur_child1, struktur_child2.nama_struktur_child2, (SELECT SUM(rencana_anggaran) FROM rkat WHERE id_user = user.id_user) as rencana_anggaran, (SELECT SUM(biaya_program) FROM pengajuan WHERE id_user = user.id_user AND  next = 3333) as biaya_program FROM user JOIN struktur JOIN struktur_child1 JOIN struktur_child2 WHERE user.id_struktur = struktur.id_struktur AND user.id_struktur_child1 = struktur_child1.id_struktur_child1 AND user.id_struktur_child2 = struktur_child2.id_struktur_child2 AND user.id_user != ' . $userStruktur->id_user . ' ORDER BY struktur.level ASC');
         } else if ($userStruktur->level == 2) {
-            $data = DB::select('SELECT user.id_user, user.fullname, struktur.nama_struktur, struktur_child1.nama_struktur_child1, struktur_child2.nama_struktur_child2, (SELECT SUM(rencara_anggaran) FROM rkat WHERE id_user = user.id_user) as rencara_anggaran, (SELECT SUM(biaya_program) FROM pengajuan WHERE id_user = user.id_user AND  next = 3333) as biaya_program FROM user JOIN struktur JOIN struktur_child1 JOIN struktur_child2 WHERE user.id_struktur = struktur.id_struktur AND user.id_struktur_child1 = struktur_child1.id_struktur_child1 AND user.id_struktur_child2 = struktur_child2.id_struktur_child2 AND user.id_user != ' . $userStruktur->id_user . ' ORDER BY struktur.level ASC');
+            $data = DB::select('SELECT user.id_user, user.fullname, struktur.nama_struktur, struktur_child1.nama_struktur_child1, struktur_child2.nama_struktur_child2, (SELECT SUM(rencana_anggaran) FROM rkat WHERE id_user = user.id_user) as rencana_anggaran, (SELECT SUM(biaya_program) FROM pengajuan WHERE id_user = user.id_user AND  next = 3333) as biaya_program FROM user JOIN struktur JOIN struktur_child1 JOIN struktur_child2 WHERE user.id_struktur = struktur.id_struktur AND user.id_struktur_child1 = struktur_child1.id_struktur_child1 AND user.id_struktur_child2 = struktur_child2.id_struktur_child2 AND user.id_user != ' . $userStruktur->id_user . ' ORDER BY struktur.level ASC');
         } else if ($userStruktur->level == 3 || $userStruktur->level == 4) {
             if ($userStruktur->child1_level == "1" || $userStruktur->level == 3) {
-                $data = DB::select('SELECT user.id_user, user.fullname, struktur.nama_struktur, struktur_child1.nama_struktur_child1, struktur_child2.nama_struktur_child2, (SELECT SUM(rencara_anggaran) FROM rkat WHERE id_user = user.id_user) as rencara_anggaran, (SELECT SUM(biaya_program) FROM pengajuan WHERE id_user = user.id_user AND  next = 3333) as biaya_program FROM user JOIN struktur JOIN struktur_child1 JOIN struktur_child2 WHERE user.id_struktur = struktur.id_struktur AND user.id_struktur_child1 = struktur_child1.id_struktur_child1 AND user.id_struktur_child2 = struktur_child2.id_struktur_child2 AND user.id_user != ' . $userStruktur->id_user . ' ORDER BY struktur.level ASC');
+                $data = DB::select('SELECT user.id_user, user.fullname, struktur.nama_struktur, struktur_child1.nama_struktur_child1, struktur_child2.nama_struktur_child2, (SELECT SUM(rencana_anggaran) FROM rkat WHERE id_user = user.id_user) as rencana_anggaran, (SELECT SUM(biaya_program) FROM pengajuan WHERE id_user = user.id_user AND  next = 3333) as biaya_program FROM user JOIN struktur JOIN struktur_child1 JOIN struktur_child2 WHERE user.id_struktur = struktur.id_struktur AND user.id_struktur_child1 = struktur_child1.id_struktur_child1 AND user.id_struktur_child2 = struktur_child2.id_struktur_child2 AND user.id_user != ' . $userStruktur->id_user . ' ORDER BY struktur.level ASC');
             } else {
-                $data = DB::select('SELECT user.id_user, user.fullname, struktur.nama_struktur, struktur_child1.nama_struktur_child1, struktur_child2.nama_struktur_child2, (SELECT SUM(rencara_anggaran) FROM rkat WHERE id_user = user.id_user) as rencara_anggaran, (SELECT SUM(biaya_program) FROM pengajuan WHERE id_user = user.id_user AND  next = 3333) as biaya_program FROM user JOIN struktur JOIN struktur_child1 JOIN struktur_child2 WHERE user.id_struktur = struktur.id_struktur AND user.id_struktur_child1 = struktur_child1.id_struktur_child1 AND user.id_struktur_child2 = struktur_child2.id_struktur_child2 AND user.id_user != ' . $userStruktur->id_user . ' AND struktur.id_struktur = ' . $userStruktur->id_struktur . ' ORDER BY struktur.level ASC');
+                $data = DB::select('SELECT user.id_user, user.fullname, struktur.nama_struktur, struktur_child1.nama_struktur_child1, struktur_child2.nama_struktur_child2, (SELECT SUM(rencana_anggaran) FROM rkat WHERE id_user = user.id_user) as rencana_anggaran, (SELECT SUM(biaya_program) FROM pengajuan WHERE id_user = user.id_user AND  next = 3333) as biaya_program FROM user JOIN struktur JOIN struktur_child1 JOIN struktur_child2 WHERE user.id_struktur = struktur.id_struktur AND user.id_struktur_child1 = struktur_child1.id_struktur_child1 AND user.id_struktur_child2 = struktur_child2.id_struktur_child2 AND user.id_user != ' . $userStruktur->id_user . ' AND struktur.id_struktur = ' . $userStruktur->id_struktur . ' ORDER BY struktur.level ASC');
             }
         } else if ($userStruktur->level == 5) {
-            $data = DB::select('SELECT user.id_user, user.fullname, struktur.nama_struktur, struktur_child1.nama_struktur_child1, struktur_child2.nama_struktur_child2, (SELECT SUM(rencara_anggaran) FROM rkat WHERE id_user = user.id_user) as rencara_anggaran, (SELECT SUM(biaya_program) FROM pengajuan WHERE id_user = user.id_user AND  next = 3333) as biaya_program FROM user JOIN struktur JOIN struktur_child1 JOIN struktur_child2 WHERE user.id_struktur = struktur.id_struktur AND user.id_struktur_child1 = struktur_child1.id_struktur_child1 AND user.id_struktur_child2 = struktur_child2.id_struktur_child2 AND user.id_user != ' . $userStruktur->id_user . ' AND struktur.id_struktur = ' . $userStruktur->id_struktur . '  AND struktur_child1.id_struktur_child1 = ' . $userStruktur->id_struktur_child1 . ' ORDER BY struktur.level ASC');
+            $data = DB::select('SELECT user.id_user, user.fullname, struktur.nama_struktur, struktur_child1.nama_struktur_child1, struktur_child2.nama_struktur_child2, (SELECT SUM(rencana_anggaran) FROM rkat WHERE id_user = user.id_user) as rencana_anggaran, (SELECT SUM(biaya_program) FROM pengajuan WHERE id_user = user.id_user AND  next = 3333) as biaya_program FROM user JOIN struktur JOIN struktur_child1 JOIN struktur_child2 WHERE user.id_struktur = struktur.id_struktur AND user.id_struktur_child1 = struktur_child1.id_struktur_child1 AND user.id_struktur_child2 = struktur_child2.id_struktur_child2 AND user.id_user != ' . $userStruktur->id_user . ' AND struktur.id_struktur = ' . $userStruktur->id_struktur . '  AND struktur_child1.id_struktur_child1 = ' . $userStruktur->id_struktur_child1 . ' ORDER BY struktur.level ASC');
         }
 
         return response()->json([
@@ -999,7 +999,7 @@ class PengajuanController extends Controller
                     ->where('rkat.period', 'LIKE', '%' . date('Y') . '%')
                     ->where('pengajuan.next', '!=', 3333)
                     ->count(),
-                'rkat' => DB::select('SELECT rkat.id_rkat, rkat.kode_rkat, rkat.period, rkat.rencara_anggaran, (SELECT SUM(biaya_program) FROM pengajuan WHERE kode_rkat = rkat.id_rkat AND next = 3333) as biaya_program, rkat.created_at FROM rkat WHERE rkat.id_user = ' . $params . ' AND rkat.period LIKE "%' . date('Y') . '%" ORDER BY rkat.created_at DESC'),
+                'rkat' => DB::select('SELECT rkat.id_rkat, rkat.kode_rkat, rkat.period, rkat.rencana_anggaran, (SELECT SUM(biaya_program) FROM pengajuan WHERE kode_rkat = rkat.id_rkat AND next = 3333) as biaya_program, rkat.created_at FROM rkat WHERE rkat.id_user = ' . $params . ' AND rkat.period LIKE "%' . date('Y') . '%" ORDER BY rkat.created_at DESC'),
                 'pengajuan' => PengajuanModel::select(
                     'user.fullname',
                     'rkat.kode_rkat',
@@ -1083,7 +1083,7 @@ class PengajuanController extends Controller
 
     public function coba()
     {
-        $listRkat =  DB::select('SELECT rkat.id_rkat, rkat.kode_rkat, rkat.rencara_anggaran, (SELECT SUM(biaya_program) FROM pengajuan WHERE kode_rkat = rkat.id_rkat AND pencairan != null) as biaya_program, rkat.created_at FROM rkat ORDER BY kode_rkat ASC');
+        $listRkat =  DB::select('SELECT rkat.id_rkat, rkat.kode_rkat, rkat.rencana_anggaran, (SELECT SUM(biaya_program) FROM pengajuan WHERE kode_rkat = rkat.id_rkat AND pencairan != null) as biaya_program, rkat.created_at FROM rkat ORDER BY kode_rkat ASC');
 
         $id_rkat = [];
         foreach ($listRkat as $value) {
@@ -1098,7 +1098,7 @@ class PengajuanController extends Controller
             $newList[] = [
                 "id_rkat" => $value->id_rkat,
                 "kode_rkat" => $value->kode_rkat,
-                "rencara_anggaran" => $value->rencara_anggaran,
+                "rencana_anggaran" => $value->rencana_anggaran,
                 "biaya_program" => $value->biaya_program,
                 "created_at" => $value->created_at,
                 "pengajuan" => $this->getCoba($listPengajuan, $value->id_rkat)
@@ -1486,6 +1486,7 @@ class PengajuanController extends Controller
                     'rkat.mulai_program',
                     'rkat.selesai_program',
                     'rkat.nama_program',
+                    'rkat.rencana_anggaran',
                     'pengajuan.id_pengajuan',
                     'pengajuan.biaya_program',
                     'pengajuan.biaya_disetujui',
@@ -1502,6 +1503,7 @@ class PengajuanController extends Controller
                     'mulai_program' => $item->mulai_program,
                     'selesai_program' => $item->selesai_program,
                     'nama_program' => $item->nama_program,
+                    'rkat' => $item->rencana_anggaran,
                     'biaya_program' => $item->biaya_program,
                     'biaya_disetujui' => $item->biaya_disetujui,
                     'pencairan' => $item->pencairan,
@@ -1559,5 +1561,78 @@ class PengajuanController extends Controller
                 'lpj_kegiatan' => $item->lpj_kegiatan,
             ];
         });
+    }
+
+    public function summaryByUnitExport($params)
+    {
+        $summary = $this->summaryByUnit($params);
+        $summary = json_decode(json_encode($summary), true);
+        $summary = $summary['original']['data'];
+        $data = [];
+        $data[] = [
+            'Nama',
+            'Kode RKAT',
+            'Mulai Program',
+            'Selesai Program',
+            'Status',
+            'Nama Program',
+            'Anggaran RKAT',
+            'Biaya Diajukan',
+            'Biaya Disetujui',
+            'Pencairan',
+            'LPJ Keuangan',
+            'LPJ Kegiatan',
+        ];
+        foreach ($summary as $item) {
+            $pencairan = '';
+            if ($item['biaya_disetujui']) {
+                $item['pencairan'] === 'default.jpg' ? 'Telah dicarikan' : 'Proses pencairan';
+            } else {
+                $pencairan = '-';
+            }
+            $data[] = [
+                'Nama' => $item['fullname'],
+                'Kode RKAT' => $item['kode_rkat'],
+                'Mulai Program' => $item['mulai_program'],
+                'Selesai Program' => $item['selesai_program'],
+                'Nama Program' => $item['nama_program'],
+                'Status' => $item['biaya_program'] ? 'Telah diajukan' : 'Belum diajukan',
+                'Anggaran RKAT' => $item['rkat'],
+                'Biaya Diajukan' => $item['biaya_program'],
+                'Biaya Disetujui' => $item['biaya_disetujui'],
+                'Pencairan' => $pencairan,
+                'LPJ Keuangan' => $item['lpj_keuangan'] ? 'https://aperkat.uts.ac.id/api/public/file/' . $item['lpj_keuangan'] : 'Belum diupload',
+                'LPJ Kegiatan' => $item['lpj_kegiatan'] ? 'https://aperkat.uts.ac.id/api/public/file/' . $item['lpj_kegiatan'] : 'Belum diupload',
+            ];
+        }
+        $fileName = 'summary_rkat_' . date('Y-m-d-H-i-s') . '.xlsx';
+        $filePath = $this->public_path($fileName);
+        (new FastExcel($data))->export($fileName);
+        if (file_exists($filePath)) {
+            return response()->json([
+                "status" => "success",
+                "message" => "Data berhasil diunduh",
+                "data" => $fileName
+            ], 200);
+        } else {
+            return response()->json([
+                "status" => "error",
+                "message" => "File tidak ditemukan"
+            ], 404);
+        }
+    }
+
+    public function summaryByUnitDelete($params)
+    {
+        unlink($this->public_path($params));
+        return response()->json([
+            "status" => "success",
+            "message" => "File berhasil dihapus"
+        ], 200);
+    }
+
+    public function public_path($params)
+    {
+        return base_path('public/' . $params);
     }
 }

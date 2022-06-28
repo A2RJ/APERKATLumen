@@ -25,6 +25,7 @@ $router->get('/', function () use ($router) {
     ]);
 });
 
+// check token header
 $router->get('/g/{params}', 'PengajuanController@printPengajuan');
 
 $router->group(['middleware' => 'auth', 'prefix' => 'api'], function ($router) {
@@ -52,6 +53,8 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/belumLPJKegiatan', 'PengajuanController@belumLPJKegiatan');
         $router->get('/summary/{params}', 'PengajuanController@summary');
         $router->get('/summaryByUnit/{params}', 'PengajuanController@summaryByUnit');
+        $router->get('/summaryByUnit/export/{params}', 'PengajuanController@summaryByUnitExport');
+        $router->get('/summaryByUnit/delete/{params}', 'PengajuanController@summaryByUnitDelete');
         $router->get('/sendMail/{params}', 'PengajuanController@sendMail');
         $router->get('/pdf_pengajuan/{params}', 'PengajuanController@pdfById');
         $router->get('/destroy/{params}', 'PengajuanController@destroy');
@@ -184,5 +187,4 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 // For testing only
 $router->group(['prefix' => 'testing'], function () use ($router) {
     $router->get('/validasiLPJ/{id_user}', 'PengajuanController@validasiLPJ');
-
 });

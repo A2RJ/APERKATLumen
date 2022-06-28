@@ -28,7 +28,7 @@ class CreateRkatTable extends Migration
             $table->string('selesai_program');
             $table->text('tempat');
             $table->text('sumber_anggaran');
-            $table->string('rencara_anggaran', 50);
+            $table->string('rencana_anggaran', 50);
             $table->string('total_anggaran', 50);
             $table->string('anggaran_digunakan', 50);
             $table->date('created_at');

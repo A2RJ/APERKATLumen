@@ -29,7 +29,7 @@ class RKATModel extends Model
         "selesai_program",
         "tempat",
         "sumber_anggaran",
-        "rencara_anggaran",
+        "rencana_anggaran",
         "total_anggaran",
         "anggaran_digunakan"
     ];

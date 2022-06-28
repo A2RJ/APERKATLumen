@@ -51,7 +51,7 @@ class RKATController extends Controller
             "selesai_program" => "required",
             "tempat" => "required",
             "sumber_anggaran" => "required",
-            "rencara_anggaran" => "required",
+            "rencana_anggaran" => "required",
             "total_anggaran" => "required",
             "anggaran_digunakan" => "required"
         ]);
@@ -339,7 +339,7 @@ class RKATController extends Controller
                 // "selesai_program" => $value["selesai_program"],
                 // "tempat" => $value["tempat"],
                 // "sumber_anggaran" => "-",
-                // "rencara_anggaran" => $value["total_anggaran"],
+                // "rencana_anggaran" => $value["total_anggaran"],
                 // "anggaran_digunakan" => "0",
                 // "total_anggaran" => $value["total_anggaran"],
                 // "created_at" => date('Y-m-d'),
@@ -357,7 +357,7 @@ class RKATController extends Controller
                 "selesai_program" => $value["selesai_program"],
                 "tempat" => $value["tempat"],
                 "sumber_anggaran" => $value["sumber_anggaran"],
-                "rencara_anggaran" => $value["total_anggaran"],
+                "rencana_anggaran" => $value["total_anggaran"],
                 "anggaran_digunakan" => "0",
                 "total_anggaran" => $value["total_anggaran"],
                 "created_at" => date('Y-m-d'),
