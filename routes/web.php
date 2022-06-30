@@ -54,7 +54,8 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/summary/{params}', 'PengajuanController@summary');
         $router->get('/summaryByUnit/{params}', 'PengajuanController@summaryByUnit');
         $router->get('/summaryByUnit/export/{params}', 'PengajuanController@summaryByUnitExport');
-        $router->get('/summaryByUnit/delete/{params}', 'PengajuanController@summaryByUnitDelete');
+        $router->get('/summaryByUser/{params}', 'PengajuanController@summaryByUser');
+        // $router->get('/summaryByUnit/delete/{params}', 'PengajuanController@summaryByUnitDelete');
         $router->get('/sendMail/{params}', 'PengajuanController@sendMail');
         $router->get('/pdf_pengajuan/{params}', 'PengajuanController@pdfById');
         $router->get('/destroy/{params}', 'PengajuanController@destroy');

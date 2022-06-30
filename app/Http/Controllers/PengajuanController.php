@@ -176,6 +176,7 @@ class PengajuanController extends Controller
             'user.id_user',
             'rkat.kode_rkat',
             'rkat.period',
+            'rkat.nama_program',
             'pengajuan.id_pengajuan',
             'pengajuan.id_period',
             'pengajuan.biaya_program',
@@ -586,12 +587,12 @@ class PengajuanController extends Controller
             ],
             [
                 "id_user" => $struktur[3]->id_user,
-                "nama_struktur" => $struktur[3]->nama_struktur_child1,
+                "nama_struktur" => $struktur[3]->nama_struktur_child1 . " (Pencairan)",
                 "status" => $this->statusNull($struktur[3]->id_user, $pengajuan->id_pengajuan, 3)
             ],
             [
                 "id_user" => 1111,
-                "nama_struktur" => 'LPJ',
+                "nama_struktur" => 'Upload LPJ',
                 "status" => $this->statusNull($struktur[3]->id_user, $pengajuan->id_pengajuan, 4) && $this->statusNull($struktur[0]->id_user, $pengajuan->id_pengajuan, 4) ? true : false,
                 "lpj" => [
                     // Dir Keuangan
@@ -1517,7 +1518,7 @@ class PengajuanController extends Controller
         return $data;
     }
 
-    public function summary($params)
+    public function summaryByUser($params)
     {
         $user = UserModel::select('id_user')->where('id_user', $params)->first();
 
@@ -1530,13 +1531,14 @@ class PengajuanController extends Controller
 
         $rkat = RKATModel::leftJoin('pengajuan', 'rkat.id_rkat', 'pengajuan.kode_rkat')
             ->where('rkat.period', 'like', '%' . date('Y') . '%')
-            ->where('rkat.id_user', $params)
+            ->where('rkat.id_user', $user->id_user)
             ->select(
                 'rkat.id_user',
                 'rkat.kode_rkat',
                 'rkat.mulai_program',
                 'rkat.selesai_program',
                 'rkat.nama_program',
+                'rkat.rencana_anggaran',
                 'pengajuan.id_pengajuan',
                 'pengajuan.biaya_program',
                 'pengajuan.biaya_disetujui',
@@ -1546,13 +1548,16 @@ class PengajuanController extends Controller
             )
             ->get();
 
-        return $rkat->map(function ($item) {
-            return [
+        $data = [];
+
+        foreach ($rkat as $item) {
+            $data[] = [
                 'fullname' => UserModel::select('fullname')->where('id_user', $item->id_user)->first()->fullname,
                 'kode_rkat' => $item->kode_rkat,
                 'mulai_program' => $item->mulai_program,
                 'selesai_program' => $item->selesai_program,
                 'nama_program' => $item->nama_program,
+                'rkat' => $item->rencana_anggaran,
                 'biaya_program' => $item->biaya_program,
                 'biaya_disetujui' => $item->biaya_disetujui,
                 'pencairan' => $item->pencairan,
@@ -1560,7 +1565,11 @@ class PengajuanController extends Controller
                 'lpj_keuangan' => $item->lpj_keuangan,
                 'lpj_kegiatan' => $item->lpj_kegiatan,
             ];
-        });
+        }
+
+        return response()->json([
+            "data" => $data
+        ]);
     }
 
     public function summaryByUnitExport($params)
