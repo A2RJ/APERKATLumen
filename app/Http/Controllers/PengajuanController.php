@@ -589,36 +589,57 @@ class PengajuanController extends Controller
                 "id_user" => $struktur[3]->id_user,
                 "nama_struktur" => $struktur[3]->nama_struktur_child1 . " (Pencairan)",
                 "status" => $this->statusNull($struktur[3]->id_user, $pengajuan->id_pengajuan, 3)
-            ],
-            [
-                "id_user" => 1111,
-                "nama_struktur" => 'Upload LPJ',
-                "status" => $this->statusNull($struktur[3]->id_user, $pengajuan->id_pengajuan, 4) && $this->statusNull($struktur[0]->id_user, $pengajuan->id_pengajuan, 4) ? true : false,
-                "lpj" => [
-                    // Dir Keuangan
-                    [
-                        "id_user" => $struktur[3]->id_user,
-                        "nama_struktur" => $struktur[3]->nama_struktur_child1,
-                        "status" => $this->statusNull($struktur[3]->id_user, $pengajuan->id_pengajuan, 4)
-                    ],
-                    // Sekniv
-                    [
-                        "id_user" => $struktur[0]->id_user,
-                        "nama_struktur" => 'Sekniv',
-                        "status" => $this->statusNull($struktur[0]->id_user, $pengajuan->id_pengajuan, 4)
-                    ]
-                ]
-            ],
-            // Completed
-            [
-                "id_user" => 2222,
-                "nama_struktur" => 'Completed',
-                "status" => $this->statusNull($struktur[3]->id_user, $pengajuan->id_pengajuan, 4) && $this->statusNull($struktur[0]->id_user, $pengajuan->id_pengajuan, 4) ? true : false
             ]
         );
 
+        $isTrue = $this->format1Lpj($params);
+
+        if ($isTrue) {
+            array_push(
+                $status,
+                [
+                    "id_user" => 1111,
+                    "nama_struktur" => 'Direktur Keuangan (LPJ)',
+                    "status" => $this->statusNull($struktur[3]->id_user, $pengajuan->id_pengajuan, 4),
+                    "lpj" => []
+                ],
+                [
+                    "id_user" => 2222,
+                    "nama_struktur" => 'Completed',
+                    "status" => $this->statusNull($struktur[3]->id_user, $pengajuan->id_pengajuan, 4)
+                ]
+            );
+        } else {
+            array_push(
+                $status,
+                [
+                    "id_user" => 1111,
+                    "nama_struktur" => 'LPJ',
+                    "status" => $this->statusNull($struktur[3]->id_user, $pengajuan->id_pengajuan, 4) && $this->statusNull($struktur[0]->id_user, $pengajuan->id_pengajuan, 4) ? true : false,
+                    "lpj" => [
+                        [
+                            "id_user" => $struktur[3]->id_user,
+                            "nama_struktur" => $struktur[3]->nama_struktur_child1,
+                            "status" => $this->statusNull($struktur[3]->id_user, $pengajuan->id_pengajuan, 4)
+                        ],
+                        [
+                            "id_user" => $struktur[0]->id_user,
+                            "nama_struktur" => 'Sekniv',
+                            "status" => $this->statusNull($struktur[0]->id_user, $pengajuan->id_pengajuan, 4)
+                        ]
+                    ]
+                ],
+                [
+                    "id_user" => 2222,
+                    "nama_struktur" => 'Completed',
+                    "status" => $this->statusNull($struktur[3]->id_user, $pengajuan->id_pengajuan, 4) && $this->statusNull($struktur[0]->id_user, $pengajuan->id_pengajuan, 4) ? true : false
+                ]
+            );
+        }
+
         return response()->json([
-            "data" => $status
+            "data" => $status,
+            "isNewFormat" => $isTrue
         ]);
     }
 
@@ -1643,5 +1664,22 @@ class PengajuanController extends Controller
     public function public_path($params)
     {
         return base_path('public/' . $params);
+    }
+
+    public function format1Lpj($params)
+    {
+
+        $pengajuan = PengajuanModel::where('id_pengajuan', $params)->first();
+        $isTrue = false;
+
+        if ($pengajuan && !$pengajuan->lpj_keuangan) {
+            $updated_at = Date('Y-m-d', strtotime($pengajuan->updated_at));
+            $startActive = Date('2022-07-01');
+            if ($startActive < $updated_at) {
+                $isTrue = true;
+            }
+        }
+
+        return $isTrue;
     }
 }

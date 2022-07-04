@@ -188,4 +188,5 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 // For testing only
 $router->group(['prefix' => 'testing'], function () use ($router) {
     $router->get('/validasiLPJ/{id_user}', 'PengajuanController@validasiLPJ');
+    $router->get('/format1Lpj/{id_pengajuan}', 'PengajuanController@format1Lpj');
 });
