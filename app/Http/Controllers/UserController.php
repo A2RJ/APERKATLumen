@@ -97,8 +97,14 @@ class UserController extends Controller
     {
         $data = UserModel::find($params);
 
+        if (!$data) {
+            return Response()->json([
+                'data' => "Data not found"
+            ], 404);
+        }
+
         return response()->json([
-            'data' => $data ? $data : "Failed, data not found"
+            'data' => $data
         ]);
     }
 
@@ -120,11 +126,18 @@ class UserController extends Controller
             $id_struktur = $userStruktur->id_struktur_child2;
             $nama_struktur = $userStruktur->nama_struktur_child2;
         }
+
+        if (!$userStruktur) {
+            return Response()->json([
+                'data' => "Data not found"
+            ], 404);
+        }
+
         return response()->json([
-            'data' => $userStruktur ? [
+            'data' => [
                 'id_struktur' => $id_struktur,
                 'nama_struktur' => $nama_struktur
-            ] : "Failed, data not found"
+            ]
         ]);
     }
 
@@ -144,8 +157,14 @@ class UserController extends Controller
             $update->save();
         }
 
+        if (!$data) {
+            return Response()->json([
+                'data' => "Fail update data"
+            ], 400);
+        }
+
         return response()->json([
-            'data' => $data ? "Data was updated" : "Failed to update data"
+            'data' => "Success update data"
         ]);
     }
 
@@ -157,22 +176,28 @@ class UserController extends Controller
      */
     public function destroy()
     {
-        $data = UserModel::find();
-        if ($data) $data->delete();
+        // $data = UserModel::find();
+        // if ($data) $data->delete();
 
-        return response()->json([
-            'data' => $data ? "Success delete data" : "Failed, data not found"
-        ]);
+        // return response()->json([
+        //     'data' => $data ? "Success delete data" : "Failed, data not found"
+        // ]);
     }
 
     public function hapus($params)
     {
         $data = UserModel::find($params);
-        if ($data) $data->delete();
-
-        return response()->json([
-            'data' => $data ? "Success delete data" : "Failed, data not found"
-        ]);
+        if (!$data) {
+            return Response()->json([
+                'data' => "User not found"
+            ], 404);
+        }
+        if ($data) {
+            $data->delete();
+            return response()->json([
+                'data' => "Success delete user"
+            ]);
+        }
     }
 
     public function login(Request $request)

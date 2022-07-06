@@ -83,7 +83,6 @@ class PengajuanController extends Controller
                 'message' => 'Tidak dapat menambah pengajuan, RKAT tidak ditemukan'
             ], 400);
         } else {
-            // if ($rkat->total_anggaran !== $request->biaya_program) {
             if ($request->biaya_program > $rkat->total_anggaran) {
                 return response()->json([
                     'status' => 'error',
