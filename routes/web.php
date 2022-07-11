@@ -82,6 +82,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->post('/approve/{params}', 'PengajuanController@approve');
         $router->post('/decline/{params}', 'PengajuanController@decline');
         $router->post('/{params}', 'PengajuanController@update');
+        $router->post('/autoLpjKegiatan/{params}', 'PengajuanController@autoLpjKegiatan');
     });
 
     $router->group(['prefix' => 'rkat'], function () use ($router) {
@@ -189,4 +190,5 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 $router->group(['prefix' => 'testing'], function () use ($router) {
     $router->get('/validasiLPJ/{id_user}', 'PengajuanController@validasiLPJ');
     $router->get('/format1Lpj/{id_pengajuan}', 'PengajuanController@format1Lpj');
+    $router->get('/autoLpjKegiatan/{params}', 'PengajuanController@autoLpjKegiatan');
 });

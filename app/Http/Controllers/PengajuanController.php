@@ -1227,6 +1227,7 @@ class PengajuanController extends Controller
                         ->where('id_struktur', 24);
                 })
                 ->distinct()
+                ->orderBy('pengajuan.id_pengajuan', 'DESC')
                 ->get()
         ]);
     }
@@ -1261,6 +1262,7 @@ class PengajuanController extends Controller
                         ->where('id_struktur', 24);
                 })
                 ->distinct()
+                ->orderBy('pengajuan.id_pengajuan', 'DESC')
                 ->get()
         ]);
     }
@@ -1291,10 +1293,33 @@ class PengajuanController extends Controller
                     ->where('id_struktur', 24);
             }])
             ->distinct()
+            ->orderBy('pengajuan.id_pengajuan', 'DESC')
             ->get();
+
         return response()->json([
             'data' => $data->count() ? $data : []
         ]);
+    }
+
+    /**
+     * Setelah diterima lpj keuangan
+     * lalu ubah lpj kegiatan dengan dummy pdf
+     * lalu terima lpj kegiatan
+     * sehingga status menjadi true
+     */
+    public function autoLpjKegiatan($params)
+    {
+        if ($this->format1Lpj($params)) {
+            $pengajuan = PengajuanModel::find($params);
+            $pengajuan->lpj_kegiatan = 'autoLpjKegiatan.pdf';
+            $pengajuan->next = 3333;
+            $pengajuan->save();
+            $pengajuan->validasi()->create([
+                'id_struktur' => 21,
+                'status_validasi' => 4,
+                'message' => 'LPJ Kegiatan Diterima'
+            ]);
+        }
     }
 
     public function lpjKegiatan()
@@ -1391,7 +1416,23 @@ class PengajuanController extends Controller
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                 // ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
                 ->where('pengajuan.next', 3333)
-                ->select('user.id_user', 'rkat.kode_rkat',  'rkat.period', 'pengajuan.next', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at')
+                ->select(
+                    'user.id_user',
+                    'rkat.kode_rkat',
+                    'rkat.period',
+                    'rkat.nama_program',
+                    'pengajuan.id_pengajuan',
+                    'pengajuan.id_period',
+                    'pengajuan.biaya_program',
+                    'pengajuan.biaya_disetujui',
+                    'pengajuan.validasi_status',
+                    'pengajuan.nama_status',
+                    'user.fullname',
+                    'struktur.nama_struktur',
+                    'struktur_child1.nama_struktur_child1',
+                    'struktur_child2.nama_struktur_child2',
+                    'pengajuan.created_at'
+                )
                 ->orderBy('pengajuan.id_pengajuan', 'DESC')
                 ->get();
         } else if ($userStruktur->level == 2) {
@@ -1402,7 +1443,23 @@ class PengajuanController extends Controller
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                 // ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
                 ->where('pengajuan.next', 3333)
-                ->select('user.id_user', 'rkat.kode_rkat',  'rkat.period', 'pengajuan.next', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at')
+                ->select(
+                    'user.id_user',
+                    'rkat.kode_rkat',
+                    'rkat.period',
+                    'rkat.nama_program',
+                    'pengajuan.id_pengajuan',
+                    'pengajuan.id_period',
+                    'pengajuan.biaya_program',
+                    'pengajuan.biaya_disetujui',
+                    'pengajuan.validasi_status',
+                    'pengajuan.nama_status',
+                    'user.fullname',
+                    'struktur.nama_struktur',
+                    'struktur_child1.nama_struktur_child1',
+                    'struktur_child2.nama_struktur_child2',
+                    'pengajuan.created_at'
+                )
                 ->orderBy('pengajuan.id_pengajuan', 'DESC')
                 ->get();
         } else if ($userStruktur->level == 3 || $userStruktur->level == 4) {
@@ -1414,7 +1471,23 @@ class PengajuanController extends Controller
                     ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                     // ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
                     ->where('pengajuan.next', 3333)
-                    ->select('user.id_user', 'rkat.kode_rkat',  'rkat.period', 'pengajuan.next', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at')
+                    ->select(
+                        'user.id_user',
+                        'rkat.kode_rkat',
+                        'rkat.period',
+                        'rkat.nama_program',
+                        'pengajuan.id_pengajuan',
+                        'pengajuan.id_period',
+                        'pengajuan.biaya_program',
+                        'pengajuan.biaya_disetujui',
+                        'pengajuan.validasi_status',
+                        'pengajuan.nama_status',
+                        'user.fullname',
+                        'struktur.nama_struktur',
+                        'struktur_child1.nama_struktur_child1',
+                        'struktur_child2.nama_struktur_child2',
+                        'pengajuan.created_at'
+                    )
                     ->orderBy('pengajuan.id_pengajuan', 'DESC')
                     ->get();
             } else {
@@ -1426,7 +1499,23 @@ class PengajuanController extends Controller
                     // ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
                     ->where('struktur.id_struktur', $userStruktur->id_struktur)
                     ->where('pengajuan.next', 3333)
-                    ->select('user.id_user', 'rkat.kode_rkat',  'rkat.period', 'pengajuan.next', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at')
+                    ->select(
+                        'user.id_user',
+                        'rkat.kode_rkat',
+                        'rkat.period',
+                        'rkat.nama_program',
+                        'pengajuan.id_pengajuan',
+                        'pengajuan.id_period',
+                        'pengajuan.biaya_program',
+                        'pengajuan.biaya_disetujui',
+                        'pengajuan.validasi_status',
+                        'pengajuan.nama_status',
+                        'user.fullname',
+                        'struktur.nama_struktur',
+                        'struktur_child1.nama_struktur_child1',
+                        'struktur_child2.nama_struktur_child2',
+                        'pengajuan.created_at'
+                    )
                     ->orderBy('pengajuan.id_pengajuan', 'DESC')
                     ->get();
             }
@@ -1440,7 +1529,23 @@ class PengajuanController extends Controller
                 // ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
                 ->where('struktur.id_struktur', $userStruktur->id_struktur)
                 ->where('struktur_child1.id_struktur_child1', $userStruktur->id_struktur_child1)
-                ->select('user.id_user', 'rkat.kode_rkat',  'rkat.period', 'pengajuan.next', 'pengajuan.id_pengajuan', 'pengajuan.validasi_status', 'pengajuan.nama_status', 'user.fullname', 'struktur.nama_struktur', 'struktur_child1.nama_struktur_child1', 'struktur_child2.nama_struktur_child2', 'pengajuan.created_at')
+                ->select(
+                    'user.id_user',
+                    'rkat.kode_rkat',
+                    'rkat.period',
+                    'rkat.nama_program',
+                    'pengajuan.id_pengajuan',
+                    'pengajuan.id_period',
+                    'pengajuan.biaya_program',
+                    'pengajuan.biaya_disetujui',
+                    'pengajuan.validasi_status',
+                    'pengajuan.nama_status',
+                    'user.fullname',
+                    'struktur.nama_struktur',
+                    'struktur_child1.nama_struktur_child1',
+                    'struktur_child2.nama_struktur_child2',
+                    'pengajuan.created_at'
+                )
                 ->orderBy('pengajuan.id_pengajuan', 'DESC')
                 ->get();
         }
@@ -1667,11 +1772,10 @@ class PengajuanController extends Controller
 
     public function format1Lpj($params)
     {
-
         $pengajuan = PengajuanModel::where('id_pengajuan', $params)->first();
         $isTrue = false;
 
-        if ($pengajuan && !$pengajuan->lpj_keuangan) {
+        if ($pengajuan) {
             $updated_at = Date('Y-m-d', strtotime($pengajuan->updated_at));
             $startActive = Date('2022-07-01');
             if ($startActive < $updated_at) {
