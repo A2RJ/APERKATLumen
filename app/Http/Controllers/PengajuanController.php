@@ -849,6 +849,8 @@ class PengajuanController extends Controller
                 ->join('struktur_child1', 'user.id_struktur_child1', 'struktur_child1.id_struktur_child1')
                 ->join('struktur_child2', 'user.id_struktur_child2', 'struktur_child2.id_struktur_child2')
                 ->where('pengajuan.next', $params)
+                ->where('pengajuan.lpj_keuangan', null)
+                ->where('pengajuan.lpj_kegiatan', null)
                 ->where('pengajuan.id_user', '!=', $userStruktur->id_user)
                 ->select(
                     'user.id_user',
@@ -872,7 +874,6 @@ class PengajuanController extends Controller
                 ->get();
         } else if ($userStruktur->level == 3 || $userStruktur->level == 4) {
             if ($userStruktur->child1_level == "1" || $userStruktur->level == 3) {
-
                 $data = PengajuanModel::join('user', 'pengajuan.id_user', 'user.id_user')
                     ->join('rkat', 'pengajuan.kode_rkat', 'rkat.id_rkat')
                     ->join('struktur', 'user.id_struktur', 'struktur.id_struktur')
