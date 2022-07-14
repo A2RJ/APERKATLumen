@@ -214,7 +214,7 @@ class PengajuanController extends Controller
         $data = PengajuanModel::find($params);
 
         return response()->json([
-            'data' => $data ? $data : "Failed, data not found"
+            'data' => $data
         ]);
     }
 
