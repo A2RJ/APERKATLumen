@@ -1786,4 +1786,19 @@ class PengajuanController extends Controller
 
         return $isTrue;
     }
+
+    public function checkIfHasAccess($id_pengajuan, $id_user)
+    {
+        $pengajuan = $this->pengajuanSubordinate($id_user);
+        $pengajuan = json_decode(json_encode($pengajuan), true);
+        $pengajuan = $pengajuan['original']['data'];
+
+        $isTrue = "invalid";
+        foreach ($pengajuan as $item) {
+            if ($item['id_pengajuan'] == $id_pengajuan) {
+                $isTrue = "valid";
+            }
+        }
+        return ["status" => $isTrue];
+    }
 }
